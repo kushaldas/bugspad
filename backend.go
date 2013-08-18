@@ -168,3 +168,21 @@ func add_user(name string, email string, user_type string, password string) {
 	_ = <-c
 
 }
+
+func get_components_by_id(product_id string) map[string][3]string {
+	m := make(map[string][3]string)
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	rows, err := db.Query("SELECT id, name, description from components where product_id=?", product_id)
+	if err != nil {
+		return m
+	}
+	var name, description, c_id string
+	for rows.Next() {
+		err = rows.Scan(&c_id, &name, &description)
+		//fmt.Println(c_id, name, description)
+		m[name] = [3]string{c_id, name, description}
+	}
+	return m
+
+}
