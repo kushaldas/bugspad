@@ -109,7 +109,7 @@ func insert_product(name string, desc string) (id string, err error) {
 /*
 Inserts a new component in the database for a given product_id.
 */
-func insert_component(name string, desc string, product_id string) (id string, err error) {
+func insert_component(name string, desc string, product_id int, owner int) (id string, err error) {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
@@ -118,8 +118,9 @@ func insert_component(name string, desc string, product_id string) (id string, e
 	}
 	defer db.Close()
 
-	ret, err := db.Exec("INSERT INTO components (name, description, product_id) VALUES (?, ?, ?)", name, desc, product_id)
+	ret, err := db.Exec("INSERT INTO components (name, description, product_id, owner) VALUES (?, ?, ?, ?)", name, desc, product_id, owner)
 	if err != nil {
+		fmt.Println(err.Error())
 		return "No such product.", err
 	}
 	rid, err := ret.LastInsertId()
