@@ -31,7 +31,7 @@ func get_hex(password string) string {
 	return mdstr
 }
 
-func update_redis(email string, password string, channel chan int) {
+func update_redis(email string, password string, utype string, channel chan int) {
 	conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
@@ -41,6 +41,7 @@ func update_redis(email string, password string, channel chan int) {
 	}
 	defer conn.Close()
 	_, err = conn.Do("HSET", "users", email, password)
+	_, err = conn.Do("HSET", "userstype", email, utype)
 
 	if err != nil {
 		// handle error
@@ -58,16 +59,51 @@ the server starts up.
 func load_users() {
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
-	rows, err := db.Query("SELECT email, password from users")
+	rows, err := db.Query("SELECT email, password, type from users")
 	if err == nil {
-		var email, password string
+		var email, password, utype string
 		c := make(chan int)
 		for rows.Next() {
-			err = rows.Scan(&email, &password)
-			go update_redis(email, password, c)
+			err = rows.Scan(&email, &password, utype)
+			go update_redis(email, password, utype, c)
 		}
 	}
 	fmt.Println("Users loaded.")
+}
+
+/* To find out if an user already exists or not. */
+func find_user(email string) (bool, string) {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return true, "Redis error."
+	}
+	defer conn.Close()
+	ret, err := conn.Do("HGET", "users", email)
+	if ret != nil {
+		return true, "User exists."
+	}
+	return false, "No such user."
+}
+
+/*
+Adds a new user to the system. user_type can be 0,1,2. First it updates the
+redis server and then saves the details to the MySQL db.
+*/
+func add_user(name string, email string, user_type string, password string) string {
+	answer, res := find_user(email)
+	if answer == true {
+		return res
+	}
+	mdstr := get_hex(password)
+	c := make(chan int)
+	go update_redis(email, mdstr, user_type, c)
+	fmt.Println(mdstr)
+	update_mysql(name, email, user_type, mdstr)
+	_ = <-c
+	return "User added."
+
 }
 
 /*
@@ -154,20 +190,6 @@ func authenticate_redis(email string, password string) bool {
 	} else {
 		return false
 	}
-}
-
-/*
-Adds a new user to the system. user_type can be 0,1,2. First it updates the
-redis server and then saves the details to the MySQL db.
-*/
-func add_user(name string, email string, user_type string, password string) {
-	mdstr := get_hex(password)
-	c := make(chan int)
-	go update_redis(email, mdstr, c)
-	fmt.Println(mdstr)
-	update_mysql(name, email, user_type, mdstr)
-	_ = <-c
-
 }
 
 func get_components_by_id(product_id string) map[string][3]string {
