@@ -91,12 +91,61 @@ func components(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func bug(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		decoder := json.NewDecoder(r.Body)
+		pdata := make(map[string]interface{})
+		err := decoder.Decode(&pdata)
+		if err != nil {
+			panic(err)
+		}
+
+		component_id := int(pdata["component_id"].(float64))
+		user := pdata["user"].(string)
+		password := pdata["password"].(string)
+		summary := pdata["summary"].(string)
+		description := pdata["description"].(string)
+		if authenticate_redis(user, password) {
+			user_id := get_user_id(user)
+			id, err := new_bug(user_id, summary, description, component_id)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			fmt.Fprintln(w, id)
+		}
+	}
+}
+
+func comment(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		decoder := json.NewDecoder(r.Body)
+		pdata := make(map[string]interface{})
+		err := decoder.Decode(&pdata)
+		if err != nil {
+			panic(err)
+		}
+		user := pdata["user"].(string)
+		password := pdata["password"].(string)
+		desc := pdata["desc"].(string)
+		bug_id := int(pdata["bug_id"].(float64))
+		if authenticate_redis(user, password) {
+			user_id := get_user_id(user)
+			id, err := new_comment(user_id, bug_id, desc)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+			fmt.Fprintln(w, id)
+		}
+	}
+}
+
 func main() {
 	load_config("config/bugspad.ini")
 	load_users()
-	fmt.Println(conn_str)
 	http.HandleFunc("/component/", component)
 	http.HandleFunc("/components/", components)
 	http.HandleFunc("/product/", product)
+	http.HandleFunc("/bug/", bug)
+	http.HandleFunc("/bug/comment/", comment)
 	http.ListenAndServe(":9998", nil)
 }

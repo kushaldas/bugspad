@@ -64,7 +64,7 @@ func load_users() {
 		var email, password, utype string
 		c := make(chan int)
 		for rows.Next() {
-			err = rows.Scan(&email, &password, utype)
+			err = rows.Scan(&email, &password, &utype)
 			go update_redis(email, password, utype, c)
 		}
 	}
@@ -208,4 +208,64 @@ func get_components_by_id(product_id string) map[string][3]string {
 	}
 	return m
 
+}
+
+func new_bug(reporter int, summary string, description string, component_id int) (id string, err error) {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return "", err
+	}
+	defer db.Close()
+
+	ret, err := db.Exec("INSERT INTO bugs (reporter, summary, description, component_id) VALUES (?,?,?,?)", reporter, summary, description, component_id)
+	if err != nil {
+		fmt.Println(err.Error())
+		return "Error in entering a new bug", err
+	}
+	rid, err := ret.LastInsertId()
+	return strconv.FormatInt(rid, 10), err
+}
+
+/*
+Adds a new comment to a given bug.
+*/
+func new_comment(reporter int, bug_id int, desc string) (id string, err error) {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return "", err
+	}
+	defer db.Close()
+
+	ret, err := db.Exec("INSERT INTO comments (description, user, datec, bug) VALUES (?,?,NOW(),?)", desc, reporter, bug_id)
+	if err != nil {
+		fmt.Println(err.Error())
+		return "Error in entering a new comment", err
+	}
+	rid, err := ret.LastInsertId()
+	return strconv.FormatInt(rid, 10), err
+}
+
+func get_user_id(email string) int {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return -1
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT id from users where email = ?", email)
+	if err == nil {
+		var id int
+		for rows.Next() {
+			err = rows.Scan(&id)
+			if id != 0 {
+				return id
+			}
+		}
+	}
+	return -1
 }
