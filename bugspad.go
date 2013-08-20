@@ -93,6 +93,8 @@ func components(w http.ResponseWriter, r *http.Request) {
 
 func bug(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
+		// In case of wrong type of input we should recover.
+		defer myrecover(w)
 		decoder := json.NewDecoder(r.Body)
 		pdata := make(map[string]interface{})
 		err := decoder.Decode(&pdata)
@@ -112,6 +114,25 @@ func bug(w http.ResponseWriter, r *http.Request) {
 				fmt.Println(err.Error())
 			}
 			fmt.Fprintln(w, id)
+		}
+	}
+}
+
+func updatebug(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		// In case of wrong type of input we should recover.
+		defer myrecover(w)
+		decoder := json.NewDecoder(r.Body)
+		pdata := make(map[string]interface{})
+		err := decoder.Decode(&pdata)
+		if err != nil {
+			panic(err)
+		}
+
+		user := pdata["user"].(string)
+		password := pdata["password"].(string)
+		if authenticate_redis(user, password) {
+			update_bug(pdata)
 		}
 	}
 }
@@ -146,6 +167,7 @@ func main() {
 	http.HandleFunc("/components/", components)
 	http.HandleFunc("/product/", product)
 	http.HandleFunc("/bug/", bug)
+	http.HandleFunc("/updatebug/", updatebug)
 	http.HandleFunc("/bug/comment/", comment)
 	http.ListenAndServe(":9998", nil)
 }

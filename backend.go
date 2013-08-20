@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
@@ -12,6 +13,11 @@ import (
 )
 
 var conn_str string
+
+type Bug struct {
+	id                                                                                                                            int
+	reporter, qa, docs, component_id, status, version, severity, hardware, priority, whiteboard, summary, description, fixedinver interface{}
+}
 
 func load_config(filepath string) {
 	file, _ := ini.LoadFile(filepath)
@@ -68,6 +74,7 @@ func load_users() {
 			go update_redis(email, password, utype, c)
 		}
 	}
+	defer rows.Close()
 	fmt.Println("Users loaded.")
 }
 
@@ -200,6 +207,7 @@ func get_components_by_id(product_id string) map[string][3]string {
 	if err != nil {
 		return m
 	}
+	defer rows.Close()
 	var name, description, c_id string
 	for rows.Next() {
 		err = rows.Scan(&c_id, &name, &description)
@@ -219,13 +227,105 @@ func new_bug(reporter int, summary string, description string, component_id int)
 	}
 	defer db.Close()
 
-	ret, err := db.Exec("INSERT INTO bugs (reporter, summary, description, component_id) VALUES (?,?,?,?)", reporter, summary, description, component_id)
+	ret, err := db.Exec("INSERT INTO bugs (reporter, summary, description, component_id, reported) VALUES (?,?,?,?, NOW())", reporter, summary, description, component_id)
 	if err != nil {
 		fmt.Println(err.Error())
 		return "Error in entering a new bug", err
 	}
 	rid, err := ret.LastInsertId()
 	return strconv.FormatInt(rid, 10), err
+}
+
+/*
+Updates a given bug based on input
+*/
+func update_bug(data map[string]interface{}) {
+	var buffer bytes.Buffer
+	vals := make([]interface{}, 0)
+	buffer.WriteString("UPDATE bugs SET ")
+
+	val, ok := data["status"]
+	if ok {
+		buffer.WriteString("status=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["version"]
+	if ok {
+		buffer.WriteString(", version=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["severity"]
+	if ok {
+		buffer.WriteString(", severity=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["hardware"]
+	if ok {
+		buffer.WriteString(", hardware=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["priority"]
+	if ok {
+		buffer.WriteString(", priority=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["reporter"]
+	if ok {
+		buffer.WriteString(", reporter=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["qa"]
+	if ok {
+		buffer.WriteString(", qa=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["docs"]
+	if ok {
+		buffer.WriteString(", docs=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["whiteboard"]
+	if ok {
+		buffer.WriteString(", whiteboard=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["fixedinver"]
+	if ok {
+		buffer.WriteString(", fixedinver=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["component_id"]
+	if ok {
+		buffer.WriteString(", component_id=?")
+		vals = append(vals, val)
+	}
+
+	buffer.WriteString(" WHERE id=?")
+	fmt.Println(buffer.String())
+
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
+
+	vals = append(vals, data["bug_id"])
+	_, err = db.Exec(buffer.String(), vals...)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 /*
