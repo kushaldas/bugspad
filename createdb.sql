@@ -16,6 +16,30 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `attachments`
+--
+
+DROP TABLE IF EXISTS `attachments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `attachments` (
+  `id` int(11) NOT NULL,
+  `bug_id` int(11) DEFAULT NULL,
+  `datec` datetime NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `filename` varchar(255) NOT NULL,
+  `systempath` varchar(500) NOT NULL,
+  `isobsolete` tinyint(4) NOT NULL DEFAULT '0',
+  `submitter` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_attachments_bug_idx` (`bug_id`),
+  KEY `fk_attachments_submitter_idx` (`submitter`),
+  CONSTRAINT `fk_attachments_bug` FOREIGN KEY (`bug_id`) REFERENCES `bugs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_attachments_submitter` FOREIGN KEY (`submitter`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `bugs`
 --
 
@@ -206,4 +230,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-08-20 10:16:38
+-- Dump completed on 2013-08-20 10:28:00
