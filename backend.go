@@ -218,7 +218,7 @@ func get_components_by_id(product_id string) map[string][3]string {
 
 }
 
-func new_bug(reporter int, summary string, description string, component_id int) (id string, err error) {
+func new_bug(data map[string]interface{}) (id string, err error) {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
@@ -227,7 +227,98 @@ func new_bug(reporter int, summary string, description string, component_id int)
 	}
 	defer db.Close()
 
-	ret, err := db.Exec("INSERT INTO bugs (reporter, summary, description, component_id, reported) VALUES (?,?,?,?, NOW())", reporter, summary, description, component_id)
+	var buffer, buffer2 bytes.Buffer
+	vals := make([]interface{}, 0)
+	buffer.WriteString("INSERT INTO bugs (")
+
+	val, ok := data["status"]
+	if ok {
+		buffer.WriteString("status")
+		buffer2.WriteString("?")
+		vals = append(vals, val)
+	} else {
+		buffer.WriteString("status")
+		buffer2.WriteString("'new'")
+	}
+
+	val, ok = data["version"]
+	if ok {
+		buffer.WriteString(", version")
+		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["severity"]
+	if ok {
+		buffer.WriteString(", severity")
+		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["hardware"]
+	if ok {
+		buffer.WriteString(", hardware")
+		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["priority"]
+	if ok {
+		buffer.WriteString(", priority")
+		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["whiteboard"]
+	if ok {
+		buffer.WriteString(", whiteboard")
+		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["reporter"]
+	if ok {
+		buffer.WriteString(", reporter")
+		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	} else {
+		return "Missing input: reporter", nil
+	}
+
+	val, ok = data["summary"]
+	if ok {
+		buffer.WriteString(", summary")
+		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	} else {
+		return "Missing input: summary", nil
+	}
+
+	val, ok = data["description"]
+	if ok {
+		buffer.WriteString(", description")
+		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	} else {
+		return "Missing input: description", nil
+	}
+
+	val, ok = data["component_id"]
+	if ok {
+		buffer.WriteString(", component_id")
+		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	} else {
+		return "Missing input: component_id", nil
+	}
+
+	buffer.WriteString(", reported) VALUES (")
+	buffer2.WriteString(",NOW()")
+
+	buffer.WriteString(buffer2.String())
+	buffer.WriteString(")")
+
+	ret, err := db.Exec(buffer.String(), vals...)
 	if err != nil {
 		fmt.Println(err.Error())
 		return "Error in entering a new bug", err

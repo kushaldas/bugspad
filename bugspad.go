@@ -102,14 +102,12 @@ func bug(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 
-		component_id := int(pdata["component_id"].(float64))
 		user := pdata["user"].(string)
 		password := pdata["password"].(string)
-		summary := pdata["summary"].(string)
-		description := pdata["description"].(string)
 		if authenticate_redis(user, password) {
 			user_id := get_user_id(user)
-			id, err := new_bug(user_id, summary, description, component_id)
+			pdata["reporter"] = user_id
+			id, err := new_bug(pdata)
 			if err != nil {
 				fmt.Println(err.Error())
 			}
