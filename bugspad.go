@@ -8,6 +8,10 @@ import (
 
 type Result1 map[string]string
 
+const (
+	AUTH_ERROR string = "\"Authentication failure.\""
+)
+
 func myrecover(w http.ResponseWriter) {
 	if r := recover(); r != nil {
 		fmt.Fprintln(w, "\"Wrong input.\"")
@@ -36,7 +40,7 @@ func product(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintln(w, string(res_json))
 
 		} else {
-			fmt.Fprintln(w, "\"Authentication failure.\"")
+			fmt.Fprintln(w, AUTH_ERROR)
 		}
 
 	}
@@ -66,7 +70,7 @@ func component(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintln(w, string(res_json))
 
 		} else {
-			fmt.Fprintln(w, "\"Authentication failure.\"")
+			fmt.Fprintln(w, AUTH_ERROR)
 		}
 
 	}
@@ -112,6 +116,8 @@ func bug(w http.ResponseWriter, r *http.Request) {
 				fmt.Println(err.Error())
 			}
 			fmt.Fprintln(w, id)
+		} else {
+			fmt.Fprintln(w, AUTH_ERROR)
 		}
 	}
 }
@@ -131,6 +137,8 @@ func updatebug(w http.ResponseWriter, r *http.Request) {
 		password := pdata["password"].(string)
 		if authenticate_redis(user, password) {
 			update_bug(pdata)
+		} else {
+			fmt.Fprintln(w, AUTH_ERROR)
 		}
 	}
 }
@@ -154,6 +162,8 @@ func comment(w http.ResponseWriter, r *http.Request) {
 				fmt.Println(err.Error())
 			}
 			fmt.Fprintln(w, id)
+		} else {
+			fmt.Fprintln(w, AUTH_ERROR)
 		}
 	}
 }
@@ -182,7 +192,7 @@ func bug_cc(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprintln(w, "\"No vaild action provided.\"")
 			}
 		} else {
-			fmt.Fprintln(w, "\"Authentication failure.\"")
+			fmt.Fprintln(w, AUTH_ERROR)
 		}
 	}
 }
