@@ -16,13 +16,14 @@ under your home directory.
 	
 	$ mkdir ~/gocode
 
-Now write the following lines in your ~/.bashrc file.::
+Now write the following lines in your ~/.bashrc file.
+::
 
 	export PATH=$PATH:~/go/bin
 	export GOPATH=~/gocode/
  	export GOROOT=~/go/
 
- and then 
+and then ::
 
  	$ source ~/.bashrc
 
@@ -43,7 +44,7 @@ Setup Mariadb (or MySQL)
 
 	$ mysql -u root
 	> CREATE USER 'bugspad'@'localhost' IDENTIFIED BY 'mypass';
-	> CREATE DATABASE bugzilla
+	> CREATE DATABASE bugzilla;
 	> GRANT ALL PRIVILEGES ON bugzilla.* TO 'bugspad'@'localhost';
 
 Clone the git repo
