@@ -168,15 +168,21 @@ func bug_cc(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		bug_id := int(pdata["bug_id"].(float64))
-		emails := pdata["emails"]
-		action := pdata["action"].(string)
-		if action == "add" {
-			add_bug_cc(bug_id, emails)
-		} else if action == "remove" {
-			remove_bug_cc(bug_id, emails)
+		user := pdata["user"].(string)
+		password := pdata["password"].(string)
+		if authenticate_redis(user, password) {
+			bug_id := int(pdata["bug_id"].(float64))
+			emails := pdata["emails"]
+			action := pdata["action"].(string)
+			if action == "add" {
+				add_bug_cc(bug_id, emails)
+			} else if action == "remove" {
+				remove_bug_cc(bug_id, emails)
+			} else {
+				fmt.Fprintln(w, "\"No vaild action provided.\"")
+			}
 		} else {
-			fmt.Fprintln(w, "\"No vaild action provided.\"")
+			fmt.Fprintln(w, "\"Authentication failure.\"")
 		}
 	}
 }
