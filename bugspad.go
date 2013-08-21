@@ -158,6 +158,29 @@ func comment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func bug_cc(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		// In case of wrong type of input we should recover.
+		defer myrecover(w)
+		decoder := json.NewDecoder(r.Body)
+		pdata := make(map[string]interface{})
+		err := decoder.Decode(&pdata)
+		if err != nil {
+			panic(err)
+		}
+		bug_id := int(pdata["bug_id"].(float64))
+		emails := pdata["emails"]
+		action := pdata["action"].(string)
+		if action == "add" {
+			add_bug_cc(bug_id, emails)
+		} else if action == "remove" {
+			remove_bug_cc(bug_id, emails)
+		} else {
+			fmt.Fprintln(w, "\"No vaild action provided.\"")
+		}
+	}
+}
+
 func main() {
 	load_config("config/bugspad.ini")
 	load_users()
@@ -165,7 +188,8 @@ func main() {
 	http.HandleFunc("/components/", components)
 	http.HandleFunc("/product/", product)
 	http.HandleFunc("/bug/", bug)
+	http.HandleFunc("/bug/cc/", bug_cc)
 	http.HandleFunc("/updatebug/", updatebug)
-	http.HandleFunc("/bug/comment/", comment)
+	http.HandleFunc("/comment/", comment)
 	http.ListenAndServe(":9998", nil)
 }

@@ -107,7 +107,7 @@ func add_user(name string, email string, user_type string, password string) stri
 	c := make(chan int)
 	go update_redis(email, mdstr, user_type, c)
 	fmt.Println(mdstr)
-	update_mysql(name, email, user_type, mdstr)
+	add_user_mysql(name, email, user_type, mdstr)
 	_ = <-c
 	return "User added."
 
@@ -116,7 +116,7 @@ func add_user(name string, email string, user_type string, password string) stri
 /*
 Adds a new user into the database.
 */
-func update_mysql(name string, email string, user_type string, password string) {
+func add_user_mysql(name string, email string, user_type string, password string) {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
@@ -417,6 +417,55 @@ func update_bug(data map[string]interface{}) {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+/*
+Adds new CC users to a bug
+*/
+func add_bug_cc(bug_id int, emails interface{}) bool {
+	email_list := emails.([]interface{})
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return false
+	}
+	defer db.Close()
+	for i := range email_list {
+		email := email_list[i].(string)
+		user_id := get_user_id(email)
+		// If user_id is -1 means no such user
+		if user_id != -1 {
+			db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, user_id)
+		}
+	}
+	return true
+}
+
+/*
+Removes CC users from a bug
+*/
+func remove_bug_cc(bug_id int, emails interface{}) bool {
+	email_list := emails.([]interface{})
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return false
+	}
+	defer db.Close()
+	for i := range email_list {
+		email := email_list[i].(string)
+		user_id := get_user_id(email)
+		// If user_id is -1 means no such user
+		if user_id != -1 {
+			_, err = db.Exec("DELETE FROM cc WHERE bug_id=? and who=?", bug_id, user_id)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+	return true
 }
 
 /*
