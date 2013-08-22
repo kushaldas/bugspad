@@ -71,6 +71,7 @@ Create a new bug
 
 Post data:
 ::
+
 	{
 	   "user":"username@example.com",
 	   "password":"asdf",
