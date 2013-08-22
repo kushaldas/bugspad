@@ -83,9 +83,8 @@ Post data:
 	   "severity":"severity",
 	   "hardware":"hardware",
 	   "priority":"priority",
-	   "whiteboard":"whiteboard"
-	   "fixedinver": "fixedinver"
-
+	   "whiteboard":"whiteboard",
+	   "fixedinver":"fixedinver"
 	}
 
 Output:
@@ -97,3 +96,26 @@ Default values (optional arguments)
 ####################################
 *priority*, *severity* has a default value of "medium". *status* is "new" by default.
 *hardware*, *whiteboard*, *fixedinver* is optional.
+
+Update a bug
+-----------------
+
+- Request type: *POST*
+- URL:          */updatebug/*
+
+Post data:
+::
+
+	{
+	   "user":"username@example.com",
+	   "password":"asdf",
+	   "bug_id":1,
+	   "component_id":1,
+	   "status":"status of e bug",
+	   "version":"version",
+	   "severity":"severity",
+	   "hardware":"hardware",
+	   "priority":"priority",
+	   "whiteboard":"whiteboard",
+	   "fixedinver":"fixedinver"
+	}
