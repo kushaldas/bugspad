@@ -167,15 +167,11 @@ LOGGING = {
     }
 }
 
-PIPELINE_COMPILERS = (
-  'pipeline.compilers.less.LessCompiler',
-)
-
 PIPELINE_CSS = {
     'bootstrap': {
         'source_filenames': (
-            'less/bootstrap.less',
-            'less/responsive.less'
+            'less/bootstrap.css',
+            'less/responsive.css'
         ),
         'output_filename': 'css/b.css',
         'extra_context': {
