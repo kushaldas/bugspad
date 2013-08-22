@@ -227,6 +227,7 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 	}
 	defer db.Close()
 
+	var status string
 	var buffer, buffer2 bytes.Buffer
 	vals := make([]interface{}, 0)
 	buffer.WriteString("INSERT INTO bugs (")
@@ -236,9 +237,11 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 		buffer.WriteString("status")
 		buffer2.WriteString("?")
 		vals = append(vals, val)
+		status = val.(string)
 	} else {
 		buffer.WriteString("status")
 		buffer2.WriteString("'new'")
+		status = "new"
 	}
 
 	val, ok = data["version"]
@@ -323,8 +326,12 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 		fmt.Println(err.Error())
 		return "Error in entering a new bug", err
 	}
+
 	rid, err := ret.LastInsertId()
-	return strconv.FormatInt(rid, 10), err
+	bug_id := strconv.FormatInt(rid, 10)
+	// Now update redis cache for status
+	go update_redis_bug_status(bug_id, status)
+	return bug_id, err
 }
 
 /*
