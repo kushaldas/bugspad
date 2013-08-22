@@ -61,3 +61,38 @@ Output:
 	      "Admin Server for 389 Directory Server"
 	   ]
 	}
+
+
+Create a new bug
+-----------------
+
+- Request type: *POST*
+- URL:          */bug/*
+
+Post data:
+::
+	{
+	   "user":"username@example.com",
+	   "password":"asdf",
+	   "summary":"summary text of the bug",
+	   "description":"description of the bug",
+	   "component_id":1,
+	   "status":"status of the bug",
+	   "version":"version",
+	   "severity":"severity",
+	   "hardware":"hardware",
+	   "priority":"priority",
+	   "whiteboard":"whiteboard"
+	   "fixedinver": "fixedinver"
+
+	}
+
+Output:
+::
+
+	bug_id
+
+Default values (optional arguments)
+####################################
+*priority*, *severity* has a default value of "medium". *status* is "new" by default.
+*hardware*, *whiteboard*, *fixedinver* is optional.
