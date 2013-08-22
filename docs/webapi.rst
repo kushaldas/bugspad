@@ -119,3 +119,20 @@ Post data:
 	   "whiteboard":"whiteboard",
 	   "fixedinver":"fixedinver"
 	}
+
+
+Adding a comment to a bug
+-------------------------
+
+- Request type: *POST*
+- URL:          */comment/*
+
+Post data:
+::
+	
+	{
+	   "user":"username@example.com",
+	   "password":"asdf",
+	   "bug_id":1,
+	   "desc":"comment text",
+	}
