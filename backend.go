@@ -14,11 +14,6 @@ import (
 
 var conn_str string
 
-type Bug struct {
-	id                                                                                                                            int
-	reporter, qa, docs, component_id, status, version, severity, hardware, priority, whiteboard, summary, description, fixedinver interface{}
-}
-
 func load_config(filepath string) {
 	file, _ := ini.LoadFile(filepath)
 	db_user, _ := file.Get("bugspad", "user")
@@ -35,47 +30,6 @@ func get_hex(password string) string {
 	md := hash.Sum(nil)
 	mdstr := hex.EncodeToString(md)
 	return mdstr
-}
-
-func update_redis(email string, password string, utype string, channel chan int) {
-	conn, err := redis.Dial("tcp", ":6379")
-	if err != nil {
-		// handle error
-		fmt.Print(err)
-		channel <- 1
-		return
-	}
-	defer conn.Close()
-	_, err = conn.Do("HSET", "users", email, password)
-	_, err = conn.Do("HSET", "userstype", email, utype)
-
-	if err != nil {
-		// handle error
-		fmt.Print(err)
-		channel <- 1
-		return
-	}
-	channel <- 1
-}
-
-/*
-Loads all user details from the database into redis. This needs to called before
-the server starts up.
-*/
-func load_users() {
-	db, err := sql.Open("mysql", conn_str)
-	defer db.Close()
-	rows, err := db.Query("SELECT email, password, type from users")
-	if err == nil {
-		var email, password, utype string
-		c := make(chan int)
-		for rows.Next() {
-			err = rows.Scan(&email, &password, &utype)
-			go update_redis(email, password, utype, c)
-		}
-	}
-	defer rows.Close()
-	fmt.Println("Users loaded.")
 }
 
 /* To find out if an user already exists or not. */
@@ -176,23 +130,9 @@ db. The details are stored in a hashmap "users" in the redis db.
 */
 func authenticate_redis(email string, password string) bool {
 	mdstr := get_hex(password)
-	conn, err := redis.Dial("tcp", ":6379")
-	if err != nil {
-		// handle error
-		fmt.Print(err)
-		return false
-	}
-	defer conn.Close()
-	ret, err := conn.Do("HGET", "users", email)
+	ret := redis_hget("users", email)
 
-	//val, err := redis.Values(ret, err)
-	if err != nil {
-		// handle error
-		fmt.Print(err)
-		return false
-	}
-
-	if string(ret.([]uint8)) == mdstr {
+	if string(ret) == mdstr {
 		return true
 	} else {
 		return false
@@ -330,7 +270,7 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 	rid, err := ret.LastInsertId()
 	bug_id := strconv.FormatInt(rid, 10)
 	// Now update redis cache for status
-	go update_redis_bug_status(bug_id, status)
+	update_redis_bug_status(bug_id, status)
 	return bug_id, err
 }
 

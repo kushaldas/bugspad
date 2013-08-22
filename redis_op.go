@@ -1,13 +1,19 @@
 package main
 
 import (
+	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/garyburd/redigo/redis"
+	_ "github.com/go-sql-driver/mysql"
 )
+
+type Bug map[string]interface{}
 
 // TODO: Update this codebase to keep all search related indexs on redis.
 
-func update_redis_bug_status(bug_id string, status string) {
+// Generic function to update a redis HASH
+func redis_hset(name, key, value string) {
 	conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
@@ -16,10 +22,91 @@ func update_redis_bug_status(bug_id string, status string) {
 	}
 
 	defer conn.Close()
-	_, err = conn.Do("HSET", "b_status:"+status, bug_id, 1)
+	_, err = conn.Do("HSET", name, key, value)
 	if err != nil {
 		// handle error
 		fmt.Print(err)
 		return
 	}
+}
+
+// Generic function to get a redis HASH
+func redis_hget(name, key string) []byte {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return nil
+	}
+
+	defer conn.Close()
+	val, err := conn.Do("HGET", name, key)
+	if err != nil || val == nil {
+		// handle error
+		fmt.Print(err)
+		return nil
+	}
+	return val.([]uint8)
+}
+
+func update_redis_bug_status(bug_id string, status string) {
+	redis_hset("b_status:"+status, bug_id, "1")
+}
+
+func get_redis_bug(bug_id string) Bug {
+	m := make(Bug)
+	data := redis_hget("bugs", bug_id)
+	if data == nil {
+		fmt.Println("sorry no data")
+		return nil
+	}
+	err := json.Unmarshal(data, &m)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	return m
+
+}
+
+/*
+Loads all user details from the database into redis. This needs to called before
+the server starts up.
+*/
+func load_users() {
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	rows, err := db.Query("SELECT email, password, type from users")
+	if err == nil {
+		var email, password, utype string
+		c := make(chan int)
+		for rows.Next() {
+			err = rows.Scan(&email, &password, &utype)
+			go update_redis(email, password, utype, c)
+		}
+	}
+	defer rows.Close()
+	fmt.Println("Users loaded.")
+}
+
+func update_redis(email string, password string, utype string, channel chan int) {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		channel <- 1
+		return
+	}
+	defer conn.Close()
+	_, err = conn.Do("HSET", "users", email, password)
+	_, err = conn.Do("HSET", "userstype", email, utype)
+
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		channel <- 1
+		return
+	}
+	channel <- 1
 }
