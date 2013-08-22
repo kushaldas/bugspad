@@ -30,6 +30,7 @@ func main() {
 		fmt.Print(err)
 	}
 	defer db.Close()
+	// TODO: Update all searchable columns from bugs
 	rows, err := db.Query("SELECT id, status, summary FROM bugs")
 	if err == nil {
 		var id int64
