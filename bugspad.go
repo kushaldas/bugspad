@@ -95,7 +95,7 @@ func components(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func bug(w http.ResponseWriter, r *http.Request) {
+func create_bug(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
 		defer myrecover(w)
@@ -203,7 +203,7 @@ func main() {
 	http.HandleFunc("/component/", component)
 	http.HandleFunc("/components/", components)
 	http.HandleFunc("/product/", product)
-	http.HandleFunc("/bug/", bug)
+	http.HandleFunc("/bug/", create_bug)
 	http.HandleFunc("/bug/cc/", bug_cc)
 	http.HandleFunc("/updatebug/", updatebug)
 	http.HandleFunc("/comment/", comment)
