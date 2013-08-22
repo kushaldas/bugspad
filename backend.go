@@ -286,6 +286,14 @@ func update_bug(data map[string]interface{}) {
 	if ok {
 		buffer.WriteString("status=?")
 		vals = append(vals, val)
+		// TODO
+		// In case of status change we have to update the redis index for the bug
+	} else {
+		bug_id := data["bug_id"].(float64)
+		bug := get_redis_bug(strconv.FormatInt(int64(bug_id), 10))
+		buffer.WriteString("status='")
+		buffer.WriteString(bug["status"].(string))
+		buffer.WriteString("'")
 	}
 
 	val, ok = data["version"]
