@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset="utf-8" />
+  <title>Hello world!</title>
+  <link type="text/css" rel="stylesheet"
+        href="{{ url_for('static',
+              filename='hello.css')}}" />
+</head>
+<body>
+
+It works!
+            {% if not g.fas_user %}
+            <h4> <a class="toDisable" href={{ url_for("auth_login", next=request.url) }}>FAS Log in</a> </h4>
+            <div></div>
+            {% else %}
+            <h4> User </h4>
+            <div>
+                <p> Welcome, {{ g.fas_user.username }}</p>
+                <ul class="checkmark-list">
+                    <li><a href="{{ url_for('auth_logout') }}"> Log-out </a></li>
+                </ul>
+            </div>
+            {% endif %}
+
+</body>
+</html>
