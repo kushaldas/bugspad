@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <title>Bugspad</title>
+  <link href="{{ url_for('static', filename='plugins/bootstrap/css/bootstrap.css')}}" rel="stylesheet" />
+  <style>
+    body {
+      padding-top: 60px;
+    }
+  </style>
+  <link href="{{ url_for('static', filename='plugins/bootstrap/css/bootstrap-responsive.css')}}" rel="stylesheet" />
+</head>
+<body>
+  {% block content %}
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          {% block navbar_content %}
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">Bugspad</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li><a href="#about">New</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+            <form class="navbar-form pull-right" _lpchecked="1">
+              {% if g.fas_user %}
+              <span style="color: #ffffff;">Welcome, {{ g.fas_user.username }}</span>
+                <a href="{{ url_for('auth_logout') }}" class="btn">Sign out</a>
+              {% else %}
+                <a href="{{ url_for('auth_login', next=request.url) }}" class="btn">Sign in</a>
+              {% endif %}
+            </form>
+          </div><!--/.nav-collapse -->
+          {% endblock %}
+        </div>
+      </div>
+    </div>
+    <div class="main-content container">
+    {% block container_content %}{% endblock %}
+    </div>
+  {% endblock %}
+  <script src="{{ url_for('static', filename='js/jquery-1.10.2.js')}}"></script>
+  <script src="{{ url_for('static', filename='plugins/bootstrap/js/bootstrap.js')}}"></script>
+</body>
+</html>
