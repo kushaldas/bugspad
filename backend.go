@@ -377,7 +377,7 @@ func update_bug(data map[string]interface{}) {
 /*
 Adds new CC users to a bug
 */
-func add_bug_cc(bug_id int, emails interface{}) bool {
+func add_bug_cc(bug_id int64, emails interface{}) bool {
 	email_list := emails.([]interface{})
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
@@ -400,7 +400,7 @@ func add_bug_cc(bug_id int, emails interface{}) bool {
 /*
 Removes CC users from a bug
 */
-func remove_bug_cc(bug_id int, emails interface{}) bool {
+func remove_bug_cc(bug_id int64, emails interface{}) bool {
 	email_list := emails.([]interface{})
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {

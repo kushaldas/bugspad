@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 type Result1 map[string]string
@@ -115,7 +116,13 @@ func create_bug(w http.ResponseWriter, r *http.Request) {
 			id, err := new_bug(pdata)
 			if err != nil {
 				fmt.Println(err.Error())
+				return
 			}
+			bug_id, ok := strconv.ParseInt(id, 10, 32)
+			if ok == nil {
+				add_bug_cc(bug_id, pdata["emails"])
+			}
+
 			fmt.Fprintln(w, id)
 		} else {
 			fmt.Fprintln(w, AUTH_ERROR)
@@ -182,7 +189,7 @@ func bug_cc(w http.ResponseWriter, r *http.Request) {
 		user := pdata["user"].(string)
 		password := pdata["password"].(string)
 		if authenticate_redis(user, password) {
-			bug_id := int(pdata["bug_id"].(float64))
+			bug_id := int64(pdata["bug_id"].(float64))
 			emails := pdata["emails"]
 			action := pdata["action"].(string)
 			if action == "add" {
