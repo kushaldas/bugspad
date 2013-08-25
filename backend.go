@@ -271,6 +271,7 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 	bug_id := strconv.FormatInt(rid, 10)
 	// Now update redis cache for status
 	update_redis_bug_status(bug_id, status)
+	add_latest_created(bug_id)
 	return bug_id, err
 }
 

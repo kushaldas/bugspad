@@ -205,6 +205,23 @@ func bug_cc(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
+API call to get latest 10 bugs from the server
+*/
+func latest_bugs(w http.ResponseWriter, r *http.Request) {
+	vals := get_latest_created_list().([]interface{})
+	m := make([]string, 0)
+	if vals != nil {
+		for i := range vals {
+			bug_id := string(vals[i].([]uint8))
+			json_data := redis_hget("bugs", bug_id)
+			m = append(m, string(json_data))
+		}
+	}
+	res_json, _ := json.Marshal(m)
+	fmt.Fprintln(w, string(res_json))
+}
+
 func main() {
 	load_config("config/bugspad.ini")
 	load_users()
@@ -215,5 +232,6 @@ func main() {
 	http.HandleFunc("/bug/cc/", bug_cc)
 	http.HandleFunc("/updatebug/", updatebug)
 	http.HandleFunc("/comment/", comment)
+	http.HandleFunc("/latestcreated/", latest_bugs)
 	http.ListenAndServe(":9998", nil)
 }
