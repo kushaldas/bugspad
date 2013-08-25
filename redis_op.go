@@ -53,6 +53,18 @@ func update_redis_bug_status(bug_id string, status string) {
 	redis_hset("b_status:"+status, bug_id, "1")
 }
 
+func delete_redis_bug_status(bug_id string, status string) {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return
+	}
+
+	defer conn.Close()
+	conn.Do("HDEL", "b_status:"+status, bug_id)
+}
+
 func get_redis_bug(bug_id string) Bug {
 	m := make(Bug)
 	data := redis_hget("bugs", bug_id)
@@ -135,6 +147,35 @@ func get_latest_created_list() interface{} {
 		return nil
 	}
 	val, err := conn.Do("LRANGE", "latest_created", 0, 9)
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return nil
+	}
+	return val
+}
+
+func add_latest_updated(bug_id string) {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return
+	}
+	defer conn.Close()
+	_, err = conn.Do("LPUSH", "latest_updated", bug_id)
+	_, err = conn.Do("LTRIM", "latest_updated", 0, 9)
+
+}
+
+func get_latest_updated_list() interface{} {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return nil
+	}
+	val, err := conn.Do("LRANGE", "latest_updated", 0, 9)
 	if err != nil {
 		// handle error
 		fmt.Println(err)

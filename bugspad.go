@@ -100,7 +100,7 @@ func components(w http.ResponseWriter, r *http.Request) {
 func create_bug(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
-		defer myrecover(w)
+		//defer myrecover(w)
 		decoder := json.NewDecoder(r.Body)
 		pdata := make(map[string]interface{})
 		err := decoder.Decode(&pdata)
@@ -120,7 +120,10 @@ func create_bug(w http.ResponseWriter, r *http.Request) {
 			}
 			bug_id, ok := strconv.ParseInt(id, 10, 32)
 			if ok == nil {
-				add_bug_cc(bug_id, pdata["emails"])
+				if pdata["emails"] != nil {
+					add_bug_cc(bug_id, pdata["emails"])
+				}
+
 			}
 
 			fmt.Fprintln(w, id)
@@ -222,6 +225,20 @@ func latest_bugs(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(res_json))
 }
 
+func latest_updated_bugs(w http.ResponseWriter, r *http.Request) {
+	vals := get_latest_updated_list().([]interface{})
+	m := make([]string, 0)
+	if vals != nil {
+		for i := range vals {
+			bug_id := string(vals[i].([]uint8))
+			json_data := redis_hget("bugs", bug_id)
+			m = append(m, string(json_data))
+		}
+	}
+	res_json, _ := json.Marshal(m)
+	fmt.Fprintln(w, string(res_json))
+}
+
 func main() {
 	load_config("config/bugspad.ini")
 	load_users()
@@ -233,5 +250,6 @@ func main() {
 	http.HandleFunc("/updatebug/", updatebug)
 	http.HandleFunc("/comment/", comment)
 	http.HandleFunc("/latestcreated/", latest_bugs)
+	http.HandleFunc("/latestupdated/", latest_updated_bugs)
 	http.ListenAndServe(":9998", nil)
 }
