@@ -282,6 +282,7 @@ func update_bug(data map[string]interface{}) {
 	var buffer bytes.Buffer
 	vals := make([]interface{}, 0)
 	buffer.WriteString("UPDATE bugs SET ")
+	bug_id := data["bug_id"].(float64)
 
 	val, ok := data["status"]
 	if ok {
@@ -290,7 +291,7 @@ func update_bug(data map[string]interface{}) {
 		// TODO
 		// In case of status change we have to update the redis index for the bug
 	} else {
-		bug_id := data["bug_id"].(float64)
+
 		bug := get_redis_bug(strconv.FormatInt(int64(bug_id), 10))
 		buffer.WriteString("status='")
 		buffer.WriteString(bug["status"].(string))
@@ -373,6 +374,7 @@ func update_bug(data map[string]interface{}) {
 	if err != nil {
 		fmt.Println(err)
 	}
+	add_latest_updated(strconv.FormatInt(int64(bug_id), 10))
 }
 
 /*

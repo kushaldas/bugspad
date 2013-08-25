@@ -142,3 +142,32 @@ func get_latest_created_list() interface{} {
 	}
 	return val
 }
+
+func add_latest_updated(bug_id string) {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return
+	}
+	defer conn.Close()
+	_, err = conn.Do("LPUSH", "latest_updated", bug_id)
+	_, err = conn.Do("LTRIM", "latest_updated", 0, 9)
+
+}
+
+func get_latest_updated_list() interface{} {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return nil
+	}
+	val, err := conn.Do("LRANGE", "latest_updated", 0, 9)
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return nil
+	}
+	return val
+}
