@@ -53,6 +53,18 @@ func update_redis_bug_status(bug_id string, status string) {
 	redis_hset("b_status:"+status, bug_id, "1")
 }
 
+func delete_redis_bug_status(bug_id string, status string) {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return
+	}
+
+	defer conn.Close()
+	conn.Do("HDEL", "b_status:"+status, bug_id)
+}
+
 func get_redis_bug(bug_id string) Bug {
 	m := make(Bug)
 	data := redis_hget("bugs", bug_id)
