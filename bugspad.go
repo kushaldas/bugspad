@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type Result1 map[string]string
@@ -79,6 +80,7 @@ func component(w http.ResponseWriter, r *http.Request) {
 }
 
 func components(w http.ResponseWriter, r *http.Request) {
+	product_id := ""
 	if r.Method == "POST" {
 		decoder := json.NewDecoder(r.Body)
 		pdata := make(map[string]string)
@@ -87,13 +89,27 @@ func components(w http.ResponseWriter, r *http.Request) {
 			panic(err)
 		}
 		// name := pdata["name"].(string)
-		product_id := pdata["product_id"]
-		if product_id != "" {
-			m := get_components_by_id(product_id)
-			res_json, _ := json.Marshal(m)
-			fmt.Fprintln(w, string(res_json))
+		product_id = pdata["product_id"]
+
+	} else if r.Method == "GET" {
+		title := r.URL.Path[12:]
+
+		if title == "" {
+			return
 		}
 
+		index := strings.Index(title, "/")
+		if index != -1 {
+			title = title[:index]
+		}
+		product_id = title
+
+	}
+	if product_id != "" {
+		w.Header().Set("Content-Type", "application/json")
+		m := get_components_by_id(product_id)
+		res_json, _ := json.Marshal(m)
+		fmt.Fprintln(w, string(res_json))
 	}
 }
 
