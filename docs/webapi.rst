@@ -71,6 +71,7 @@ Post data:
 	   "summary":"summary text of the bug",
 	   "description":"description of the bug",
 	   "component_id":1,
+	   "subcomponent_id":1,
 	   "status":"status of the bug",
 	   "version":"version",
 	   "severity":"severity",
@@ -88,7 +89,7 @@ Output:
 Default values (optional arguments)
 ####################################
 *priority*, *severity* has a default value of "medium". *status* is "new" by default.
-*hardware*, *whiteboard*, *fixedinver* is optional.
+*hardware*, *whiteboard*, *fixedinver*, *subcomponent_id* is optional.
 
 Update a bug
 -----------------
@@ -104,6 +105,7 @@ Post data:
 	   "password":"asdf",
 	   "bug_id":1,
 	   "component_id":1,
+	   "subcomponent_id":1,
 	   "status":"status of e bug",
 	   "version":"version",
 	   "severity":"severity",
