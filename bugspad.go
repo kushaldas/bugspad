@@ -21,6 +21,7 @@ func myrecover(w http.ResponseWriter) {
 }
 
 func product(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
 		defer myrecover(w)
@@ -49,6 +50,7 @@ func product(w http.ResponseWriter, r *http.Request) {
 }
 
 func component(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
 		defer myrecover(w)
@@ -114,6 +116,7 @@ func components(w http.ResponseWriter, r *http.Request) {
 }
 
 func create_bug(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
 		//defer myrecover(w)
@@ -150,6 +153,7 @@ func create_bug(w http.ResponseWriter, r *http.Request) {
 }
 
 func updatebug(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
 		defer myrecover(w)
@@ -171,6 +175,7 @@ func updatebug(w http.ResponseWriter, r *http.Request) {
 }
 
 func comment(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "POST" {
 		decoder := json.NewDecoder(r.Body)
 		pdata := make(map[string]interface{})
@@ -196,6 +201,7 @@ func comment(w http.ResponseWriter, r *http.Request) {
 }
 
 func bug_cc(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
 		defer myrecover(w)
@@ -228,6 +234,7 @@ func bug_cc(w http.ResponseWriter, r *http.Request) {
 API call to get latest 10 bugs from the server
 */
 func latest_bugs(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	vals := get_latest_created_list().([]interface{})
 	m := make([]string, 0)
 	if vals != nil {
@@ -242,6 +249,7 @@ func latest_bugs(w http.ResponseWriter, r *http.Request) {
 }
 
 func latest_updated_bugs(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	vals := get_latest_updated_list().([]interface{})
 	m := make([]string, 0)
 	if vals != nil {
