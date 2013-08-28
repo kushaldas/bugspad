@@ -26,15 +26,8 @@ Post data:
 Get component list for a product
 ---------------------------------
 
-- Request type: *POST*
-- URL:          */components/*
-
-Post data:
-::
-
-	{ 
-		"product_id": 1
-	}
+- Request type: *GET*
+- URL:          */components/<int: product_id>*
 
 Output:
 ::
