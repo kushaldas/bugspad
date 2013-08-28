@@ -499,7 +499,12 @@ func add_release(name string) {
 	}
 	defer db.Close()
 
-	db.Exec("INSERT INTO releases (name) VALUES (?)", name)
+	_, err = db.Exec("INSERT INTO releases (name) VALUES (?)", name)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return
+	}
 
 }
 
