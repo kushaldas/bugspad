@@ -75,7 +75,7 @@ Build bugspad
 After this you have to build the helper tools also.
 ::
 
-	$ go build load_all_bugs_redis.go redis_op.go
+	$ go build load_all_bugs_redis.go redis_op.go backend.go
 
 This should create a binary called `bugspad` in the directory.
 
