@@ -185,7 +185,7 @@ func get_latest_updated_list() interface{} {
 	return val
 }
 
-func bug_redis_hset(id int64, status, summary string) {
+func set_redis_bug(id int64, status, summary string) {
 	m := make(Bug)
 	m["id"] = id
 	m["status"] = status

@@ -37,7 +37,7 @@ func main() {
 		for rows.Next() {
 			err = rows.Scan(&id, &status, &summary)
 			sid := strconv.FormatInt(id, 10)
-			bug_redis_hset(id, status, summary)
+			set_redis_bug(id, status, summary)
 			update_redis_bug_status(sid, status)
 		}
 		fmt.Println("All bug indexes loaded in Redis.")
