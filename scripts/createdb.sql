@@ -62,16 +62,19 @@ CREATE TABLE `bugs` (
   `reported` datetime NOT NULL,
   `fixedinver` varchar(255) DEFAULT NULL,
   `component_id` int(11) NOT NULL,
+  `subcomponent_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_bugs_reporter_idx` (`reporter`),
   KEY `fk_bugs_qa_idx` (`qa`),
   KEY `fk_bugs_docs_idx` (`docs`),
   KEY `fk_bugs_component_id_idx` (`component_id`),
+  KEY `fk_bugs_subcomponent_id_idx` (`subcomponent_id`),
+  CONSTRAINT `fk_bugs_subcomponent_id` FOREIGN KEY (`subcomponent_id`) REFERENCES `subcomponent` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_bugs_component_id` FOREIGN KEY (`component_id`) REFERENCES `components` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_bugs_docs` FOREIGN KEY (`docs`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_bugs_qa` FOREIGN KEY (`qa`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_bugs_reporter` FOREIGN KEY (`reporter`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=22556 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -110,7 +113,7 @@ CREATE TABLE `comments` (
   KEY `fk_comments_bug_idx` (`bug`),
   CONSTRAINT `fk_comments_bug` FOREIGN KEY (`bug`) REFERENCES `bugs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_comments_user` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -152,7 +155,7 @@ CREATE TABLE `components` (
   CONSTRAINT `fk_components_1` FOREIGN KEY (`owner`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_components_2` FOREIGN KEY (`qa`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_components_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=32648 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -167,8 +170,8 @@ CREATE TABLE `dependencies` (
   `dependson` int(11) NOT NULL,
   PRIMARY KEY (`blocked`),
   KEY `fk_dependencies_dep_idx` (`dependson`),
-  CONSTRAINT `fk_dependencies_dep` FOREIGN KEY (`dependson`) REFERENCES `bugs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_dependencies_block` FOREIGN KEY (`blocked`) REFERENCES `bugs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `fk_dependencies_block` FOREIGN KEY (`blocked`) REFERENCES `bugs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_dependencies_dep` FOREIGN KEY (`dependson`) REFERENCES `bugs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -201,7 +204,41 @@ CREATE TABLE `products` (
   `name` varchar(255) DEFAULT NULL,
   `description` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `subcomponent`
+--
+
+DROP TABLE IF EXISTS `subcomponent`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `subcomponent` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `subcomponent_owners`
+--
+
+DROP TABLE IF EXISTS `subcomponent_owners`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `subcomponent_owners` (
+  `id` int(11) NOT NULL,
+  `subcomponent_id` int(11) NOT NULL,
+  `subcomponent_owner` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_subcomponent_owners_comp_idx` (`subcomponent_id`),
+  KEY `fk_subcomponent_owners_owner_idx` (`subcomponent_owner`),
+  CONSTRAINT `fk_subcomponent_owners_comp` FOREIGN KEY (`subcomponent_id`) REFERENCES `subcomponent` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_subcomponent_owners_owner` FOREIGN KEY (`subcomponent_owner`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -218,7 +255,7 @@ CREATE TABLE `users` (
   `type` varchar(19) DEFAULT '1',
   `password` varchar(255) CHARACTER SET latin1 NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -230,4 +267,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-08-20 10:28:00
+-- Dump completed on 2013-08-28 13:55:13
