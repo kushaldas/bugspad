@@ -12,6 +12,7 @@ type Result1 map[string]string
 
 const (
 	AUTH_ERROR string = "\"Authentication failure.\""
+	SUCCESS    string = "\"Success\""
 )
 
 func myrecover(w http.ResponseWriter) {
@@ -170,7 +171,9 @@ func updatebug(w http.ResponseWriter, r *http.Request) {
 			update_bug(pdata)
 		} else {
 			fmt.Fprintln(w, AUTH_ERROR)
+			return
 		}
+		fmt.Fprintln(w, SUCCESS)
 	}
 }
 
