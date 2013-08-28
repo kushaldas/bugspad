@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/vaughan0/go-ini"
@@ -37,15 +36,8 @@ func main() {
 		var status, summary string
 		for rows.Next() {
 			err = rows.Scan(&id, &status, &summary)
-			//fmt.Println(id, status, summary)
-			m := make(Bug)
-			m["id"] = id
-			m["status"] = status
-			m["summary"] = summary
-			data, _ := json.Marshal(m)
-			sdata := string(data)
 			sid := strconv.FormatInt(id, 10)
-			redis_hset("bugs", sid, sdata)
+			bug_redis_hset(id, status, summary)
 			update_redis_bug_status(sid, status)
 		}
 		fmt.Println("All bug indexes loaded in Redis.")

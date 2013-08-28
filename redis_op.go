@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/garyburd/redigo/redis"
 	_ "github.com/go-sql-driver/mysql"
+	"strconv"
 )
 
 type Bug map[string]interface{}
@@ -182,4 +183,15 @@ func get_latest_updated_list() interface{} {
 		return nil
 	}
 	return val
+}
+
+func bug_redis_hset(id int64, status, summary string) {
+	m := make(Bug)
+	m["id"] = id
+	m["status"] = status
+	m["summary"] = summary
+	data, _ := json.Marshal(m)
+	sdata := string(data)
+	sid := strconv.FormatInt(id, 10)
+	redis_hset("bugs", sid, sdata)
 }
