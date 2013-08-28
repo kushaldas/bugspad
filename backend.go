@@ -503,15 +503,16 @@ func add_release(name string) {
 
 }
 
-func get_releases() interface{} {
+func get_releases() []string {
+	m := make([]string, 0)
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
 		fmt.Print(err)
-		return false
+		return m
 	}
 	defer db.Close()
-	m := make([]string, 0)
+
 	rows, err := db.Query("SELECT name FROM releases")
 	if err != nil {
 		return m

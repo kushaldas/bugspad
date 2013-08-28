@@ -329,11 +329,18 @@ func releases(w http.ResponseWriter, r *http.Request) {
 		if authenticate_redis(user, password) {
 			release_name := pdata["name"].(string)
 			add_release(release_name)
+			add_redis_release(release_name)
 			fmt.Fprintln(w, SUCCESS)
 		}
 		return
 	} else if r.Method == "GET" {
-		releases := get_releases()
+		vals := get_redis_release_list().([]interface{})
+		releases := make([]string, 0)
+		if vals != nil {
+			for i := range vals {
+				releases = append(releases, string(vals[i].([]uint8)))
+			}
+		}
 		res_json, _ := json.Marshal(releases)
 		fmt.Fprintln(w, string(res_json))
 	}

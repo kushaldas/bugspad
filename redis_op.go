@@ -195,3 +195,41 @@ func set_redis_bug(id int64, status, summary string) {
 	sid := strconv.FormatInt(id, 10)
 	redis_hset("bugs", sid, sdata)
 }
+
+func add_redis_release(name string) {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return
+	}
+	defer conn.Close()
+	_, err = conn.Do("LPUSH", "releases", name)
+
+}
+
+func get_redis_release_list() interface{} {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return nil
+	}
+	val, err := conn.Do("LRANGE", "releases", 0, -1)
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return nil
+	}
+	return val
+}
+
+func clear_redis_releases() {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+	}
+	conn.Do("DEL", "releases")
+
+}
