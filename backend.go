@@ -489,3 +489,39 @@ func get_user_id(email string) int {
 	}
 	return -1
 }
+
+func add_release(name string) {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return
+	}
+	defer db.Close()
+
+	db.Exec("INSERT INTO releases (name) VALUES (?)", name)
+
+}
+
+func get_releases() interface{} {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return false
+	}
+	defer db.Close()
+	m := make([]string, 0)
+	rows, err := db.Query("SELECT name FROM releases")
+	if err != nil {
+		return m
+	}
+	defer rows.Close()
+	var name string
+	for rows.Next() {
+		err = rows.Scan(&name)
+		//fmt.Println(c_id, name, description)
+		m = append(m, name)
+	}
+	return m
+}

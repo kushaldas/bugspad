@@ -308,6 +308,37 @@ func latest_updated_bugs(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(res_json))
 }
 
+func releases(w http.ResponseWriter, r *http.Request) {
+
+	tm := time.Now().UTC()
+	defer log(r, tm)
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method == "POST" {
+		// In case of wrong type of input we should recover.
+		defer myrecover(w)
+		decoder := json.NewDecoder(r.Body)
+		pdata := make(map[string]interface{})
+		err := decoder.Decode(&pdata)
+		if err != nil {
+			panic(err)
+		}
+		user := pdata["user"].(string)
+		password := pdata["password"].(string)
+		if authenticate_redis(user, password) {
+			release_name := pdata["name"].(string)
+			add_release(release_name)
+			fmt.Fprintln(w, SUCCESS)
+		}
+		return
+	} else if r.Method == "GET" {
+		releases := get_releases()
+		res_json, _ := json.Marshal(releases)
+		fmt.Fprintln(w, string(res_json))
+	}
+}
+
 func main() {
 	load_config("config/bugspad.ini")
 	load_users()
@@ -320,5 +351,7 @@ func main() {
 	http.HandleFunc("/comment/", comment)
 	http.HandleFunc("/latestcreated/", latest_bugs)
 	http.HandleFunc("/latestupdated/", latest_updated_bugs)
+	http.HandleFunc("/releases/", releases)
+
 	http.ListenAndServe(":9998", nil)
 }
