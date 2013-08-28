@@ -219,6 +219,13 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 		vals = append(vals, val)
 	}
 
+	val, ok = data["subcomponent_id"]
+	if ok {
+		buffer.WriteString(", subcomponent_id")
+		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	}
+
 	val, ok = data["reporter"]
 	if ok {
 		buffer.WriteString(", reporter")
@@ -345,6 +352,12 @@ func update_bug(data map[string]interface{}) {
 	val, ok = data["whiteboard"]
 	if ok {
 		buffer.WriteString(", whiteboard=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["subcomponent_id"]
+	if ok {
+		buffer.WriteString(", subcomponent_id=?")
 		vals = append(vals, val)
 	}
 
