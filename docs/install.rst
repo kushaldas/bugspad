@@ -86,6 +86,16 @@ Install and run redis server
 	# yum install redis
 	# service redis start
 
+Customize config file
+---------------------
+First, copy the sample config file ``config/bugspad.ini-dist`` to ``config/bugspad.ini``.
+::
+
+    $ cp config/bugspad.ini-dist config/bugspad.ini
+
+Now, edit ``config/bugspad.ini`` and add proper credentials(``user`` and
+``password``) to access your ``bugzilla`` database.
+
 Start the backend server
 -------------------------
 First run the loader to load all index data in redis.
