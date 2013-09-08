@@ -131,3 +131,9 @@ Post data:
 	   "bug_id":1,
 	   "desc":"comment text",
 	}
+
+Getting details of a bug
+-------------------------
+
+- Request type: *GET*
+- URL:          */bug/<int bug_id>*

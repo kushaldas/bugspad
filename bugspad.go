@@ -134,7 +134,7 @@ func components(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func create_bug(w http.ResponseWriter, r *http.Request) {
+func backend_bug(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	tm := time.Now().UTC()
@@ -172,6 +172,21 @@ func create_bug(w http.ResponseWriter, r *http.Request) {
 		} else {
 			fmt.Fprintln(w, AUTH_ERROR)
 		}
+	} else if r.Method == "GET" {
+		title := r.URL.Path[5:]
+
+		if title == "" {
+			return
+		}
+
+		index := strings.Index(title, "/")
+		if index != -1 {
+			title = title[:index]
+		}
+		data := get_bug(title)
+		res_json, _ := json.Marshal(data)
+		fmt.Fprintln(w, string(res_json))
+
 	}
 }
 
@@ -352,7 +367,7 @@ func main() {
 	http.HandleFunc("/component/", component)
 	http.HandleFunc("/components/", components)
 	http.HandleFunc("/product/", product)
-	http.HandleFunc("/bug/", create_bug)
+	http.HandleFunc("/bug/", backend_bug)
 	http.HandleFunc("/bug/cc/", bug_cc)
 	http.HandleFunc("/updatebug/", updatebug)
 	http.HandleFunc("/comment/", comment)

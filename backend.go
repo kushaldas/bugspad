@@ -10,6 +10,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/vaughan0/go-ini"
 	"strconv"
+	"time"
 )
 
 var conn_str string
@@ -20,7 +21,7 @@ func load_config(filepath string) {
 	db_pass, _ := file.Get("bugspad", "password")
 	db_host, _ := file.Get("bugspad", "host")
 	db_name, _ := file.Get("bugspad", "database")
-	conn_str = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", db_user, db_pass, db_host, db_name)
+	conn_str = fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", db_user, db_pass, db_host, db_name)
 
 }
 
@@ -397,6 +398,35 @@ func update_bug(data map[string]interface{}) {
 		update_redis_bug_status(strconv.FormatInt(int64(bug_id), 10), val1.(string))
 	}
 	add_latest_updated(strconv.FormatInt(int64(bug_id), 10))
+}
+
+/*
+Get a bug details.
+*/
+func get_bug(bug_id string) Bug {
+	fmt.Println(bug_id)
+	m := make(Bug)
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	row := db.QueryRow("SELECT status, description, version, severity, hardware, priority, whiteboard, reported, component_id, subcomponent_id, reporter from bugs where id=?", bug_id)
+	var status, description, version, severity, hardware, priority, whiteboard, subcomponent_id []byte
+	var reporter, component_id int
+	var reported time.Time
+	err = row.Scan(&status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &subcomponent_id, &reporter)
+	if err == nil {
+		m["id"] = bug_id
+		m["status"] = string(status)
+		m["description"] = string(description)
+		m["version"] = string(version)
+		m["hardware"] = string(hardware)
+		m["priority"] = string(priority)
+		m["whiteboard"] = string(whiteboard)
+		m["reported"] = reported.String()
+
+	} else {
+		fmt.Println(err)
+	}
+	return m
 }
 
 /*
