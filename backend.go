@@ -10,6 +10,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/vaughan0/go-ini"
 	"strconv"
+    "time"
 )
 
 var conn_str string
@@ -282,6 +283,52 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 	set_redis_bug(rid, status, summary)
 	add_latest_created(bug_id)
 	return bug_id, err
+}
+
+/*
+Fetch bug details by bug id.
+*/
+func bug_details(bug_id string) map[string]string {
+	m := make(map[string]string)
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	rows, err := db.Query("SELECT id, status, version, severity, hardware, " +
+        "priority, reporter, qa, docs, whiteboard, summary, description, " +
+        "reported, fixedinver, component_id, subcomponent_id from " +
+        "bugs where id=?", bug_id)
+	if err != nil {
+        fmt.Println(err.Error())
+		return m
+	}
+	defer rows.Close()
+	var id, status, version, severity, hardware string
+    var priority, reporter, qa, docs, whiteboard, summary string
+    var description string
+    var reported time.Time
+    var fixedinver, component_id, subcomponent_id string
+    for rows.Next() {
+        err = rows.Scan(&id, &status, &version, &severity, &hardware,
+                        &priority, &reporter, &qa, &docs, &whiteboard,
+                        &summary, &description, &reported, &fixedinver,
+                        &component_id, &subcomponent_id)
+        m["id"] = id
+        m["status"] = status
+        m["version"] = version
+        m["severity"] = severity
+        m["hardware"] = hardware
+        m["priority"] = priority
+        m["reporter"] = reporter
+        m["qa"] = qa
+        m["docs"] = docs
+        m["whiteboard"] = whiteboard
+        m["summary"] = summary
+        m["description"] = description
+        m["reported"] = reported.String()
+        m["fixedinver"] = fixedinver
+        m["component_id"] = component_id
+        m["subcomponent_id"] = subcomponent_id
+    }
+	return m
 }
 
 /*

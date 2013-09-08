@@ -134,6 +134,30 @@ func components(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func get_bug_details(w http.ResponseWriter, r *http.Request) {
+    var bug_id string
+    bug_id = ""
+    if r.Method == "GET" {
+		title := r.URL.Path[13:]
+
+		if title == "" {
+			return
+		}
+
+		index := strings.Index(title, "/")
+		if index != -1 {
+			title = title[:index]
+		}
+		bug_id = title 
+        if bug_id != "" {
+            w.Header().Set("Content-Type", "application/json")
+            m := bug_details(bug_id)
+            res_json, _ := json.Marshal(m)
+            fmt.Fprintln(w, string(res_json))
+        }
+    }
+}
+
 func create_bug(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -353,6 +377,7 @@ func main() {
 	http.HandleFunc("/components/", components)
 	http.HandleFunc("/product/", product)
 	http.HandleFunc("/bug/", create_bug)
+    http.HandleFunc("/bug/details/", get_bug_details)
 	http.HandleFunc("/bug/cc/", bug_cc)
 	http.HandleFunc("/updatebug/", updatebug)
 	http.HandleFunc("/comment/", comment)
