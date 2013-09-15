@@ -408,13 +408,14 @@ func get_bug(bug_id string) Bug {
 	m := make(Bug)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
-	row := db.QueryRow("SELECT status, description, version, severity, hardware, priority, whiteboard, reported, component_id, subcomponent_id, reporter from bugs where id=?", bug_id)
-	var status, description, version, severity, hardware, priority, whiteboard, subcomponent_id []byte
+	row := db.QueryRow("SELECT bug.summary, bug.status, bug.description, bug.version, bug.severity, bug.hardware, bug.priority, bug.whiteboard, bug.reported, bug.component_id, bug.subcomponent_id, bug.reporter, user.name, user.email from bugs as bug INNER JOIN users as user where bug.id=? and bug.reporter=user.id", bug_id)
+	var summary, status, description, version, severity, hardware, priority, whiteboard, subcomponent_id, reporter_name, reporter_email []byte
 	var reporter, component_id int
 	var reported time.Time
-	err = row.Scan(&status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &subcomponent_id, &reporter)
+	err = row.Scan(&summary, &status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &subcomponent_id, &reporter, &reporter_name, &reporter_email)
 	if err == nil {
 		m["id"] = bug_id
+		m["summary"] = string(summary)
 		m["status"] = string(status)
 		m["description"] = string(description)
 		m["version"] = string(version)
@@ -422,6 +423,9 @@ func get_bug(bug_id string) Bug {
 		m["priority"] = string(priority)
 		m["whiteboard"] = string(whiteboard)
 		m["reported"] = reported.String()
+		m["reporter"] = string(reporter)
+		m["reporter_name"] = string(reporter_name)
+		m["reporter_email"] = string(reporter_email)
 
 	} else {
 		fmt.Println(err)
