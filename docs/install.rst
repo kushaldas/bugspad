@@ -59,13 +59,6 @@ First edit `scripts/bootstrap.sql` line 2 with your username and email id.
 	$ mysql -u bugspad -pmypass bugzilla < createdb.sql
 	$ mysql -u bugspad -pmypass bugzilla < bootstrap.sql
 
-
-Update database config file
----------------------------
-
-Update the `config/bugspad.ini` file with database details.
-
-
 Build bugspad
 -------------
 ::
