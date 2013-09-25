@@ -346,6 +346,8 @@ func releases(w http.ResponseWriter, r *http.Request) {
 			add_release(release_name)
 			add_redis_release(release_name)
 			fmt.Fprintln(w, SUCCESS)
+		} else {
+			fmt.Fprintln(w, AUTH_ERROR)
 		}
 		return
 	} else if r.Method == "GET" {
