@@ -1,6 +1,15 @@
 Installation
 ==================================
 
+Requirements
+-------------
+
+* golang
+* python-requests module
+* mariadb server
+* redis
+* git (to get the sources)
+
 Install golang
 ---------------
 
