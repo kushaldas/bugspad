@@ -5,7 +5,7 @@ Requirements
 -------------
 
 * golang
-* python-requests module
+* python-requests module (to add sample components to play with)
 * mariadb server
 * redis
 * git (to get the sources)
