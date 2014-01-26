@@ -14,7 +14,7 @@ import (
 )
 
 var conn_str string
-
+/* To read config file values.  */
 func load_config(filepath string) {
 	file, _ := ini.LoadFile(filepath)
 	db_user, _ := file.Get("bugspad", "user")
@@ -25,6 +25,7 @@ func load_config(filepath string) {
 
 }
 
+/* Gets the HEX values of the string password*/
 func get_hex(password string) string {
 	hash := sha256.New()
 	hash.Write([]byte(password))
@@ -140,6 +141,7 @@ func authenticate_redis(email string, password string) bool {
 	}
 }
 
+/* Finds all components for a given product id*/
 func get_components_by_id(product_id string) map[string][3]string {
 	m := make(map[string][3]string)
 	db, err := sql.Open("mysql", conn_str)
@@ -159,6 +161,7 @@ func get_components_by_id(product_id string) map[string][3]string {
 
 }
 
+/* Files a new bug based on input*/
 func new_bug(data map[string]interface{}) (id string, err error) {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
