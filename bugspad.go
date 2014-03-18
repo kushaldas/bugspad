@@ -248,6 +248,9 @@ func comment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
+Adds or removes a new CC address to the bug.
+*/
 func bug_cc(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -304,6 +307,10 @@ func latest_bugs(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(res_json))
 }
 
+/*
+Find out the latest updated bugs.
+Can be used in the frontpage of the application.
+*/
 func latest_updated_bugs(w http.ResponseWriter, r *http.Request) {
 
 	tm := time.Now().UTC()
