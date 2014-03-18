@@ -361,8 +361,12 @@ func releases(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Main function of the application. This handles
+// all entry points for the webapplication.
 func main() {
+        // First load the configuration details.
 	load_config("config/bugspad.ini")
+        // Load the user details into redis.
 	load_users()
 	http.HandleFunc("/component/", component)
 	http.HandleFunc("/components/", components)
