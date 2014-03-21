@@ -134,6 +134,9 @@ func components(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
+Creates a new bug or gets the details of a bug.
+*/
 func backend_bug(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -190,6 +193,9 @@ func backend_bug(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
+Updates the content of a given bug.
+*/
 func updatebug(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
