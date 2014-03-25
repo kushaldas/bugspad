@@ -13,6 +13,25 @@ type Bug map[string]interface{}
 
 // TODO: Update this codebase to keep all search related indexs on redis.
 
+// Generic function to delete a redis HASH
+func redis_hdel(name, key string) {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return
+	}
+
+	defer conn.Close()
+	_, err = conn.Do("HDEL", name, key)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return
+	}
+}
+
+
 // Generic function to update a redis HASH
 func redis_hset(name, key, value string) {
 	conn, err := redis.Dial("tcp", ":6379")
