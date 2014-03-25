@@ -73,6 +73,7 @@ Build bugspad
 ::
 	
 	$ make
+	$ make web # To build experimental frontend
 
 After this you have to build the helper tools also.
 ::
@@ -124,3 +125,10 @@ Then update `addcomponents.py` with your email id as username and execute it.
 ::
 
 	$ python addcomponents.py
+
+
+Starting the golang frontend
+-----------------------------
+::
+
+	$ ./web4
