@@ -34,13 +34,19 @@ func generate_hash() []byte {
     return b
 }
 
+/*
+This function is the starting point for user authentication.
+*/
+
 func login(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		tml, err := template.ParseFiles("login.html")
+
+		//One style of template parsing.
+		tml, err := template.ParseFiles("./templates/login.html","./templates/base.html")
 		if err != nil {
 			checkError(err)
 		}
-		tml.Execute(w, nil)
+		tml.ExecuteTemplate(w,"base", nil)
 		return
 	} else {
 		user := strings.TrimSpace(r.FormValue("username"))
@@ -53,13 +59,12 @@ func login(w http.ResponseWriter, r *http.Request) {
 			cookie := http.Cookie{Name: "bugsuser", Value: final_hash, Path: "/", Expires: expire, MaxAge: 86400}
 			http.SetCookie(w, &cookie)
 			redis_hset("sessions", user, final_hash)
-			tml, err := template.ParseFiles("logout.html")
-			if err != nil {
-				checkError(err)
-			}
+			//Second style of template parsing.
+			tml := template.Must(template.ParseFiles("templates/logout.html","templates/base.html"))
+			
 			user_type := User{Email: user}
 			
-			tml.Execute(w, user_type)
+			tml.ExecuteTemplate(w,"base", user_type)
 
 		} else {
 			fmt.Fprintln(w, AUTH_ERROR)
