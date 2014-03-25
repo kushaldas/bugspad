@@ -1,11 +1,9 @@
-<html>
-<head></head>
-<body>
+{{define "head"}}<title>Login Page</title>{{end}}
+{{define "body"}}
     <h1>Login</h1>
     <form action="/login" method="POST">
         <p>Username: <input type="text" name="username"></p>
         <p>Password: <input type="password" name="password"></p>
         <p><button>Login</button></p>
     </form>
-</body>
-</html>
+{{end}}
