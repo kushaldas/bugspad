@@ -59,6 +59,21 @@ Now clone the source repo somewhere in your home directory.
 
 	$ git clone https://github.com/kushaldas/bugspad.git
 
+Adding new users
+-------------------
+
+Currently the only way to add a new user is through SQL scripts.
+You can add the new user details in the `scripts/bootstrap.sql` file.
+
+The following python script can help you generate password value:
+
+::
+
+	import hashlib
+	print hashlib.sha256('password').hexdigest()
+
+	'5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8'
+
 Create the tables
 ------------------------
 First edit `scripts/bootstrap.sql` line 2 with your username and email id.
