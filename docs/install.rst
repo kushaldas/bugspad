@@ -40,6 +40,7 @@ After golang installation, get the dependent libraries.
 	$ go get github.com/garyburd/redigo/redis
 	$ go get github.com/go-sql-driver/mysql
 	$ go get github.com/vaughan0/go-ini
+	$ go get github.com/gorilla/securecookie
 
 
 Setup Mariadb (or MySQL)
