@@ -431,7 +431,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	if username != "" && password != "" {
 		/*  checking credentials */
 		if authenticate_redis(username, password){
-			setSession(username, w)
+			setCookie(username, w)
 			redirectTarget = "/internal"
 		}
 	}
@@ -440,7 +440,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
  
 /*Logout Handling for users*/
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	clearSession(w)
+	clearCookie(w)
 	http.Redirect(w, r, "/", 302)
 }
 
