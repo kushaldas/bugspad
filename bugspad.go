@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"github.com/gorilla/securecookie"
 )
 
 type Result1 map[string]string
@@ -376,6 +377,73 @@ func releases(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*Generates a cookie based on a random key*/
+var cookieHandler = securecookie.New(
+securecookie.GenerateRandomKey(64),
+securecookie.GenerateRandomKey(32))
+ 
+/*Fetches a UserName based on a Cookie, using the Handler*/
+func getUserName(r *http.Request) (userName string) {
+	cookie, err := request.Cookie("session"); 
+	if err == nil {
+		cookieValue := make(map[string]string)
+		err = cookieHandler.Decode("session", cookie.Value, &cookieValue); 
+		if err == nil {
+		    userName = cookieValue["name"]
+		}
+	}
+	return userName
+}
+
+/*Sets a cookie for a user*/
+func setCookie(userName string, w http.ResponseWriter) {
+	value := map[string]string{
+	"name": userName,
+	}
+	encoded, err := cookieHandler.Encode("session", value); 
+	if err == nil {
+		cookie := &http.Cookie{
+		Name: "session",
+		Value: encoded,
+		Path: "/",
+		}
+		http.SetCookie(w, cookie)
+	}
+}
+ 
+/*Clears a cookie*/
+func clearCookie(w http.ResponseWriter) {
+	cookie := &http.Cookie{
+		Name: "session",
+		Value: "",
+		Path: "/",
+		MaxAge: -1,
+	}
+	http.SetCookie(w, cookie)
+}
+ 
+/*Login handling for users*/
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	username:="dummy"
+	password:="dummypass"
+	/*we get the username and password from http.Request here*/
+	redirectTarget := "/"
+	if username != "" && password != "" {
+		/*  checking credentials */
+		if authenticate_redis(username, password){
+			setCookie(username, w)
+			redirectTarget = "/internal"
+		}
+	}
+	http.Redirect(w, r, redirectTarget, 302)
+}
+ 
+/*Logout Handling for users*/
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	clearCookie(w)
+	http.Redirect(w, r, "/", 302)
+}
+
 // Main function of the application. This handles
 // all entry points for the webapplication.
 func main() {
@@ -393,6 +461,8 @@ func main() {
 	http.HandleFunc("/latestcreated/", latest_bugs)
 	http.HandleFunc("/latestupdated/", latest_updated_bugs)
 	http.HandleFunc("/releases/", releases)
+	http.HandleFunc("/logout/", logoutHandler)
+	http.HandleFunc("/login/", loginHandler)
 
 	http.ListenAndServe(":9998", nil)
 }
