@@ -1,4 +1,11 @@
 {{define "base"}}<html>
   <head>{{template "head" .}}</head>
-  <body>{{template "body" .}}</body>
+  <body>
+  	{{if .islogged}}
+	    <p> Welcome, {{ .useremail}} </p>
+	    <p><a href="/logout">Logout</a></p>
+	{{else}}
+	    <p><a href="/login">Login</a></p>
+	{{end}}
+  {{template "body" .}}</body>
 </html>{{end}}

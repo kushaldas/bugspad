@@ -35,6 +35,27 @@ func generate_hash() []byte {
 }
 
 /*
+The home landing page of bugspad
+*/
+func home(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == "GET" {
+	    //fmt.Fprintln(w, "get")
+	    il, useremail := is_logged(r)
+	    fmt.Println(il)
+	    fmt.Println(useremail)
+		//fmt.Println(r.FormValue("username"))
+		    
+	    tml, err := template.ParseFiles("./templates/home.html","./templates/base.html")
+	    if err != nil {
+		checkError(err)
+	    }
+	    tml.ExecuteTemplate(w,"base", map[string]interface{}{"useremail":useremail,"islogged":il})
+	    return
+	}
+	    
+}
+/*
 This function is the starting point for user authentication.
 */
 
@@ -72,27 +93,53 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
+Logging out a user.
+*/
 func logout(w http.ResponseWriter, r *http.Request) {
-
-	cookie, err := r.Cookie("bugsuser")
-	if err == nil {
-		hash := cookie.Value
-		words := strings.Split(hash, ":")
-		if len(words) == 2 {
-			pss := string(redis_hget("sessions", words[0]))
-			if pss == hash {
-				// Now we have a proper session matched, We can logout now.
-				fmt.Println("Logout man!")
-				http.Redirect(w, r, "/login", http.StatusFound)
-			}
-		}
-		
-
-	}
+	il, user := is_logged(r)
+	if il{
+		redis_hdel("sessions",user)
+		fmt.Println("Logout!")
+		http.Redirect(w,r,"/",http.StatusFound)
+	    }
 	return
 }
 
+
+/*
+Registering a User
+*/
+func registeruser(w http.ResponseWriter, r *http.Request) {
+    // TODO add email verification for the user. 
+    // TODO add openid registration. 
+
+	if r.Method == "GET" {
+	
+		tml, err := template.ParseFiles("./templates/registeruser.html","./templates/base.html")
+		if err != nil {
+			checkError(err)
+		}
+		tml.ExecuteTemplate(w,"base", nil)
+		return
+	
+	} else if r.Method == "POST" {
+		//type "0" refers to the normal user, while "1" refers to the admin
+		ans := add_user(r.FormValue("username"), r.FormValue("useremail"), "0", r.FormValue("password") )
+		if ans != "User added." {
+		    fmt.Fprintln(w,"User could not be registered.")
+		}		
+		http.Redirect(w,r,"/",http.StatusFound)
+	}
+	
+}
+
 func main() {
+        load_config("config/bugspad.ini")
+        // Load the user details into redis.
+	load_users()
+	http.HandleFunc("/", home)
+	http.HandleFunc("/register/", registeruser)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/logout/", logout)
 	http.ListenAndServe(":9999", nil)

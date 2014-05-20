@@ -72,7 +72,7 @@ func add_user(name string, email string, user_type string, password string) stri
 /*
 Adds a new user into the database.
 */
-func add_user_mysql(name string, email string, user_type string, password string) (id int64, err error) {
+func add_user_mysql(name string, email string, user_type string, password string) (err error) {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
