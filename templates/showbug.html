@@ -1,0 +1,54 @@
+{{define "head"}}<title>Bug Description Page</title>{{end}}
+{{define "body"}}
+    <table>
+	<tr>
+	    <td><b>Bug Id </b>{{ .id}}</td>
+	    <td>{{ .summary}}</td>
+	</tr>
+	<tr>
+	    <td><b>Status</b></td>
+	    <td>{{ .status}}</td>
+	</tr>
+	<tr>
+	    <td><b>Version</b></td>
+	    <td>{{ .version}}</td>
+	</tr>
+	<tr>
+	    <td><b>Hardware</b></td>
+	    <td>{{ .hardware}}</td>
+	</tr>
+	<tr>
+	    <td><b>Priority</b></td>
+	    <td>{{ .priority}}</td>
+	</tr>
+	<tr>
+	    <td><b>Reporter</b></td>
+	    <td>{{ .reporter}}</td>
+	</tr>
+	<tr>
+	    <td><b>WhiteBoard</b></td>
+	    <td>{{ .whiteboard}}</td>
+	</tr>
+	<tr>
+	    <td><b>Reported at</b></td>
+	    <td>{{ .reported}}</td>
+	</tr>
+    </table>
+    <p><b>Bug Description</b></p>
+    <p>{{ .description}}</p>
+<h2>Comments</h2>
+{{end}}
+{{define "comments_on_bug"}}
+    {{range $key, $val := .comment_data}}
+	<div id={{ $key }}>
+	    <i>{{ index $val 0 }}  {{index $val 1}} {{index $val 3}}</i>
+	    <p>{{index $val 2}}</p>
+	    <br>
+	</div>
+    {{end}}
+    <form  action="/commentonbug/" method="POST" name="add_comment" >
+	<textarea name="com_content" rows="3" cols="20"></textarea>
+	<input name="bug_id" type="hidden" value="{{ .bug_id}}"></input>
+	<button>Comment</button>
+    </form>
+{{end}}

@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 	"strings"
+	"strconv"
 	"crypto/rand"
     "encoding/base64" 
 )
@@ -133,6 +134,71 @@ func registeruser(w http.ResponseWriter, r *http.Request) {
 	}
 	
 }
+/*
+Function for displaying the bug details.
+*/
+func showbug(w http.ResponseWriter, r *http.Request) {
+	//perform any preliminary check if required.
+	//backend_bug(w,r)
+	il, useremail:= is_logged(r)
+	bug_id := r.URL.Path[len("/showbug/"):]
+    	if (r.Method == "GET" && bug_id!="") {
+	    
+		bug_data := get_bug(bug_id)
+		tml, err := template.ParseFiles("./templates/showbug.html","./templates/base.html")
+		if err != nil {
+			checkError(err)
+		}
+		bug_data["islogged"]=il
+		bug_data["useremail"]=useremail
+		fmt.Println(bug_data["reporter"])
+		tml.ExecuteTemplate(w,"base", bug_data)
+		comment_data := fetch_comments_by_bug(bug_id)
+		tml.ExecuteTemplate(w,"comments_on_bug",map[string]interface{}{"comment_data":comment_data,"bug_id":bug_id})
+		return
+	    
+	} else if r.Method == "POST"{
+	    fmt.Println(r.FormValue("com_content"))
+	    
+	}
+  /*
+	fmt.Fprintln(w,"resp.Body: ?",resp.Body)   
+	fmt.Fprintln(w,"body: "+string(body))
+	json.Marshal(string(body),&res)
+	fmt.Fprintln(w,"err: ?",err)
+	//convert this to json and apply to the specific template
+	//to_be_rendered by the template
+*/}
+
+/*
+Frontend function for handling the commenting on 
+a bug.
+*/
+func commentonbug(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == "POST"{
+	    il, _ := is_logged(r)
+	    if il{
+		user_id := get_user_id(r.FormValue("useremail"))
+		bug_id,err := strconv.Atoi(r.FormValue("bug_id"))
+		if err!=nil{
+		    checkError(err)
+		}
+		_,err = new_comment(user_id, bug_id, r.FormValue("com_content"))
+		if err!= nil {
+		    checkError(err)
+		}
+		fmt.Println("hool")
+		http.Redirect(w,r,"/showbug/"+r.FormValue("bug_id"),http.StatusFound)
+	    //fmt.Println( r.FormValue("com_content"));
+	    } else {
+		http.Redirect(w,r,"/login",http.StatusFound)
+		//fmt.Fprintln(w, "Illegal Operation!")
+	    }
+	}
+	    
+    
+}
 
 func main() {
         load_config("config/bugspad.ini")
@@ -142,5 +208,7 @@ func main() {
 	http.HandleFunc("/register/", registeruser)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/logout/", logout)
+	http.HandleFunc("/showbug/", showbug)
+	http.HandleFunc("/commentonbug/", commentonbug)
 	http.ListenAndServe(":9999", nil)
 }

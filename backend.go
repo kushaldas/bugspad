@@ -415,25 +415,80 @@ func get_bug(bug_id string) Bug {
 	m := make(Bug)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
-	row := db.QueryRow("SELECT status, description, version, severity, hardware, priority, whiteboard, reported, component_id, subcomponent_id, reporter from bugs where id=?", bug_id)
-	var status, description, version, severity, hardware, priority, whiteboard, subcomponent_id []byte
+	row := db.QueryRow("SELECT status, description, version, severity, hardware, priority, whiteboard, reported, component_id, subcomponent_id, reporter, summary, fixedinver, qa, docs from bugs where id=?", bug_id)
+	var status, description, version, severity, hardware, priority, whiteboard,  summary, fixedinver []byte
 	var reporter, component_id int
+	var qa, docs, subcomponent_id sql.NullInt64
 	var reported time.Time
-	err = row.Scan(&status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &subcomponent_id, &reporter)
+	err = row.Scan(&status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &subcomponent_id, &reporter, &summary, &fixedinver, &qa, &docs)
 	if err == nil {
+	    	    qaint := -1
+		    docsint := -1
+		    subcint := -1
+		    if qa.Valid{
+			qaint = int(qa.Int64)
+		    }
+		    if docs.Valid{
+			docsint = int(docs.Int64)
+		    }
+		    if subcomponent_id.Valid{
+			subcint = int(subcomponent_id.Int64)
+		    }
+		qa_name := ""
+		docs_name := ""
+		if qaint!=-1 {
+		    qa_name = get_user_email(qaint) 
+		}
+		if docsint!=-1 {
+		    docs_name = get_user_email(docsint)
+		}
 		m["id"] = bug_id
 		m["status"] = string(status)
+		m["summary"] = string(summary)
+		m["severity"] = string(severity)
 		m["description"] = string(description)
 		m["version"] = string(version)
 		m["hardware"] = string(hardware)
 		m["priority"] = string(priority)
 		m["whiteboard"] = string(whiteboard)
 		m["reported"] = reported.String()
+		m["reporter"] = get_user_email(reporter)
+		m["component"] = component_id
+		m["subcomponent"] = subcint
+		m["fixedinver"] = fixedinver
+		m["qa"] = qa_name
+		m["docs"] = docs_name 
 
 	} else {
+		m["error_msg"] = err
 		fmt.Println(err)
 	}
 	return m
+}
+
+
+/*
+Returns the user email given the user id.
+*/ 
+func get_user_email(id int) string {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return ""
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT email from users where id = ?", id)
+	if err == nil {
+		var email string
+		for rows.Next() {
+			err = rows.Scan(&email)
+			if email != "" {
+				return email
+			}
+		}
+	}
+	return ""
 }
 
 /*
@@ -565,6 +620,31 @@ func get_releases() []string {
 		err = rows.Scan(&name)
 		//fmt.Println(c_id, name, description)
 		m = append(m, name)
+	}
+	return m
+}
+
+
+func fetch_comments_by_bug(bug_id string) map[string][4]string {
+
+	m := make(map[string][4]string)
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	rows, err := db.Query("SELECT users.email as useremail, users.name as username, comments.id as com_id, description, datec, bug FROM comments JOIN users WHERE bug=? and users.id=comments.user;", bug_id)
+	//fmt.Println(rows)
+	if err != nil {
+		return m
+	}
+	defer rows.Close()
+	var com_id, description, username, useremail, bug string
+	var datec time.Time
+	for rows.Next() {
+		err = rows.Scan(&useremail, &username, &com_id, &description, &datec, &bug)
+		//fmt.Println(c_id, name, description)
+		//m = append(m,Comment{com_id, description, user, datec})
+		//user="jj"
+		fmt.Println(datec)
+		m[com_id] = [4]string{useremail, username, description, time.Time.String(datec)}
 	}
 	return m
 }
