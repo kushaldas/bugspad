@@ -59,10 +59,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 /*
 This function is the starting point for user authentication.
 */
-
 func login(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-
+	
 		//One style of template parsing.
 		tml, err := template.ParseFiles("./templates/login.html","./templates/base.html")
 		if err != nil {
@@ -70,7 +69,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 		}
 		tml.ExecuteTemplate(w,"base", nil)
 		return
-	} else {
+	} else if r.Method == "POST" {
+		//fmt.Println(r.Method)
 		user := strings.TrimSpace(r.FormValue("username"))
 		password := strings.TrimSpace(r.FormValue("password"))
 		if authenticate_redis(user, password) {
@@ -82,11 +82,12 @@ func login(w http.ResponseWriter, r *http.Request) {
 			http.SetCookie(w, &cookie)
 			redis_hset("sessions", user, final_hash)
 			//Second style of template parsing.
-			tml := template.Must(template.ParseFiles("templates/logout.html","templates/base.html"))
+			http.Redirect(w, r, "/", http.StatusFound)
+			/*tml := template.Must(template.ParseFiles("templates/logout.html","templates/base.html"))
 			
 			user_type := User{Email: user}
 			
-			tml.ExecuteTemplate(w,"base", user_type)
+			tml.ExecuteTemplate(w,"base", user_type)*/
 
 		} else {
 			fmt.Fprintln(w, AUTH_ERROR)
@@ -200,6 +201,66 @@ func commentonbug(w http.ResponseWriter, r *http.Request) {
     
 }
 
+/*
+Function for creating a new bug.
+*/
+func createbug(w http.ResponseWriter, r *http.Request) {
+	//perform any preliminary check
+	//backend_bug(w,r)
+	//to_be_rendered by the template
+	il, useremail:= is_logged(r)
+	if r.Method == "GET" {
+	    tml, err := template.ParseFiles("./templates/createbug.html","./templates/base.html")
+	    if err != nil {
+		checkError(err)
+	    }
+	    if il{
+	    fmt.Println(useremail)
+		//fmt.Println(r.FormValue("username"))
+		    
+
+		allcomponents := get_all_components()
+		fmt.Println(allcomponents)
+		tml.ExecuteTemplate(w,"base", map[string]interface{}{"useremail":useremail,"islogged":il,/*"products":products_data,*/"components":allcomponents})
+		return
+	    } else {
+		http.Redirect(w,r,"/login",http.StatusFound)
+	    }
+	} else if r.Method == "POST" {
+	    if il{
+		newbug := make(Bug)
+		newbug["summary"]=r.FormValue("bug_title")
+		newbug["whiteboard"]=r.FormValue("bug_whiteboard")
+		newbug["severity"]=r.FormValue("bug_severity")
+		newbug["hardware"]=r.FormValue("bug_hardware")
+		newbug["version"]=r.FormValue("bug_version")
+		newbug["description"]=r.FormValue("bug_description")
+		newbug["priority"]=r.FormValue("bug_priority")
+		newbug["component_id"]=r.FormValue("bug_component")
+		newbug["reporter"]=get_user_id(useremail)
+		id,err := new_bug(newbug)
+		
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		bug_id, ok := strconv.ParseInt(id, 10, 32)
+		if ok == nil {
+			if newbug["emails"] != nil {
+				add_bug_cc(bug_id, newbug["emails"])
+			}
+			http.Redirect(w,r,"/showbug/"+id,http.StatusFound)
+
+
+		} else {
+		        fmt.Fprintln(w, id)
+		}
+	    //fmt.Println( r.FormValue("com_content"));
+	    }
+	}
+    
+}
+
 func main() {
         load_config("config/bugspad.ini")
         // Load the user details into redis.
@@ -210,5 +271,6 @@ func main() {
 	http.HandleFunc("/logout/", logout)
 	http.HandleFunc("/showbug/", showbug)
 	http.HandleFunc("/commentonbug/", commentonbug)
+	http.HandleFunc("/filebug/", createbug)
 	http.ListenAndServe(":9999", nil)
 }

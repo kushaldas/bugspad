@@ -624,7 +624,9 @@ func get_releases() []string {
 	return m
 }
 
-
+/*
+Retrieving comments of a bug.
+*/
 func fetch_comments_by_bug(bug_id string) map[string][4]string {
 
 	m := make(map[string][4]string)
@@ -645,6 +647,28 @@ func fetch_comments_by_bug(bug_id string) map[string][4]string {
 		//user="jj"
 		fmt.Println(datec)
 		m[com_id] = [4]string{useremail, username, description, time.Time.String(datec)}
+	}
+	return m
+}
+
+
+/*
+Retrieving all components of all products.
+*/
+func get_all_components() map[string][2]string {
+    	m := make(map[string][2]string)
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	rows, err := db.Query("SELECT id, name, description from components")
+	if err != nil {
+		return m
+	}
+	defer rows.Close()
+	var name, description, c_id string
+	for rows.Next() {
+		err = rows.Scan(&c_id, &name, &description)
+		//fmt.Println(c_id, name, description)
+		m[c_id] = [2]string{name, description}
 	}
 	return m
 }
