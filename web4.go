@@ -150,6 +150,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			checkError(err)
 		}
+		fmt.Println(bug_data["cclist"])
 		bug_data["islogged"]=il
 		bug_data["useremail"]=useremail
 		fmt.Println(bug_data["reporter"])

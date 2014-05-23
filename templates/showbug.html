@@ -10,6 +10,22 @@
 	    <td>{{ .status}}</td>
 	</tr>
 	<tr>
+	    <td><b>Component</b></td>
+	    <td>{{ .component}}</td>
+	</tr>
+	<tr>
+	    <td><b>Sub Component</b></td>
+	    <td>{{ .subcomponent}}</td>
+	</tr>
+	<tr>
+	    <td><b>Quality Assurance</b></td>
+	    <td>{{ .qa}}</td>
+	</tr>
+	<tr>
+	    <td><b>Docs Maintainter</b></td>
+	    <td>{{ .docs}}</td>
+	</tr>
+	<tr>
 	    <td><b>Version</b></td>
 	    <td>{{ .version}}</td>
 	</tr>
@@ -20,6 +36,14 @@
 	<tr>
 	    <td><b>Priority</b></td>
 	    <td>{{ .priority}}</td>
+	</tr>
+	<tr>
+	    <td><b>CC List</b></td>
+	    <td>
+		{{range $val := .cclist}}
+		    {{ index $val }}
+		{{end}}
+	    </td>
 	</tr>
 	<tr>
 	    <td><b>Reporter</b></td>

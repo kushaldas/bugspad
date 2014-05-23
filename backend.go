@@ -146,7 +146,7 @@ func authenticate_redis(email string, password string) bool {
 }
 
 /* Finds all components for a given product id*/
-func get_components_by_id(product_id string) map[string][3]string {
+func get_components_by_product(product_id string) map[string][3]string {
 	m := make(map[string][3]string)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
@@ -162,6 +162,102 @@ func get_components_by_id(product_id string) map[string][3]string {
 		m[name] = [3]string{c_id, name, description}
 	}
 	return m
+
+}
+
+/* Gets component name using the id*/
+func get_component_name_by_id(component_id int) string {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return ""
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT name from components where id = ?", component_id)
+	if err == nil {
+		var name string
+		for rows.Next() {
+			err = rows.Scan(&name)
+			if name != "" {
+				return name
+			}
+		}
+	}
+	return ""
+
+}
+
+/* Gets component name using the id*/
+func get_subcomponent_name_by_id(subcomponent_id int) string {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return ""
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT name from subcomponent where id = ?", subcomponent_id)
+	if err == nil {
+		var name string
+		for rows.Next() {
+			err = rows.Scan(&name)
+			if name != "" {
+				return name
+			}
+		}
+	}
+	return ""
+
+}
+
+/* Get bug cc list*/
+func get_bugcc_list(bug_id int) []string {
+	ans:=make([]string,0)
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return ans
+	}
+	defer db.Close()
+	//from the cc table
+	rows, err := db.Query("SELECT who from cc where bug_id = ?", bug_id)
+	if err == nil {
+		var user_id int
+		for rows.Next() {
+			err = rows.Scan(&user_id)
+			email := get_user_email(user_id)
+			if email != "" {
+				ans = append(ans,email)
+			}
+		}
+	}
+	//from component_cc table
+	rows, err = db.Query("select component_cc.user_id as user from bugs join component_cc where bugs.id=? and component_cc.component_id=bugs.component_id", bug_id)
+	if err == nil {
+		var user_id int
+		for rows.Next() {
+			err = rows.Scan(&user_id)
+			email := get_user_email(user_id)
+			if email != "" {
+				ans = append(ans,email)
+			}
+		}
+	}
+	//from subcomponent_owners table
+	rows, err = db.Query("select subcomponent_owners.subcomponent_owner as user from bugs join subcomponent_owners where bugs.id=? and subcomponent_owners.subcomponent_id=bugs.subcomponent_id", bug_id)
+	if err == nil {
+		var user_id int
+		for rows.Next() {
+			err = rows.Scan(&user_id)
+			email := get_user_email(user_id)
+			if email != "" {
+				ans = append(ans,email)
+			}
+		}
+	}
+	return ans
 
 }
 
@@ -442,6 +538,7 @@ func get_bug(bug_id string) Bug {
 		if docsint!=-1 {
 		    docs_name = get_user_email(docsint)
 		}
+		bugs_idint,_ := strconv.Atoi(bug_id)
 		m["id"] = bug_id
 		m["status"] = string(status)
 		m["summary"] = string(summary)
@@ -453,11 +550,12 @@ func get_bug(bug_id string) Bug {
 		m["whiteboard"] = string(whiteboard)
 		m["reported"] = reported.String()
 		m["reporter"] = get_user_email(reporter)
-		m["component"] = component_id
-		m["subcomponent"] = subcint
+		m["component"] = get_component_name_by_id(component_id)
+		m["subcomponent"] = get_subcomponent_name_by_id(subcint)
 		m["fixedinver"] = fixedinver
 		m["qa"] = qa_name
-		m["docs"] = docs_name 
+		m["docs"] = docs_name
+		m["cclist"] = get_bugcc_list(bugs_idint)
 
 	} else {
 		m["error_msg"] = err
@@ -490,6 +588,8 @@ func get_user_email(id int) string {
 	}
 	return ""
 }
+
+
 
 /*
 Adds new CC users to a bug
@@ -561,6 +661,9 @@ func new_comment(reporter int, bug_id int, desc string) (id string, err error) {
 	return strconv.FormatInt(rid, 10), err
 }
 
+/*
+Get user id by email.
+*/
 func get_user_id(email string) int {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
