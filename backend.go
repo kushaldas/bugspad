@@ -388,14 +388,15 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 	return bug_id, err
 }
 
+
 /*
 Updates a given bug based on input
 */
-func update_bug(data map[string]interface{}) {
+func update_bug(data map[string]interface{}) error {
 	var buffer bytes.Buffer
 	vals := make([]interface{}, 0)
 	buffer.WriteString("UPDATE bugs SET ")
-	bug_id := data["bug_id"].(float64)
+	bug_id,_ := strconv.ParseInt(data["id"].(string),10,64)
 
 	val1, ok1 := data["status"]
 	if ok1 {
@@ -435,12 +436,6 @@ func update_bug(data map[string]interface{}) {
 		vals = append(vals, val)
 	}
 
-	val, ok = data["reporter"]
-	if ok {
-		buffer.WriteString(", reporter=?")
-		vals = append(vals, val)
-	}
-
 	val, ok = data["qa"]
 	if ok {
 		buffer.WriteString(", qa=?")
@@ -458,25 +453,27 @@ func update_bug(data map[string]interface{}) {
 		buffer.WriteString(", whiteboard=?")
 		vals = append(vals, val)
 	}
-
+/*
+ * Since this canot be changes.
 	val, ok = data["subcomponent_id"]
 	if ok {
 		buffer.WriteString(", subcomponent_id=?")
 		vals = append(vals, val)
 	}
-
+*/
 	val, ok = data["fixedinver"]
 	if ok {
 		buffer.WriteString(", fixedinver=?")
 		vals = append(vals, val)
 	}
-
+/*
+ * Since this cannot be changed
 	val, ok = data["component_id"]
 	if ok {
 		buffer.WriteString(", component_id=?")
 		vals = append(vals, val)
 	}
-
+*/
 	buffer.WriteString(" WHERE id=?")
 	fmt.Println(buffer.String())
 
@@ -484,15 +481,15 @@ func update_bug(data map[string]interface{}) {
 	if err != nil {
 		// handle error
 		fmt.Println(err)
-		return
+		return err
 	}
 	defer db.Close()
-
-	vals = append(vals, data["bug_id"])
+	fmt.Println(data["id"].(string)+"lll")
+	vals = append(vals, data["id"])
 	_, err = db.Exec(buffer.String(), vals...)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 	if ok1 {
 		bug := get_redis_bug(strconv.FormatInt(int64(bug_id), 10))
@@ -501,6 +498,7 @@ func update_bug(data map[string]interface{}) {
 		update_redis_bug_status(strconv.FormatInt(int64(bug_id), 10), val1.(string))
 	}
 	add_latest_updated(strconv.FormatInt(int64(bug_id), 10))
+	return nil
 }
 
 /*
@@ -552,7 +550,7 @@ func get_bug(bug_id string) Bug {
 		m["reporter"] = get_user_email(reporter)
 		m["component"] = get_component_name_by_id(component_id)
 		m["subcomponent"] = get_subcomponent_name_by_id(subcint)
-		m["fixedinver"] = fixedinver
+		m["fixedinver"] = string(fixedinver)
 		m["qa"] = qa_name
 		m["docs"] = docs_name
 		m["cclist"] = get_bugcc_list(bugs_idint)

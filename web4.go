@@ -262,6 +262,59 @@ func createbug(w http.ResponseWriter, r *http.Request) {
     
 }
 
+/*
+An editing page for bug.
+*/
+func editbugpage(w http.ResponseWriter, r *http.Request) {
+
+    	bug_id := r.URL.Path[len("/editbugpage/"):]
+	il, useremail := is_logged(r)
+	interface_data := make(map[string]interface{})    	
+	if il{
+			if (r.Method == "GET" && bug_id!="") {
+			    tml, err := template.ParseFiles("./templates/editbugpage.html","./templates/base.html")
+			    if err != nil {
+				checkError(err)
+			    }
+			    interface_data["islogged"]=il
+			    interface_data["useremail"]=useremail
+			    tml.ExecuteTemplate(w,"base",interface_data)
+			    bugdata := get_bug(bug_id)
+			    if bugdata["error_msg"]!=nil{
+				fmt.Fprintln(w,bugdata["error_msg"])
+				return
+			    }
+			    fmt.Println(bugdata["summary"])
+			    //productcomponents := 
+			    tml.ExecuteTemplate(w,"bugdescription",bugdata)
+			    
+
+			} else if r.Method == "POST"{
+			    	interface_data["id"]=r.FormValue("bug_id")
+				fmt.Println(interface_data["id"])
+				interface_data["status"]=r.FormValue("bug_status")
+				interface_data["version"]=r.FormValue("bug_version")
+				interface_data["hardware"]=r.FormValue("bug_hardware")
+				interface_data["priority"]=r.FormValue("bug_priority")
+				interface_data["fixedinver"]=r.FormValue("bug_fixedinver")
+				interface_data["severity"]=r.FormValue("bug_fixedinver")
+				
+				err := update_bug(interface_data)
+				if err!=nil{
+				    fmt.Fprintln(w,"Bug could not be updated!")
+				    return
+				}
+				fmt.Fprintln(w,"Bug successfully updated!")
+			
+			}
+	} else {
+		http.Redirect(w,r,"/login",http.StatusFound)
+
+	}
+	    
+    
+}
+
 func main() {
         load_config("config/bugspad.ini")
         // Load the user details into redis.
@@ -273,5 +326,6 @@ func main() {
 	http.HandleFunc("/showbug/", showbug)
 	http.HandleFunc("/commentonbug/", commentonbug)
 	http.HandleFunc("/filebug/", createbug)
+	http.HandleFunc("/editbugpage/", editbugpage)
 	http.ListenAndServe(":9999", nil)
 }
