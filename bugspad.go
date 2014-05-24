@@ -113,7 +113,7 @@ func components(w http.ResponseWriter, r *http.Request) {
 	}
 	if product_id != "" {
 		w.Header().Set("Content-Type", "application/json")
-		m := get_components_by_id(product_id)
+		m := get_components_by_product(product_id)
 		res_json, _ := json.Marshal(m)
 		fmt.Fprintln(w, string(res_json))
 	}
