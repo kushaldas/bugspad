@@ -10,7 +10,13 @@ import (
 	"strconv"
 	"crypto/rand"
     "encoding/base64" 
+    "github.com/kushaldas/openid.go/src/openid"
 )
+
+/*TODO This needs to be changed as it consumes memory.*/
+var nonceStore = &openid.SimpleNonceStore{
+	Store: make(map[string][]*openid.Nonce)}
+var discoveryCache = &openid.SimpleDiscoveryCache{}
 
 type User struct {
 	Email string
@@ -33,6 +39,15 @@ func generate_hash() []byte {
     d := make([]byte, en.EncodedLen(len(b)))
     en.Encode(d, b) 
     return b
+}
+
+func getCookie (user string) (http.Cookie,string){
+	hash := generate_hash()
+	new_hash := get_hex(string(hash))
+	expire := time.Now().AddDate(0, 0, 1)
+	final_hash := user + ":" + new_hash
+	cookie := http.Cookie{Name: "bugsuser", Value: final_hash, Path: "/", Expires: expire, MaxAge: 86400}
+	return cookie, final_hash
 }
 
 /*
@@ -74,13 +89,17 @@ func login(w http.ResponseWriter, r *http.Request) {
 		user := strings.TrimSpace(r.FormValue("username"))
 		password := strings.TrimSpace(r.FormValue("password"))
 		if authenticate_redis(user, password) {
-			hash := generate_hash()
+			/*hash := generate_hash()
 			new_hash := get_hex(string(hash))
 			expire := time.Now().AddDate(0, 0, 1)
 			final_hash := user + ":" + new_hash
 			cookie := http.Cookie{Name: "bugsuser", Value: final_hash, Path: "/", Expires: expire, MaxAge: 86400}
+			*/
+			cookie,final_hash := getCookie(user)
 			http.SetCookie(w, &cookie)
 			redis_hset("sessions", user, final_hash)
+			//setUserCookie(w,user)
+			
 			//Second style of template parsing.
 			http.Redirect(w, r, "/", http.StatusFound)
 			/*tml := template.Must(template.ParseFiles("templates/logout.html","templates/base.html"))
@@ -95,6 +114,43 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
+Discovering the URL for openid 
+*/
+func openiddiscover(w http.ResponseWriter, r *http.Request) {
+	fmt.Println(r.FormValue("id"))
+	if url, err := openid.RedirectUrl(r.FormValue("id"),
+		"http://localhost:9999/openidcallback",
+		""); err == nil {
+		http.Redirect(w, r, url, 303)
+	} else {
+		fmt.Println(err)
+	}
+}
+
+/*
+Callback function for openid.
+*/
+func openidcallback(w http.ResponseWriter, r *http.Request) {
+	fullUrl := "http://localhost:9999" + r.URL.String()
+	fmt.Println(fullUrl)
+	id, err := openid.Verify(
+		fullUrl,
+		discoveryCache, nonceStore)
+	if err == nil {
+		//setCookie corresponding to the user, and redirect to homepage
+		cookie,final_hash := getCookie(id["email"])
+		http.SetCookie(w, &cookie)
+		redis_hset("sessions", id["email"], final_hash)
+		fmt.Println(id)
+		http.Redirect(w, r, "/", http.StatusFound)
+		
+		
+	} else {
+		fmt.Println("WTF2")
+		fmt.Print(err)
+	}
+}
 /*
 Logging out a user.
 */
@@ -322,6 +378,8 @@ func main() {
 	http.HandleFunc("/", home)
 	http.HandleFunc("/register/", registeruser)
 	http.HandleFunc("/login", login)
+	http.HandleFunc("/openidlogin", openiddiscover)
+	http.HandleFunc("/openidcallback", openidcallback)
 	http.HandleFunc("/logout/", logout)
 	http.HandleFunc("/showbug/", showbug)
 	http.HandleFunc("/commentonbug/", commentonbug)
