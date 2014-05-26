@@ -61,10 +61,10 @@ func add_user(name string, email string, user_type string, password string) stri
 	}
 	mdstr := get_hex(password)
 	c := make(chan int)
-	go update_redis(email, mdstr, user_type, c)
+	id, _ := add_user_mysql(name, email, user_type, mdstr)
+	go update_redis(id, email, mdstr, user_type, c)
 	fmt.Println(mdstr)
-	add_user_mysql(name, email, user_type, mdstr)
-	_ = <-c
+	 _ = <-c
 	return "User added."
 
 }
@@ -72,7 +72,7 @@ func add_user(name string, email string, user_type string, password string) stri
 /*
 Adds a new user into the database.
 */
-func add_user_mysql(name string, email string, user_type string, password string) {
+func add_user_mysql(name string, email string, user_type string, password string) (id int64, err error) {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
@@ -81,8 +81,12 @@ func add_user_mysql(name string, email string, user_type string, password string
 	}
 	defer db.Close()
 
-	db.Exec("INSERT INTO users (name, email, type, password) VALUES (?, ?, ?, ?)", name, email, user_type, password)
-
+	ret, err := db.Exec("INSERT INTO users (name, email, type, password) VALUES (?, ?, ?, ?)", name, email, user_type, password)
+	if err != nil {
+		return -1, err
+	}
+	rid, err := ret.LastInsertId()
+	return rid, err
 }
 
 /*

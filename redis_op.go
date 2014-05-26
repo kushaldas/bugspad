@@ -109,20 +109,21 @@ the server starts up.
 func load_users() {
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
-	rows, err := db.Query("SELECT email, password, type from users")
+	rows, err := db.Query("SELECT id, email, password, type from users")
 	if err == nil {
 		var email, password, utype string
+		var id int64
 		c := make(chan int)
 		for rows.Next() {
-			err = rows.Scan(&email, &password, &utype)
-			go update_redis(email, password, utype, c)
+			err = rows.Scan(&id, &email, &password, &utype)
+			go update_redis(id, email, password, utype, c)
 		}
 	}
 	defer rows.Close()
 	fmt.Println("Users loaded.")
 }
 
-func update_redis(email string, password string, utype string, channel chan int) {
+func update_redis(id int64, email string, password string, utype string, channel chan int) {
 	conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
@@ -133,6 +134,7 @@ func update_redis(email string, password string, utype string, channel chan int)
 	defer conn.Close()
 	_, err = conn.Do("HSET", "users", email, password)
 	_, err = conn.Do("HSET", "userstype", email, utype)
+	_, err = conn.Do("HSET", "userids", email, id)
 
 	if err != nil {
 		// handle error
