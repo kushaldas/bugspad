@@ -683,6 +683,7 @@ func get_user_id(email string) int {
 	return -1
 }
 
+/*Adds release information.*/
 func add_release(name string) {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
