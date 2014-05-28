@@ -169,6 +169,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(bug_data["reporter"])
 		tml.ExecuteTemplate(w,"base", bug_data)
 		comment_data := fetch_comments_by_bug(bug_id)
+		fmt.Println(comment_data)
 		tml.ExecuteTemplate(w,"comments_on_bug",map[string]interface{}{"comment_data":comment_data,"bug_id":bug_id})
 		return
 	    

@@ -729,9 +729,9 @@ func get_releases() []string {
 /*
 Retrieving comments of a bug.
 */
-func fetch_comments_by_bug(bug_id string) map[string][4]string {
+func fetch_comments_by_bug(bug_id string) map[int64][4]string {
 
-	m := make(map[string][4]string)
+	m := make(map[int64][4]string)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
 	rows, err := db.Query("SELECT users.email as useremail, users.name as username, comments.id as com_id, description, datec, bug FROM comments JOIN users WHERE bug=? and users.id=comments.user;", bug_id)
@@ -740,8 +740,9 @@ func fetch_comments_by_bug(bug_id string) map[string][4]string {
 		return m
 	}
 	defer rows.Close()
-	var com_id, description, username, useremail, bug string
+	var description, username, useremail, bug string
 	var datec time.Time
+	var com_id int64
 	for rows.Next() {
 		err = rows.Scan(&useremail, &username, &com_id, &description, &datec, &bug)
 		//fmt.Println(c_id, name, description)
