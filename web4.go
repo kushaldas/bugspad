@@ -13,11 +13,6 @@ import (
     "github.com/kushaldas/openid.go/src/openid"
 )
 
-/*TODO This needs to be changed as it consumes memory.*/
-var nonceStore = &openid.SimpleNonceStore{
-	Store: make(map[string][]*openid.Nonce)}
-var discoveryCache = &openid.SimpleDiscoveryCache{}
-
 type User struct {
 	Email string
 }
@@ -114,43 +109,6 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*
-Discovering the URL for openid 
-*/
-func openiddiscover(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.FormValue("id"))
-	if url, err := openid.RedirectUrl(r.FormValue("id"),
-		"http://localhost:9999/openidcallback",
-		""); err == nil {
-		http.Redirect(w, r, url, 303)
-	} else {
-		fmt.Println(err)
-	}
-}
-
-/*
-Callback function for openid.
-*/
-func openidcallback(w http.ResponseWriter, r *http.Request) {
-	fullUrl := "http://localhost:9999" + r.URL.String()
-	fmt.Println(fullUrl)
-	id, err := openid.Verify(
-		fullUrl,
-		discoveryCache, nonceStore)
-	if err == nil {
-		//setCookie corresponding to the user, and redirect to homepage
-		cookie,final_hash := getCookie(id["email"])
-		http.SetCookie(w, &cookie)
-		redis_hset("sessions", id["email"], final_hash)
-		fmt.Println(id)
-		http.Redirect(w, r, "/", http.StatusFound)
-		
-		
-	} else {
-		fmt.Println("WTF2")
-		fmt.Print(err)
-	}
-}
 /*
 Logging out a user.
 */
@@ -378,8 +336,6 @@ func main() {
 	http.HandleFunc("/", home)
 	http.HandleFunc("/register/", registeruser)
 	http.HandleFunc("/login", login)
-	http.HandleFunc("/openidlogin", openiddiscover)
-	http.HandleFunc("/openidcallback", openidcallback)
 	http.HandleFunc("/logout/", logout)
 	http.HandleFunc("/showbug/", showbug)
 	http.HandleFunc("/commentonbug/", commentonbug)
