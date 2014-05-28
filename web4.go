@@ -163,18 +163,18 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			checkError(err)
 		}
-		fmt.Println(bug_data["cclist"])
+		//fmt.Println(bug_data["cclist"])
 		bug_data["islogged"]=il
 		bug_data["useremail"]=useremail
-		fmt.Println(bug_data["reporter"])
+		//fmt.Println(bug_data["reporter"])
 		tml.ExecuteTemplate(w,"base", bug_data)
 		comment_data := fetch_comments_by_bug(bug_id)
-		fmt.Println(comment_data)
+		//fmt.Println(comment_data)
 		tml.ExecuteTemplate(w,"comments_on_bug",map[string]interface{}{"comment_data":comment_data,"bug_id":bug_id})
 		return
 	    
 	} else if r.Method == "POST"{
-	    fmt.Println(r.FormValue("com_content"))
+	    //fmt.Println(r.FormValue("com_content"))
 	    
 	}
   /*
@@ -235,7 +235,7 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 		    
 
 		allcomponents := get_all_components()
-		fmt.Println(allcomponents)
+		//fmt.Println(allcomponents)
 		tml.ExecuteTemplate(w,"base", map[string]interface{}{"useremail":useremail,"islogged":il,/*"products":products_data,*/"components":allcomponents})
 		return
 	    } else {
@@ -305,7 +305,7 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 
 			} else if r.Method == "POST"{
 			    	interface_data["id"]=r.FormValue("bug_id")
-				fmt.Println(interface_data["id"])
+				//fmt.Println(interface_data["id"])
 				interface_data["status"]=r.FormValue("bug_status")
 				interface_data["version"]=r.FormValue("bug_version")
 				interface_data["hardware"]=r.FormValue("bug_hardware")
