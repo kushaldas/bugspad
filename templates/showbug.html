@@ -1,82 +1,95 @@
-{{define "head"}}<title>Bug Description Page</title>{{end}}
+{{define "head"}}<title>Bug {{ .id}} - {{ .summary}}</title>{{end}}
 {{define "body"}}
-    <table>
+<div id="bug_details">
+	<h2 id="bug_heading">Bug - {{ .id}} {{ .summary}}</h2>
+	
+    <table class="left_table">
+
+	    <tr>
+		<td class="bug_field_title"><b>Status</b></td>
+		<td>{{ .status}}</td>
+	    </tr>
+	    <tr>
+		<td class="bug_field_title"><b>Component</b></td>
+		<td>{{ .component}}</td>
+	    </tr>
+	    <tr>
+		<td class="bug_field_title"><b>Sub Component</b></td>
+		<td>{{ .subcomponent}}</td>
+	    </tr>
+	    <tr>
+		<td class="bug_field_title"><b>Quality Assurance</b></td>
+		<td>{{ .qa}}</td>
+	    </tr>
+	    <tr>
+		<td class="bug_field_title"><b>Docs Maintainter</b></td>
+		<td>{{ .docs}}</td>
+	    </tr>
+	    <tr>
+		<td class="bug_field_title"><b>Version</b></td>
+		<td>{{ .version}}</td>
+	    </tr>
+	    <tr>
+		<td class="bug_field_title"><b>Hardware</b></td>
+		<td>{{ .hardware}}</td>
+	    </tr>
+	    <tr>
+		<td class="bug_field_title"><b>Priority</b></td>
+		<td>{{ .priority}}</td>
+	    </tr>
+    </table>
+    <table class="right_table">
 	<tr>
-	    <td><b>Bug Id </b>{{ .id}}</td>
-	    <td>{{ .summary}}</td>
-	</tr>
-	<tr>
-	    <td><b>Status</b></td>
-	    <td>{{ .status}}</td>
-	</tr>
-	<tr>
-	    <td><b>Component</b></td>
-	    <td>{{ .component}}</td>
-	</tr>
-	<tr>
-	    <td><b>Sub Component</b></td>
-	    <td>{{ .subcomponent}}</td>
-	</tr>
-	<tr>
-	    <td><b>Quality Assurance</b></td>
-	    <td>{{ .qa}}</td>
-	</tr>
-	<tr>
-	    <td><b>Docs Maintainter</b></td>
-	    <td>{{ .docs}}</td>
-	</tr>
-	<tr>
-	    <td><b>Version</b></td>
-	    <td>{{ .version}}</td>
-	</tr>
-	<tr>
-	    <td><b>Hardware</b></td>
-	    <td>{{ .hardware}}</td>
-	</tr>
-	<tr>
-	    <td><b>Priority</b></td>
-	    <td>{{ .priority}}</td>
-	</tr>
-	<tr>
-	    <td><b>CC List</b></td>
+	    <td class="bug_field_title"><b>CC List</b></td>
 	    <td>
 		{{range $val := .cclist}}
-		    {{ index $val }}
+			{{ index $val }}
 		{{end}}
 	    </td>
 	</tr>
 	<tr>
-	    <td><b>Reporter</b></td>
+	    <td class="bug_field_title"><b>Reporter</b></td>
 	    <td>{{ .reporter}}</td>
 	</tr>
 	<tr>
-	    <td><b>WhiteBoard</b></td>
+	    <td class="bug_field_title"><b>WhiteBoard</b></td>
 	    <td>{{ .whiteboard}}</td>
 	</tr>
 	<tr>
-	    <td><b>Reported at</b></td>
+	    <td class="bug_field_title"><b>Reported at</b></td>
 	    <td>{{ .reported}}</td>
 	</tr>
 	<tr>
-	    <td><b>Fixed in Version</b></td>
+	    <td class="bug_field_title"><b>Fixed in Version</b></td>
 	    <td>{{ .fixedinver}}</td>
 	</tr>
     </table>
+</div>
+<div id="bug_description">
     <p><b>Bug Description</b></p>
     <p>{{ .description}}</p>
-<h2>Comments</h2>
-{{end}}
-{{define "comments_on_bug"}}
-    {{range $key, $val := .comment_data}}
-	<div id={{ $key }}>
-	    <i>{{ index $val 0 }}  {{index $val 1}} {{index $val 3}}</i>
-	    <p>{{index $val 2}}</p>
-	    <br>
-	</div>
+</div>
+<div id="bug_comments">
+    <h2>Comments</h2>
     {{end}}
-    <form  action="/commentonbug/" method="POST" name="add_comment" >
-	<textarea name="com_content" rows="3" cols="20"></textarea>
-	<input name="bug_id" type="hidden" value="{{ .bug_id}}"></input>
-	<button>Comment</button>
-    </form>
+    {{define "comments_on_bug"}}
+	{{range $key, $val := .comment_data}}
+	    <div id={{ $key }} class="comment_box">
+		<i>{{ index $val 0 }}  {{index $val 1}} {{index $val 3}}</i>
+		<p>{{index $val 2}}</p>
+		<br>
+	    </div>
+	{{end}}
+	<div class="new_comment">
+	{{ if .islogged }}
+	    <form  action="/commentonbug/" method="POST" name="add_comment" class="new_comment">
+		<textarea name="com_content" rows="5" cols="100"></textarea>
+		<input name="bug_id" type="hidden" value="{{ .bug_id}}"></input>
+		<button>Comment</button>
+	    </form>
+	{{ else }}
+	    <p> You need to <a href="/login">log in</a> to comment on this bug.</p>
+	{{ end }}
+	<div>
+</div>
 {{end}}

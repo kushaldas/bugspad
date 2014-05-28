@@ -1,11 +1,23 @@
-{{define "base"}}<html>
-  <head>{{template "head" .}}</head>
-  <body>
-  	{{if .islogged}}
-	    <p> Welcome, {{ .useremail}} </p>
-	    <p><a href="/logout">Logout</a></p>
-	{{else}}
-	    <p><a href="/login">Login</a></p>
-	{{end}}
-  {{template "body" .}}</body>
-</html>{{end}}
+{{define "base"}}
+    <html>
+    <head>
+	<link rel="stylesheet" type="text/css" href="/resources/style.css" />
+	{{template "head" .}}
+    
+    </head>
+    <body>
+	<div class="centered">
+	    <ul class="head_container">
+		{{if .islogged}}
+		    <li> Welcome, {{ .useremail}} </li>
+		    <li><a href="/logout">Logout</a></li>
+		{{else}}
+		    <li><a href="/login">Login</a></li>
+		    <li><a href="/register">Register</a></li>
+		{{end}}
+	    </ul>
+	 </div>
+	 {{template "body" .}}
+    </body>
+    </html>
+{{end}}

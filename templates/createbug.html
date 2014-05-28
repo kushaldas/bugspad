@@ -1,36 +1,61 @@
 {{define "head"}}<title>Create Bug Page</title>{{end}}
 {{define "body"}}
-	Hi, {{ .useremail}}
-	<center>File A Bug</center>
-	<form action="/filebug/" method="POST">
-	    <p>Summary: <input name="bug_title" type="text"></input></p>
-	    <p>Whiteboard<input name="bug_whiteboard" type="text"></input></p>
-	    <p> Severity: 
-		 <select name="bug_severity">
-		    <option value="blocker">Blocker</option>
-		    <option value="critical">Critical</option>
-		    <option value="trivial">Trivial</option>
-		    <option value="enhancement">Enhancement</option>
-		    <option value="normal" selected>Normal</option>
-		</select>
-	    </p>
-	    <p>Version: <input name="bug_version" type="text"></input></p>
-	    <p>Hardware: <input name="bug_hardware" type="text"></input></p>
-	    <p>Priority:  <select name="bug_priority">
-			    <option value="high">High</option>
-			    <option value="low" selected>Low</option>
-			    <option value="medium">Medium</option>
+	<center><h2>New Bug</h2></center>
+	<form action="/filebug/" method="POST" >
+	    <table>
+		<tr>
+		    <td class="bug_field_title">Summary: </td>
+		    <td><input name="bug_title" type="text"></input></td>
+		</tr>
+		<tr>
+		    <td class="bug_field_title">Whiteboard: </td>
+		    <td><input name="bug_whiteboard" type="text"></input></td>
+		</tr>
+		<tr>
+		    <td class="bug_field_title">Severity: </td>
+		    <td>
+			<select name="bug_severity">
+			    <option value="blocker">Blocker</option>
 			    <option value="critical">Critical</option>
-			   </select>
-	    </p>
-	    <p>Component:  <select name="bug_component">
-			        {{range $key, $val := .components}}
-				    <option value={{$key}}>{{index $val 0}}</option>
-				{{end}}
-			   </select>
-	    </p>
-	    <p>Enter Bug Description Below: </p>
-	    <textarea name="bug_description" rows="3" columns="20" placeholder="Bug Description"></textarea>
+			    <option value="trivial">Trivial</option>
+			    <option value="enhancement">Enhancement</option>
+			    <option value="normal" selected>Normal</option>
+			</select>
+		    </td>
+		</tr>
+		<tr>
+		    <td class="bug_field_title">Version: </td>
+		    <td><input name="bug_version" type="text"></input></td>
+		</tr>
+		<tr>
+		    <td class="bug_field_title">Hardware: </td>
+		    <td><input name="bug_hardware" type="text"></input></td>
+		</tr>
+		<tr>
+		    <td class="bug_field_title">Priority:  </td>
+		    <td>	<select name="bug_priority">
+				<option value="high">High</option>
+				<option value="low" selected>Low</option>
+				<option value="medium">Medium</option>
+				<option value="critical">Critical</option>
+			    </select>
+		    </td>
+		</tr>
+		<tr>
+		    <td class="bug_field_title">Component:  </td>
+		    <td><select name="bug_component">
+				    {{range $key, $val := .components}}
+					<option value={{$key}}>{{index $val 0}}</option>
+				    {{end}}
+			    </select>
+		    </td>
+		</tr>
+		<tr>
+
+		    <td class="bug_field_title">Enter Bug Description: </td>
+		    <td><textarea name="bug_description" rows="13" cols="100" placeholder="Bug Description"></textarea></td>
+		</tr>
+	    </table>
 	    <button> File Bug </button>
 	</form>
 {{end}}

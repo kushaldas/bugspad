@@ -168,9 +168,10 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		bug_data["useremail"]=useremail
 		//fmt.Println(bug_data["reporter"])
 		tml.ExecuteTemplate(w,"base", bug_data)
+		fmt.Println(bug_data["cclist"])
 		comment_data := fetch_comments_by_bug(bug_id)
 		//fmt.Println(comment_data)
-		tml.ExecuteTemplate(w,"comments_on_bug",map[string]interface{}{"comment_data":comment_data,"bug_id":bug_id})
+		tml.ExecuteTemplate(w,"comments_on_bug",map[string]interface{}{"comment_data":comment_data,"bug_id":bug_id,"islogged":il,"useremail":useremail})
 		return
 	    
 	} else if r.Method == "POST"{
@@ -341,5 +342,10 @@ func main() {
 	http.HandleFunc("/commentonbug/", commentonbug)
 	http.HandleFunc("/filebug/", createbug)
 	http.HandleFunc("/editbugpage/", editbugpage)
+	f := http.Dir("css/style.css")
+	fmt.Println(f)
+	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources"))))
+	//http.Handle("/css/", http.FileServer(http.Dir("css/style.css")))
+	//http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css")))) 
 	http.ListenAndServe(":9999", nil)
 }

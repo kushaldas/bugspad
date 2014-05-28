@@ -748,7 +748,7 @@ func fetch_comments_by_bug(bug_id string) map[int64][4]string {
 		//fmt.Println(c_id, name, description)
 		//m = append(m,Comment{com_id, description, user, datec})
 		//user="jj"
-		fmt.Println(datec)
+		//fmt.Println(datec)
 		m[com_id] = [4]string{useremail, username, description, time.Time.String(datec)}
 	}
 	return m
