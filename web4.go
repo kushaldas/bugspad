@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"crypto/rand"
     "encoding/base64" 
-    "github.com/kushaldas/openid.go/src/openid"
 )
 
 type User struct {
