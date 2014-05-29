@@ -45,7 +45,7 @@
 		    <td class="bug_field_title">Component:  </td>
 		    <td><select name="bug_component">
 				    {{range $key, $val := .components}}
-					<option value={{$key}}>{{index $val 0}}</option>
+					<option value={{index $val 0}}>{{$key}}</option>
 				    {{end}}
 			    </select>
 		    </td>

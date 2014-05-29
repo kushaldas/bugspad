@@ -762,7 +762,7 @@ func get_all_components() map[string][2]string {
     	m := make(map[string][2]string)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
-	rows, err := db.Query("SELECT id, name, description from components")
+	rows, err := db.Query("SELECT id, name, description from components order by name")
 	if err != nil {
 		return m
 	}
@@ -771,7 +771,7 @@ func get_all_components() map[string][2]string {
 	for rows.Next() {
 		err = rows.Scan(&c_id, &name, &description)
 		//fmt.Println(c_id, name, description)
-		m[c_id] = [2]string{name, description}
+		m[name] = [2]string{c_id, description}
 	}
 	return m
 }
