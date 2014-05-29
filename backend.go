@@ -775,3 +775,338 @@ func get_all_components() map[string][2]string {
 	}
 	return m
 }
+
+/*
+Checks if the user is admin or not.
+*/
+func is_user_admin(email string) bool {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return false
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT type from users where email = ?", email)
+	if err == nil {
+		var t bool
+		for rows.Next() {
+			err = rows.Scan(&t)
+			fmt.Println(t)
+			if t {
+				return true
+			} else {
+				return false
+			}
+		}
+	}
+	return false
+}
+
+/*Returns the details of the product with the given product id*/ 
+func get_product_by_id(product_id string) map[string]interface{} {
+	m := make(map[string]interface{})
+	db, err := sql.Open("mysql", conn_str)
+	if err!=nil{
+	    m["error_msg"]=err
+	    return m
+	}
+	defer db.Close()
+	row := db.QueryRow("SELECT name, description from products where id=?", product_id)
+	if err!=nil{
+	    m["error_msg"]=err
+	    return m
+	}
+	var name, description string
+	err = row.Scan(&name, &description)
+	m["name"]=name
+	m["description"]=description
+	fmt.Println(m["name"])
+	return m
+
+}
+
+/* Finds all components for a given product id*/
+func get_components_by_id(product_id string) map[string][3]string {
+	m := make(map[string][3]string)
+	fmt.Print("dgffg")
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	rows, err := db.Query("SELECT id, name, description from components where product_id=? order by name", product_id)
+	if err != nil {
+		fmt.Println(err)
+		return m
+	}
+	defer rows.Close()
+	var name, description, c_id string
+	for rows.Next() {
+		err = rows.Scan(&c_id, &name, &description)
+		//fmt.Println(c_id, name, description)
+		m[name] = [3]string{c_id, name, description}
+	}
+	return m
+
+}
+
+/*Returns all bugs related to a single product*/
+func get_bugs_by_product(product_id string) (map[string][15]string, error) {
+	m := make(map[string][15]string)
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	if err != nil {
+		return m,err
+	}
+	r1:="distinct bugs.id as id, bugs.status as status, bugs.version as version, bugs.severity as severity, bugs.hardware as hardware, bugs.priority as priority,"
+	r2:=" bugs.reporter as reporter, bugs.qa as qa, bugs.docs as docs, bugs.whiteboard as whiteboard, bugs.summary as summary, bugs.description as description, "
+	r3:="bugs.reported as reported, bugs.fixedinver as fixedinver, bugs.component_id as component_id, bugs.subcomponent_id as subcomponent_id "
+	rows, err := db.Query("SELECT "+r1+r2+r3+" from bugs join components join products where products.id=components.product_id and products.id=?", product_id)
+	if err != nil {
+		return m,err
+	}
+	var status, description, version, severity, hardware, priority, whiteboard,  summary, fixedinver []byte
+	var id, reporter, component_id int
+	var qa, docs, subcomponent_id sql.NullInt64
+	var reported time.Time
+	for rows.Next() {
+		err = rows.Scan(&id, &status, &version, &severity, &hardware, &priority, &reporter, &qa, &docs, &whiteboard, &summary, &description, &reported, &fixedinver, &component_id, &subcomponent_id)
+		if err == nil {
+		    qaint := -1
+		    docsint := -1
+		    subcint := -1
+		    if qa.Valid{
+			qaint = int(qa.Int64)
+		    }
+		    if docs.Valid{
+			docsint = int(docs.Int64)
+		    }
+		    if subcomponent_id.Valid{
+			subcint = int(subcomponent_id.Int64)
+		    }
+		    subc := get_subcomponent_by_id(strconv.Itoa(subcint))
+		    subcomponent_name := ""
+		    if subc["name"]!=nil{
+			subcomponent_name = subc["name"].(string)
+		    }
+		    c := get_component_by_id(strconv.Itoa(component_id))
+		    component_name := ""
+		    if c["name"]!=nil{
+			component_name = c["name"].(string)
+		    }
+			
+			//fmt.Println(string(f))
+			m[strconv.Itoa(id)] = [15]string{string(status), string(version), string(severity), string(hardware), string(priority), get_user_email(reporter), get_user_email(qaint), get_user_email(docsint), string(whiteboard), string(summary), string(description), reported.String(), string(fixedinver), component_name , subcomponent_name }
+		} else {
+		    fmt.Println("yaha hai")
+		    return m,err
+		    
+		}
+	}
+	return m,err
+}
+
+/*Returns the details of the user with the given user id*/ 
+func get_user_by_id(user_id string) map[string]interface{}{
+	m := make(map[string]interface{})
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	row := db.QueryRow("SELECT name, email, type from users where id=?", user_id)
+	var name, email, u_type string
+	err = row.Scan(&name, &email, &u_type)
+	//fmt.Println(c_id, name, description)
+	if err != nil {
+	    m["error_msg"]=err
+	    return m
+	}
+	m["name"] = name
+	m["email"] = email
+	m["type"] = u_type
+	fmt.Println(m["name"])
+	return m
+
+}
+
+/*
+Updates an existing user.
+*/ 
+func update_user(data map[string]interface{}) (msg string, err error) {
+
+	var buffer bytes.Buffer
+	vals := make([]interface{}, 0)
+	buffer.WriteString("UPDATE users SET ")
+
+	val, ok := data["name"]
+	if ok {
+		buffer.WriteString("name=?")
+		vals = append(vals, val)
+	}
+	
+	val, ok = data["email"]
+	if ok {
+		buffer.WriteString(", email=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["type"]
+	if ok {
+		buffer.WriteString(",type=?")
+		vals = append(vals, val)
+	}
+
+	
+	buffer.WriteString(" WHERE id=?")
+	fmt.Println(buffer.String())
+
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
+
+	vals = append(vals, data["id"])
+	_, err = db.Exec(buffer.String(), vals...)
+	if err != nil {
+		fmt.Println(err)
+		return "Error occured updating",err
+	}
+	return "Update Successful.",err
+}
+
+/*Get the details of all users */
+func get_all_users() map[string][4]string {
+    	m := make(map[string][4]string)
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	rows, err := db.Query("SELECT id, name, email, type from users")
+	if err != nil {
+		return m
+	}
+	defer rows.Close()
+	var name, email, u_id, u_type string
+	for rows.Next() {
+		err = rows.Scan(&u_id, &name, &email, &u_type)
+		//fmt.Println(c_id, name, description)
+		m[u_id] = [4]string{u_id, name, email, u_type}
+	}
+	return m
+}
+
+
+/*
+Updates an existing product.
+*/ 
+func update_product(data map[string]interface{}) (msg string, err error) {
+
+	var buffer bytes.Buffer
+	vals := make([]interface{}, 0)
+	buffer.WriteString("UPDATE products SET ")
+
+	val, ok := data["name"]
+	if ok {
+		buffer.WriteString("name=?")
+		vals = append(vals, val)
+	}
+	
+	val, ok = data["description"]
+	if ok {
+		buffer.WriteString(", description=?")
+		vals = append(vals, val)
+	}
+
+	buffer.WriteString(" WHERE id=?")
+	fmt.Println(buffer.String())
+
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
+
+	vals = append(vals, data["id"])
+	_, err = db.Exec(buffer.String(), vals...)
+	if err != nil {
+		fmt.Println(err)
+		return "Error occured updating",err
+	}
+	return "Update Successful.",err
+}
+
+func get_subcomponent_by_id(subcomponent_id string) map[string]interface{} {
+	m := make(map[string]interface{})
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	row := db.QueryRow("SELECT name, description, component_id from subcomponent where id=?", subcomponent_id)
+	if err != nil {
+		m["error_msg"]=err
+		return m
+	}
+	var name, description string
+	var component_id int
+	err = row.Scan(&name, &description, &component_id)
+		//fmt.Println(c_id, name, description)
+	if err != nil {
+		m["error_msg"]=err
+		return m
+	}
+	m["id"]=subcomponent_id
+	m["component_id"]=component_id
+	m["description"]=description
+	m["name"]=name
+	return m
+
+}
+
+/* Finds component for a given component id*/
+func get_component_by_id(component_id string) map[string]interface{} {
+	m := make(map[string]interface{})
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	row := db.QueryRow("SELECT name, description, product_id, owner, qa from components where id=?", component_id)
+	if err != nil {
+		m["error_msg"]=err
+		return m
+	}
+	var name, description string
+	var owner, product_id int
+	var qa sql.NullInt64
+	err = row.Scan(&name, &description, &product_id, &owner, &qa)
+		//fmt.Println(c_id, name, description)
+	qaint := -1
+	if qa.Valid {
+	    qaint = int(qa.Int64)
+	}
+	if err != nil {
+		m["error_msg"]=err
+		return m
+	}
+	m["id"]=component_id
+	m["name"]=name
+	m["description"]=description
+	m["product_id"]=product_id
+	m["owner"]=get_user_email(owner)
+	m["qa"]=get_user_email(qaint)
+	return m
+
+}
+
+/*Get the details of all products */
+func get_all_products() map[string][2]string {
+    	m := make(map[string][2]string)
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	rows, err := db.Query("SELECT id, name, description from products order by name")
+	if err != nil {
+		return m
+	}
+	defer rows.Close()
+	var name, description, p_id string
+	for rows.Next() {
+		err = rows.Scan(&p_id, &name, &description)
+		//fmt.Println(c_id, name, description)
+		m[name] = [2]string{p_id, description}
+	}
+	return m
+}
