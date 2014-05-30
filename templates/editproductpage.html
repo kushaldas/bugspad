@@ -1,0 +1,52 @@
+{{define "head"}}<title>Admin Page</title>{{end}}
+{{define "body"}}
+	    <h1>Admin Interface</h1>
+    	    <p><a href="/editproducts">Products</a></p>
+    	    <p><a href="/editusers">Users</a></p>
+{{end}}
+{{define "productdescription"}}
+    <form name="productdetail" action="/editproductpage/" method="POST">
+	<p>Product: <input name="productname" type="text" value="{{ .name}}"></input></p>
+	<p>Description: <textarea name="productdescription" rows="6" cols="40" value="">{{ .description}}</textarea></p>
+	<input name="productid" type="hidden" value="{{ .product_id}}"></input>
+	<button>Save Changes</button>
+	<p>Components: 
+	    <table>
+	    {{range $key,$val := .components}}
+		<tr>
+		    <td><a href="/editcomponentpage/{{index $val 0}}">{{$key}}</a></td>
+		    <td>{{index $val 2}}</td>
+		</tr>
+	    {{end}}
+	    </table>
+	</p>
+
+	<p>Bugs: 
+	    <table>
+	    {{range $key,$val := .bugs}}
+		<tr>
+		    <td><a href="/editbugpage/{{$key}}">{{$key}}</a></td>
+		    <td>{{index $val 0}}</td>
+		    <td>{{index $val 1}}</td>
+		    <td>{{index $val 2}}</td>
+		    <td>{{index $val 3}}</td>
+		    <td>{{index $val 4}}</td>
+		    <td>{{index $val 5}}</td>
+		    <td>{{index $val 6}}</td>
+		    <td>{{index $val 7}}</td>
+		    <td>{{index $val 8}}</td>
+		    <td>{{index $val 9}}</td>
+		    <td>{{index $val 10}}</td>
+		    <td>{{index $val 11}}</td>
+		    <td>{{index $val 12}}</td>
+		    <td>{{index $val 13}}</td>
+		    <td>{{index $val 14}}</td>
+		</tr>
+	    {{end}}
+	    </table>
+	 </p>
+    </form>
+    <form name="addcomponent" action="/addcomponent/{{ .product_id}}" method="POST">
+	    <button>Add Component</button>
+    </form>
+{{end}}

@@ -1,0 +1,20 @@
+{{define "head"}}<title>Admin Page</title>{{end}}
+{{define "body"}}
+	    <h1>Admin Interface</h1>
+    	    <p><a href="/editproducts">Products</a></p>
+    	    <p><a href="/editusers">Users</a></p>
+{{end}}
+{{define "userdescription"}}
+    <form name="userdetail" action="/edituserpage/" method="POST">
+	<p>Username: <input name="username" type="text" value="{{ .name}}"></input></p>
+	<p>Useremail: <input name="useremail" type="text" value="{{ .email}}"></input></p>
+	
+	<p>Usertype:
+		    <select name="usertype">
+			<option value=0 {{if eq .type "0" }} selected {{end}} >Normal</option>
+			<option value=1 {{if eq .type "1" }} selected {{end}} >Admin</option>
+		     </select> </p>
+	<input name="userid" type="hidden" value="{{ .id}}"></input>
+	<button>Save Changes</button>
+    </form>
+{{end}}

@@ -1,0 +1,9 @@
+{{define "head"}}<title>Create Bug Page</title>{{end}}
+{{define "body"}}
+	<center><h2>Select a Product</h2></center>
+	<table>
+	{{range $key,$val := .products}}
+	    <tr><a href="/filebug/{{index $val 0}}">{{$key}}</a></tr>
+	{{end}}
+	</table>
+{{end}}

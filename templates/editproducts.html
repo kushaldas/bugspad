@@ -1,0 +1,21 @@
+{{define "head"}}<title>Admin Page</title>{{end}}
+{{define "body"}}
+	    <h1>Admin Interface</h1>
+    	    <p><a href="/editproducts">Products</a></p>
+    	    <p><a href="/editusers">Users</a></p>
+{{end}}
+{{define "productlist"}}
+    <table id="productlist">
+    	<tr>
+	    <td>Name</td>
+	    <td>Description</td>
+	    <td>Type</td>
+	</tr>
+    	{{range $key, $val := .productlist}}
+	    <tr id="p{{$key}}">
+		<td><a href="/editproductpage/{{index $val 0}}">{{$key}}</a></td>
+		<td>{{index $val 1}}</td>
+	    </tr>
+	{{end}}
+    </table>
+{{end}}

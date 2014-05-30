@@ -218,6 +218,29 @@ func commentonbug(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
+Function to handle product selection before filing a bug.
+*/
+func before_createbug(w http.ResponseWriter, r *http.Request) {
+    	il, useremail:= is_logged(r)
+	if r.Method == "GET" {
+	    tml, err := template.ParseFiles("./templates/filebug_product.html","./templates/base.html")
+	    if err != nil {
+		checkError(err)
+	    }
+	    if il{
+	    	fmt.Println(useremail)
+		//fmt.Println(r.FormValue("username"))
+		allproducts := get_all_products()
+		//fmt.Println(allcomponents)
+		tml.ExecuteTemplate(w,"base", map[string]interface{}{"useremail":useremail,"islogged":il,"products":allproducts})
+		return
+	    } else {
+		http.Redirect(w,r,"/login",http.StatusFound)
+	    }
+	}
+}
+
+/*
 Function for creating a new bug.
 */
 func createbug(w http.ResponseWriter, r *http.Request) {
@@ -226,6 +249,12 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 	//to_be_rendered by the template
 	il, useremail:= is_logged(r)
 	if r.Method == "GET" {
+	    product_id := r.URL.Path[len("/filebug/"):]
+	    _,err:=strconv.ParseInt(product_id, 10, 32)
+	    if err!=nil{
+		    fmt.Fprintln(w,"You need to give a valid product for filing a bug!")
+		    return
+	    }
 	    tml, err := template.ParseFiles("./templates/createbug.html","./templates/base.html")
 	    if err != nil {
 		checkError(err)
@@ -233,9 +262,7 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 	    if il{
 	    fmt.Println(useremail)
 		//fmt.Println(r.FormValue("username"))
-		    
-
-		allcomponents := get_all_components()
+		allcomponents := get_components_by_id(product_id)
 		//fmt.Println(allcomponents)
 		tml.ExecuteTemplate(w,"base", map[string]interface{}{"useremail":useremail,"islogged":il,/*"products":products_data,*/"components":allcomponents})
 		return
@@ -326,9 +353,215 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w,r,"/login",http.StatusFound)
 
 	}
+}
+
+/*
+Admin:: Homepage of the Admin interface.
+*/
+func admin(w http.ResponseWriter, r *http.Request) {
+
+	    il, useremail := is_logged(r)
+	    if il{
+		    if is_user_admin(useremail){
+			//anything should happen only if the user has admin rights			
+			if r.Method == "GET" {
+			    tml, err := template.ParseFiles("./templates/admin.html","./templates/base.html")
+			    if err != nil {
+				checkError(err)
+			    }
+			    interface_data := make(map[string]interface{})
+			    interface_data["islogged"]=il
+			    interface_data["useremail"]=useremail
+			    tml.ExecuteTemplate(w,"base",interface_data)
+			    
+		    
+			 } else if r.Method == "POST"{
+				    
+			 }
+		    } else {
+			fmt.Fprintln(w,"You do not have sufficient rights!")
+		    }
+	    } else {
+		    http.Redirect(w,r,"/login",http.StatusFound)
+	    }
+    
+}
+
+/*
+Admin:: Product list.
+*/
+func editproducts(w http.ResponseWriter, r *http.Request) {
+
+    	il, useremail := is_logged(r)
+	
+	    if il{
+		    if is_user_admin(useremail){
+			if r.Method == "GET" {
+			    tml, err := template.ParseFiles("./templates/editproducts.html","./templates/base.html")
+			    if err != nil {
+				checkError(err)
+			    }
+			    interface_data := make(map[string]interface{})
+			    interface_data["islogged"]=il
+			    interface_data["useremail"]=useremail
+			    tml.ExecuteTemplate(w,"base",interface_data)
+			    allproducts := get_all_products()
+			    tml.ExecuteTemplate(w,"productlist",map[string]interface{}{"productlist":allproducts})
+		     
+			} else if r.Method == "POST"{
+		
+			}
+		    } else {
+			fmt.Fprintln(w,"You do not have sufficient rights!")
+		    }
+	    } else {
+		    http.Redirect(w,r,"/login",http.StatusFound)
+	    }
+}
+
+/*
+Admin:: A product description/editing page.
+*/
+func editproductpage(w http.ResponseWriter, r *http.Request) {
+
+    	product_id := r.URL.Path[len("/editproductpage/"):]
+	il, useremail := is_logged(r)
+	interface_data := make(map[string]interface{})    	
+	if il{
+		    if is_user_admin(useremail){
+			//anything should happen only if the user has admin rights
+			if (r.Method == "GET" && product_id!="") {
+			    tml, err := template.ParseFiles("./templates/editproductpage.html","./templates/base.html")
+			    if err != nil {
+				checkError(err)
+			    }
+			    interface_data["islogged"]=il
+			    interface_data["useremail"]=useremail
+			    tml.ExecuteTemplate(w,"base",interface_data)
+			    productdata := get_product_by_id(product_id)
+			    if productdata["error_msg"]!=nil{
+				fmt.Fprintln(w,productdata["error_msg"])
+				return
+			    }
+			    //productcomponents := 
+			    productdata["components"] = get_components_by_id(product_id)
+			    //fmt.Println(productdata["components"])
+			    productdata["product_id"] = product_id
+			    productdata["bugs"],err = get_bugs_by_product(product_id)
+			    if err!=nil{
+				fmt.Fprintln(w,err)
+				fmt.Println(err)
+				return 
+			    }
+			    fmt.Println(productdata["description"])
+			    tml.ExecuteTemplate(w,"productdescription",productdata)
+			    
+
+			} else if r.Method == "POST"{
+				fmt.Println(r.FormValue("productname"))
+				fmt.Println(r.FormValue("productid"))
+				fmt.Println(r.FormValue("productdescription"))
+			    	interface_data["name"]=r.FormValue("productname")   
+				interface_data["description"]=r.FormValue("productdescription")
+				interface_data["id"]=r.FormValue("productid")
+				msg,err := update_product(interface_data)
+				if err!=nil{
+				    fmt.Fprintln(w,err)
+				}
+				fmt.Fprintln(w,msg)
+			}
+		    } else {
+			fmt.Fprintln(w,"You do not have sufficient rights!")
+		    }
+	} else {
+		http.Redirect(w,r,"/login",http.StatusFound)
+
+	}
 	    
     
 }
+
+/*
+Admin:: User list.
+*/
+func editusers(w http.ResponseWriter, r *http.Request) {
+
+    	il, useremail := is_logged(r)
+	    if il{
+		    if is_user_admin(useremail){
+			    //anything should happen only if the user has admin rights
+			    if r.Method == "GET" {
+				tml, err := template.ParseFiles("./templates/editusers.html","./templates/base.html")
+				if err != nil {
+				    checkError(err)
+				}
+				interface_data := make(map[string]interface{})
+				interface_data["islogged"]=il
+				interface_data["useremail"]=useremail
+				tml.ExecuteTemplate(w,"base",interface_data)
+				allusers := get_all_users()
+				tml.ExecuteTemplate(w,"userlist",map[string]interface{}{"userlist":allusers})
+		    
+			    } else if r.Method == "POST"{
+				    
+			    }
+		    } else {
+			fmt.Fprintln(w,"You do not have sufficient rights!")
+		    }
+	    } else {
+		    http.Redirect(w,r,"/login",http.StatusFound)
+	    }
+    
+}
+
+/*
+Admin:: A user description/editing page.
+*/
+func edituserpage(w http.ResponseWriter, r *http.Request) {
+
+    	user_id := r.URL.Path[len("/edituserpage/"):]
+    	il, useremail := is_logged(r)
+	interface_data := make(map[string]interface{})
+	    if il{
+		    if is_user_admin(useremail){
+			 //anything should happen only if the user has admin rights
+			    if (r.Method == "GET" && user_id!="") {
+				tml, err := template.ParseFiles("./templates/edituserpage.html","./templates/base.html")
+				if err != nil {
+				    checkError(err)
+				}
+				interface_data["islogged"]=il
+				interface_data["useremail"]=useremail
+				tml.ExecuteTemplate(w,"base",interface_data)
+				userdata := get_user_by_id(user_id)
+				userdata["id"]=user_id
+				if userdata["error_msg"]!=nil{
+				    fmt.Fprintln(w,userdata["error_msg"])
+				    return
+				}
+				tml.ExecuteTemplate(w,"userdescription",userdata)
+			    
+			    } else if r.Method == "POST"{
+				    interface_data["name"]=r.FormValue("username")
+				    interface_data["email"]=r.FormValue("useremail")
+				    interface_data["type"]=r.FormValue("usertype")
+				    interface_data["id"]=r.FormValue("userid")
+				    msg,err := update_user(interface_data)
+				if err!=nil{
+				    fmt.Fprintln(w,err)
+				}
+				fmt.Fprintln(w,msg)
+			    }
+		    } else {
+			fmt.Fprintln(w,"You do not have sufficient rights!")
+		    }
+	    } else {
+		    http.Redirect(w,r,"/login",http.StatusFound)
+	    }
+    
+}
+    
+
 
 func main() {
         load_config("config/bugspad.ini")
@@ -341,9 +574,13 @@ func main() {
 	http.HandleFunc("/showbug/", showbug)
 	http.HandleFunc("/commentonbug/", commentonbug)
 	http.HandleFunc("/filebug/", createbug)
+	http.HandleFunc("/filebug_product/", before_createbug)
+	http.HandleFunc("/admin/", admin)
+	http.HandleFunc("/editusers/", editusers)
+	http.HandleFunc("/edituserpage/", edituserpage)
+	http.HandleFunc("/editproductpage/", editproductpage)
+	http.HandleFunc("/editproducts/", editproducts)
 	http.HandleFunc("/editbugpage/", editbugpage)
-	f := http.Dir("css/style.css")
-	fmt.Println(f)
 	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources"))))
 	//http.Handle("/css/", http.FileServer(http.Dir("css/style.css")))
 	//http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css")))) 
