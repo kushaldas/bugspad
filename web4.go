@@ -560,8 +560,123 @@ func edituserpage(w http.ResponseWriter, r *http.Request) {
 	    }
     
 }
-    
 
+/*
+Admin:: A component adding page for a product.
+*/
+func addcomponentpage(w http.ResponseWriter, r *http.Request) {
+
+    	product_id := r.URL.Path[len("/addcomponent/"):]
+	il, useremail := is_logged(r)
+	if il{
+		if is_user_admin(useremail){
+		//anything should happen only if the user has admin rights
+		    if (r.Method == "GET" && product_id!="") {
+
+					tml, err := template.ParseFiles("./templates/addcomponent.html","./templates/base.html")
+					if err != nil {
+					    checkError(err)
+					}
+					interface_data := make(map[string]interface{})
+					interface_data["islogged"]=il
+					interface_data["useremail"]=useremail
+					
+					tml.ExecuteTemplate(w,"base",interface_data)
+					tml.ExecuteTemplate(w,"add_component",map[string]interface{}{"product_id":product_id})
+					
+
+		    } else if r.Method == "POST"{
+			    qa := get_user_id(r.FormValue("qaname"))
+			    if (qa==-1 && r.FormValue("qaname")!="") {
+				fmt.Fprintln(w,"Invalid QA name")
+			    }
+			    owner := get_user_id(r.FormValue("ownername"))
+			    if owner==-1{
+				fmt.Fprintln(w,"Invalid Owner name")
+			    }
+			    product_id,_ := strconv.Atoi(r.FormValue("productid"))
+			    id,err := insert_component(r.FormValue("name"), r.FormValue("description"), product_id, owner, qa)
+			    if err!=nil {
+				fmt.Fprintln(w,err)
+			    }
+			    fmt.Fprintln(w,"Component Successfully added. "+id)
+		    }
+		} else {
+			fmt.Fprintln(w,"You do not have sufficient rights!")
+		}
+	    
+	} else {
+	    http.Redirect(w,r,"/login",http.StatusFound)
+	}
+    
+}
+
+/*
+Admin:: A component description/editing page.
+*/
+func editcomponentpage(w http.ResponseWriter, r *http.Request) {
+
+    	component_id := r.URL.Path[len("/editcomponentpage/"):]
+	il, useremail := is_logged(r)
+    	interface_data := make(map[string]interface{})
+	    if il{
+		    if is_user_admin(useremail){
+			//anything should happen only if the user has admin rights
+			if (r.Method == "GET" && component_id!="") {
+			    tml, err := template.ParseFiles("./templates/editcomponentpage.html","./templates/base.html")
+			    if err != nil {
+				checkError(err)
+			    }
+			    interface_data["islogged"]=il
+			    interface_data["useremail"]=useremail
+			    tml.ExecuteTemplate(w,"base",interface_data)
+			    componentdata := get_component_by_id(component_id)
+			    if componentdata["error_msg"]!=nil{
+				fmt.Fprintln(w,componentdata["error_msg"])
+				return
+			    }
+			    componentdata["allproducts"] = get_all_products() 
+			    
+			    //fmt.Println(componentdata["error_msg"])
+			    tml.ExecuteTemplate(w,"componentdescription",componentdata)
+			    
+		    
+			} else if r.Method == "POST"{
+				interface_data["name"]=r.FormValue("componentname")   
+				interface_data["product_id"]=r.FormValue("componentproduct")
+				u_id := -1
+				if r.FormValue("componentqa")!=""{
+				    u_id = get_user_id(r.FormValue("componentqa"))
+				    if u_id != -1{
+					interface_data["qa"]=u_id
+				    } else {
+					fmt.Fprintln(w,"Please specify a valid QA user!")
+					return 
+				    }
+				}
+				u_id = get_user_id(r.FormValue("componentowner"))
+				if u_id != -1 {
+				    interface_data["owner"]=u_id
+				} else {
+				    fmt.Fprintln(w,"Please specify a valid Owner!")
+				    return
+				}
+				interface_data["description"]=r.FormValue("componentdescription")
+				interface_data["id"]=r.FormValue("componentid")
+				msg,err := update_component(interface_data)
+				if err!=nil{
+				    fmt.Fprintln(w,err)
+				}
+				fmt.Fprintln(w,msg)
+			}
+		    } else {
+			fmt.Fprintln(w,"You do not have sufficient rights!")
+		    }
+	    } else {
+		    http.Redirect(w,r,"/login",http.StatusFound)
+	    }
+    
+}
 
 func main() {
         load_config("config/bugspad.ini")
@@ -581,6 +696,8 @@ func main() {
 	http.HandleFunc("/editproductpage/", editproductpage)
 	http.HandleFunc("/editproducts/", editproducts)
 	http.HandleFunc("/editbugpage/", editbugpage)
+	http.HandleFunc("/editcomponentpage/", editcomponentpage)
+	http.HandleFunc("/addcomponent/", addcomponentpage)
 	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources"))))
 	//http.Handle("/css/", http.FileServer(http.Dir("css/style.css")))
 	//http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css")))) 

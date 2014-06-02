@@ -1,0 +1,23 @@
+{{define "head"}}<title>Admin Page</title>{{end}}
+{{define "body"}}
+	    <h1>Admin Interface</h1>
+    	    <p><a href="/editproducts">Products</a></p>
+    	    <p><a href="/editusers">Users</a></p>
+{{end}}
+{{define "componentdescription"}}
+
+    <form name="componentdetail" action="/editcomponentpage/" method="POST">
+	<p>Component name: <input name="componentname" type="text" value="{{ .name}}"></input></p>
+	<p>Description: <textarea name="componentdescription" rows="6" columns="40">{{ .description}}</textarea></p>
+	<select name="componentproduct">
+	    {{range $key,$val := .allproducts}}
+		<option value={{index $val 0}} {{if eq $key ".product_id"}} selected {{end}}>{{index $val 1}}</option>
+	    {{end}}
+	</select>
+	<p>Owner: <input name="componentowner" type="text" value="{{ .owner}}"></input></p>
+	<p>QA: <input name="componentqa" type="text" value="{{ .qa}}"></input></p>
+	<input name="componentproduct" type="hidden" value={{ .product_id}}></input>
+	<input name="componentid" type="hidden" value={{ .id}}></input>
+	<button>Save Changes</button>
+    </form> 
+{{end}}

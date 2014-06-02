@@ -112,16 +112,20 @@ func insert_product(name string, desc string) (id string, err error) {
 /*
 Inserts a new component in the database for a given product_id.
 */
-func insert_component(name string, desc string, product_id int, owner int) (id string, err error) {
+func insert_component(name string, desc string, product_id int, owner int, qa int) (id string, err error) {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
 		fmt.Print(err)
 		return "", err
 	}
+	var ret sql.Result;
 	defer db.Close()
-
-	ret, err := db.Exec("INSERT INTO components (name, description, product_id, owner) VALUES (?, ?, ?, ?)", name, desc, product_id, owner)
+	if qa!=-1{
+	    ret, err = db.Exec("INSERT INTO components (name, description, product_id, owner, qa) VALUES (?, ?, ?, ?, ?)", name, desc, product_id, owner, qa)
+	} else {
+	    ret, err = db.Exec("INSERT INTO components (name, description, product_id, owner) VALUES (?, ?, ?, ?)", name, desc, product_id, owner)
+	}
 	if err != nil {
 		fmt.Println(err.Error())
 		return "No such product.", err
@@ -1109,4 +1113,65 @@ func get_all_products() map[string][2]string {
 		m[name] = [2]string{p_id, description}
 	}
 	return m
+}
+
+
+/*
+Updates an existing component.
+*/ 
+func update_component(data map[string]interface{}) (msg string, err error) {
+
+	var buffer bytes.Buffer
+	vals := make([]interface{}, 0)
+	buffer.WriteString("UPDATE components SET ")
+
+	val, ok := data["name"]
+	if ok {
+		buffer.WriteString("name=?")
+		vals = append(vals, val)
+	}
+	
+	val, ok = data["description"]
+	if ok {
+		buffer.WriteString(", description=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["product_id"]
+	if ok {
+		buffer.WriteString(", product_id=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["owner"]
+	if ok {
+		buffer.WriteString(", owner=?")
+		vals = append(vals, val)
+	}
+
+	val, ok = data["qa"]
+	if ok {
+		buffer.WriteString(", qa=?")
+		vals = append(vals, val)
+	}
+
+	
+	buffer.WriteString(" WHERE id=?")
+	fmt.Println(buffer.String())
+
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
+
+	vals = append(vals, data["id"])
+	_, err = db.Exec(buffer.String(), vals...)
+	if err != nil {
+		fmt.Println(err)
+		return "Error occured updating",err
+	}
+	return "Update Successful.",err
 }
