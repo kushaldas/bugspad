@@ -1,22 +1,21 @@
 {{define "head"}}<title>Admin Page</title>{{end}}
 {{define "body"}}
-	    <h1>Admin Interface</h1>
-    	    <p><a href="/editproducts">Products</a></p>
-    	    <p><a href="/editusers">Users</a></p>
-{{end}}
-{{define "userlist"}}
-    <table id="userlist">
-    	<tr>
-	    <td>Email</td>
-	    <td>Name</td>
-	    <td>Type</td>
-	</tr>
-    	{{range $key, $val := .userlist}}
-	    <tr id="u{{$key}}">
-		<td><a href="/edituserpage/{{$key}}">{{index $val 2}}</a></td>
-		<td>{{index $val 1}}</td>
-		<td>{{index $val 3}}</td>
+
+    <div class="maincontent">
+	<table id="userlist">
+	    <tr>
+		<td>Email</td>
+		<td>Name</td>
+		<td>Type</td>
 	    </tr>
-	{{end}}
-    </table>
+	    {{range $key, $val := .userlist}}
+		<tr id="u{{$key}}">
+		    <td><a href="/edituserpage/{{$key}}">{{index $val 2}}</a></td>
+		    <td>{{index $val 1}}</td>
+		    <td>{{index $val 3}}</td>
+		</tr>
+	    {{end}}
+	</table>
+    </div>
+
 {{end}}

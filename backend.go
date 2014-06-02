@@ -215,6 +215,27 @@ func get_subcomponent_name_by_id(subcomponent_id int) string {
 
 }
 
+
+/* Finds all subcomponents for a given component*/
+func get_subcomponents_by_component(component_id string) map[string][3]string {
+	m := make(map[string][3]string)
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	rows, err := db.Query("SELECT id, name, description from subcomponent where component_id=?", component_id)
+	if err != nil {
+		return m
+	}
+	defer rows.Close()
+	var name, description, sc_id string
+	for rows.Next() {
+		err = rows.Scan(&sc_id, &name, &description)
+		//fmt.Println(c_id, name, description)
+		m[name] = [3]string{sc_id, name, description}
+	}
+	return m
+
+}
+
 /* Get bug cc list*/
 func get_bugcc_list(bug_id int) []string {
 	ans:=make([]string,0)

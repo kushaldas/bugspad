@@ -1,5 +1,6 @@
 {{define "head"}}<title>Register Page</title>{{end}}
 {{define "body"}}
+<div class="maincontent">
     <h1>Register</h1>
     <form action="/register/" method="POST">
         <p>Username: <input type="text" name="username"></p>
@@ -7,4 +8,5 @@
         <p>Password: <input type="password" name="password"></p>
         <p><button>Register</button></p>
     </form>
+</div>
 {{end}}

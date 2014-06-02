@@ -48,19 +48,22 @@ func getCookie (user string) (http.Cookie,string){
 The home landing page of bugspad
 */
 func home(w http.ResponseWriter, r *http.Request) {
-
+	interface_data := make(map[string]interface{}) 
 	if r.Method == "GET" {
 	    //fmt.Fprintln(w, "get")
 	    il, useremail := is_logged(r)
 	    fmt.Println(il)
 	    fmt.Println(useremail)
+	    interface_data["useremail"]=useremail
+	    interface_data["il"]=il
+	    interface_data["pagetitle"]="Home"
 		//fmt.Println(r.FormValue("username"))
 		    
 	    tml, err := template.ParseFiles("./templates/home.html","./templates/base.html")
 	    if err != nil {
 		checkError(err)
 	    }
-	    tml.ExecuteTemplate(w,"base", map[string]interface{}{"useremail":useremail,"islogged":il})
+	    tml.ExecuteTemplate(w,"base",interface_data)
 	    return
 	}
 	    
@@ -69,6 +72,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 This function is the starting point for user authentication.
 */
 func login(w http.ResponseWriter, r *http.Request) {
+
+	interface_data := make(map[string]interface{}) 
 	if r.Method == "GET" {
 	
 		//One style of template parsing.
@@ -76,7 +81,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			checkError(err)
 		}
-		tml.ExecuteTemplate(w,"base", nil)
+		interface_data["pagetitle"]="Login"
+		tml.ExecuteTemplate(w,"base", interface_data)
 		return
 	} else if r.Method == "POST" {
 		//fmt.Println(r.Method)
@@ -128,14 +134,15 @@ Registering a User
 func registeruser(w http.ResponseWriter, r *http.Request) {
     // TODO add email verification for the user. 
     // TODO add openid registration. 
-
+	interface_data := make(map[string]interface{}) 
 	if r.Method == "GET" {
 	
 		tml, err := template.ParseFiles("./templates/registeruser.html","./templates/base.html")
 		if err != nil {
 			checkError(err)
 		}
-		tml.ExecuteTemplate(w,"base", nil)
+		interface_data["pagetitle"]="Register"
+		tml.ExecuteTemplate(w,"base", interface_data)
 		return
 	
 	} else if r.Method == "POST" {
@@ -155,23 +162,27 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 	//perform any preliminary check if required.
 	//backend_bug(w,r)
 	il, useremail:= is_logged(r)
+	interface_data := make(map[string]interface{}) 
 	bug_id := r.URL.Path[len("/showbug/"):]
     	if (r.Method == "GET" && bug_id!="") {
 	    
-		bug_data := get_bug(bug_id)
+		interface_data = get_bug(bug_id)
 		tml, err := template.ParseFiles("./templates/showbug.html","./templates/base.html")
 		if err != nil {
 			checkError(err)
 		}
 		//fmt.Println(bug_data["cclist"])
-		bug_data["islogged"]=il
-		bug_data["useremail"]=useremail
-		//fmt.Println(bug_data["reporter"])
-		tml.ExecuteTemplate(w,"base", bug_data)
-		fmt.Println(bug_data["cclist"])
 		comment_data := fetch_comments_by_bug(bug_id)
+		interface_data["comment_data"]=comment_data
+		interface_data["islogged"]=il
+		interface_data["useremail"]=useremail
+		interface_data["pagetitle"]="Bug - "+bug_id+" details"
+		//fmt.Println(bug_data["reporter"])
+		tml.ExecuteTemplate(w,"base", interface_data)
+//		fmt.Println(bug_data["cclist"])
+		
+
 		//fmt.Println(comment_data)
-		tml.ExecuteTemplate(w,"comments_on_bug",map[string]interface{}{"comment_data":comment_data,"bug_id":bug_id,"islogged":il,"useremail":useremail})
 		return
 	    
 	} else if r.Method == "POST"{
@@ -222,6 +233,7 @@ Function to handle product selection before filing a bug.
 */
 func before_createbug(w http.ResponseWriter, r *http.Request) {
     	il, useremail:= is_logged(r)
+	interface_data := make(map[string]interface{}) 
 	if r.Method == "GET" {
 	    tml, err := template.ParseFiles("./templates/filebug_product.html","./templates/base.html")
 	    if err != nil {
@@ -231,8 +243,12 @@ func before_createbug(w http.ResponseWriter, r *http.Request) {
 	    	fmt.Println(useremail)
 		//fmt.Println(r.FormValue("username"))
 		allproducts := get_all_products()
+				interface_data["useremail"]=useremail
+		interface_data["islogged"]=il
+		interface_data["products"]=allproducts
+		interface_data["pagetitle"]="Choose Product"
 		//fmt.Println(allcomponents)
-		tml.ExecuteTemplate(w,"base", map[string]interface{}{"useremail":useremail,"islogged":il,"products":allproducts})
+		tml.ExecuteTemplate(w,"base", interface_data)
 		return
 	    } else {
 		http.Redirect(w,r,"/login",http.StatusFound)
@@ -247,6 +263,7 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 	//perform any preliminary check
 	//backend_bug(w,r)
 	//to_be_rendered by the template
+	interface_data := make(map[string]interface{}) 
 	il, useremail:= is_logged(r)
 	if r.Method == "GET" {
 	    product_id := r.URL.Path[len("/filebug/"):]
@@ -263,8 +280,13 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 	    fmt.Println(useremail)
 		//fmt.Println(r.FormValue("username"))
 		allcomponents := get_components_by_id(product_id)
+		interface_data["useremail"]=useremail
+		interface_data["islogged"]=il
+		interface_data["components"]=allcomponents
+		interface_data["pagetitle"]="File Bug"
+		
 		//fmt.Println(allcomponents)
-		tml.ExecuteTemplate(w,"base", map[string]interface{}{"useremail":useremail,"islogged":il,/*"products":products_data,*/"components":allcomponents})
+		tml.ExecuteTemplate(w,"base",interface_data)
 		return
 	    } else {
 		http.Redirect(w,r,"/login",http.StatusFound)
@@ -320,6 +342,7 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 			    }
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
+			    interface_data["pagetitle"]="Edit Bug Page"
 			    tml.ExecuteTemplate(w,"base",interface_data)
 			    bugdata := get_bug(bug_id)
 			    if bugdata["error_msg"]!=nil{
@@ -372,6 +395,7 @@ func admin(w http.ResponseWriter, r *http.Request) {
 			    interface_data := make(map[string]interface{})
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
+			    interface_data["pagetitle"]="Admin"
 			    tml.ExecuteTemplate(w,"base",interface_data)
 			    
 		    
@@ -393,7 +417,7 @@ Admin:: Product list.
 func editproducts(w http.ResponseWriter, r *http.Request) {
 
     	il, useremail := is_logged(r)
-	
+	interface_data := make(map[string]interface{})
 	    if il{
 		    if is_user_admin(useremail){
 			if r.Method == "GET" {
@@ -401,12 +425,13 @@ func editproducts(w http.ResponseWriter, r *http.Request) {
 			    if err != nil {
 				checkError(err)
 			    }
-			    interface_data := make(map[string]interface{})
+			    allproducts := get_all_products()
+			    
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
+			    interface_data["pagetitle"]="Edit Products"
+			    interface_data["productlist"]=allproducts
 			    tml.ExecuteTemplate(w,"base",interface_data)
-			    allproducts := get_all_products()
-			    tml.ExecuteTemplate(w,"productlist",map[string]interface{}{"productlist":allproducts})
 		     
 			} else if r.Method == "POST"{
 		
@@ -437,24 +462,25 @@ func editproductpage(w http.ResponseWriter, r *http.Request) {
 			    }
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
-			    tml.ExecuteTemplate(w,"base",interface_data)
+			    interface_data["pagetitle"]="Edit Product Page"
 			    productdata := get_product_by_id(product_id)
 			    if productdata["error_msg"]!=nil{
 				fmt.Fprintln(w,productdata["error_msg"])
 				return
 			    }
+			    interface_data["productname"] = productdata["name"]
+			    interface_data["productdescription"] = productdata["description"]
 			    //productcomponents := 
-			    productdata["components"] = get_components_by_id(product_id)
+			    interface_data["components"] = get_components_by_id(product_id)
 			    //fmt.Println(productdata["components"])
-			    productdata["product_id"] = product_id
-			    productdata["bugs"],err = get_bugs_by_product(product_id)
+			    interface_data["product_id"] = product_id
+			    interface_data["bugs"],err = get_bugs_by_product(product_id)
 			    if err!=nil{
 				fmt.Fprintln(w,err)
 				fmt.Println(err)
 				return 
 			    }
-			    fmt.Println(productdata["description"])
-			    tml.ExecuteTemplate(w,"productdescription",productdata)
+			    tml.ExecuteTemplate(w,"base",interface_data)
 			    
 
 			} else if r.Method == "POST"{
@@ -495,12 +521,13 @@ func editusers(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 				    checkError(err)
 				}
+				allusers := get_all_users()
 				interface_data := make(map[string]interface{})
 				interface_data["islogged"]=il
 				interface_data["useremail"]=useremail
+				interface_data["pagetitle"]="Edit Users"
+				interface_data["userlist"]=allusers
 				tml.ExecuteTemplate(w,"base",interface_data)
-				allusers := get_all_users()
-				tml.ExecuteTemplate(w,"userlist",map[string]interface{}{"userlist":allusers})
 		    
 			    } else if r.Method == "POST"{
 				    
@@ -532,14 +559,18 @@ func edituserpage(w http.ResponseWriter, r *http.Request) {
 				}
 				interface_data["islogged"]=il
 				interface_data["useremail"]=useremail
-				tml.ExecuteTemplate(w,"base",interface_data)
+				interface_data["pagetitle"]="Edit User Page"
 				userdata := get_user_by_id(user_id)
 				userdata["id"]=user_id
 				if userdata["error_msg"]!=nil{
 				    fmt.Fprintln(w,userdata["error_msg"])
 				    return
 				}
-				tml.ExecuteTemplate(w,"userdescription",userdata)
+				interface_data["id"]=user_id
+				interface_data["name"]=userdata["name"]
+				interface_data["email"]=userdata["email"]
+				interface_data["type"]=userdata["type"]
+				tml.ExecuteTemplate(w,"base",interface_data)
 			    
 			    } else if r.Method == "POST"{
 				    interface_data["name"]=r.FormValue("username")
@@ -580,7 +611,7 @@ func addcomponentpage(w http.ResponseWriter, r *http.Request) {
 					interface_data := make(map[string]interface{})
 					interface_data["islogged"]=il
 					interface_data["useremail"]=useremail
-					
+					interface_data["pagetitle"]="Add Component Page"
 					tml.ExecuteTemplate(w,"base",interface_data)
 					tml.ExecuteTemplate(w,"add_component",map[string]interface{}{"product_id":product_id})
 					
@@ -629,16 +660,20 @@ func editcomponentpage(w http.ResponseWriter, r *http.Request) {
 			    }
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
-			    tml.ExecuteTemplate(w,"base",interface_data)
-			    componentdata := get_component_by_id(component_id)
-			    if componentdata["error_msg"]!=nil{
-				fmt.Fprintln(w,componentdata["error_msg"])
+			    interface_data["pagetitle"]="Edit Component Page"
+			    interface_data["component_id"]=component_id
+			    cdata := get_component_by_id(component_id)
+			    if cdata["error_msg"]!=nil{
+				fmt.Fprintln(w,cdata["error_msg"])
 				return
 			    }
-			    componentdata["allproducts"] = get_all_products() 
-			    
+			    interface_data["component_name"]=cdata["name"]
+			    interface_data["component_qa"]=cdata["qa"]
+			    interface_data["component_owner"]=cdata["owner"]
+			    interface_data["component_description"]=cdata["description"]
+			    interface_data["component_subs"]=get_subcomponents_by_component(component_id)
 			    //fmt.Println(componentdata["error_msg"])
-			    tml.ExecuteTemplate(w,"componentdescription",componentdata)
+			    tml.ExecuteTemplate(w,"base",interface_data)
 			    
 		    
 			} else if r.Method == "POST"{

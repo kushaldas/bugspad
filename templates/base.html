@@ -6,18 +6,33 @@
     
     </head>
     <body>
-	<div class="centered">
+	<div class="title_bar">Bugspad - {{.pagetitle}}</div>
 	    <ul class="head_container">
+		<li><a href="/">Home</a></li>
+		<li>| </li>
+		<li><a href="/filebug_product">File a Bug</a></li>
+		<li>| </li>
+		<li><a href="#"> Search a Bug</a></li>
+		<li>| </li>
+		<li><a href="#"> Frequent Bugs</a></li>
 		{{if .islogged}}
-		    <li> Welcome, {{ .useremail}} </li>
-		    <li><a href="/logout">Logout</a></li>
-		{{else}}
-		    <li><a href="/login">Login</a></li>
-		    <li><a href="/register">Register</a></li>
-		{{end}}
+			<li>| </li>
+			<li> Welcome, {{ .useremail}} </li>
+			<li>| </li>
+			<li> <a href="/logout">Logout</a></li>
+		    {{else}}
+			<li>| </li>
+			<li> <a href="/login">Login</a></li>
+			<li>| </li>
+			<li> <a href="/register">New User ?</a></li>
+		    {{end}}
+		<li>| </li>
+		<li><a href="/admin"> Admin panel</a></li>
 	    </ul>
-	 </div>
 	 {{template "body" .}}
     </body>
+    <div id="footer">
+    Bugspad Footer
+    </div>
     </html>
 {{end}}

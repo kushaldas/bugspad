@@ -5,12 +5,14 @@
     	    <p><a href="/editusers">Users</a></p>
 {{end}}
 {{define "add_component"}}
-    <form name="productdetail" action="/addcomponent/" method="POST">
-	<p>Name: <input name="componentname" type="text"></input></p>
-	<p>Default Assignee: <input name="ownername" type="text"></input></p>
-	<p>QA: <input name="qaname" type="text"></input></p>
-	<p>Description: <textarea name="componentdescription" rows="6" cols="40" "></input></p>
-	<input name="productid" type="hidden" value="{{ .product_id}}"></input>
-	<button>Add Component</button>	    
-    </form>
+    <div class="maincontent">
+	<form name="productdetail" action="/addcomponent/" method="POST">
+	    <p>Name: <input name="componentname" type="text"></input></p>
+	    <p>Default Assignee: <input name="ownername" type="text"></input></p>
+	    <p>QA: <input name="qaname" type="text"></input></p>
+	    <p>Description: <textarea name="componentdescription" rows="6" cols="40" "></input></p>
+	    <input name="productid" type="hidden" value="{{ .product_id}}"></input>
+	    <button>Add Component</button>	    
+	</form>
+    </div>
 {{end}}
