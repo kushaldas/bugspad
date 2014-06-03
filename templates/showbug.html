@@ -83,7 +83,7 @@
 	    {{ if .islogged }}
 		<form  action="/commentonbug/" method="POST" name="add_comment" class="new_comment">
 		    <textarea name="com_content" rows="5" cols="100"></textarea>
-		    <input name="bug_id" type="hidden" value="{{ .bug_id}}"></input>
+		    <input name="bug_id" type="hidden" value="{{ .id}}"></input>
 		    <button>Comment</button>
 		</form>
 	    {{ else }}
