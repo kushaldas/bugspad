@@ -2,8 +2,16 @@
 {{define "body"}}
     <div class="maincontent">
 	<form name="productdetail" action="/editproductpage/" method="POST">
-	    <p>Product: <input name="productname" type="text" value="{{ .productname}}"></input></p>
-	    <p>Description: <textarea name="productdescription" rows="6" cols="40" value="">{{ .productdescription}}</textarea></p>
+	    <table>
+		<tr>
+		    <td class="bug_ield_title">Product: </td>
+		    <td><input name="productname" type="text" value="{{ .productname}}"></input></td>
+		</tr>
+		<tr>
+		    <td class="bug_field_title">Description: </td>
+		    <td><textarea name="productdescription" rows="6" cols="40" value="">{{ .productdescription}}</textarea></td>
+		</tr>
+	    </table>
 	    <input name="productid" type="hidden" value="{{ .product_id}}"></input>
 	    <button>Save Changes</button>
 	    <form name="addcomponent" action="/addcomponent/{{ .product_id}}" method="POST">

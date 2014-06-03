@@ -4,7 +4,7 @@
 {{define "bugdescription"}}
     <div class="maincontent">
 	<form name="bugdetail" action="/editbugpage/" method="POST">
-		<table>
+		<table class="left_table">
 		    <tr>
 			<td class="bug_field_title">Bug - {{ .id}}</td>
 		    </tr>
@@ -57,6 +57,8 @@
 				</select>
 			</td>
 		    </tr>
+		  </table>
+		  <table class="right_table">
 		    <tr>
 			<td class="bug_field_title">Component:</td>
 			<td>{{ .component}}</td>
@@ -85,12 +87,13 @@
 			<td class="bug_field_title">Fixed in Version: </td>
 			<td><input name="bug_fixedinver" type="text" value="{{ .fixedinver}}"></input></td>
 		    <input name="bug_id" value="{{ .id}}" type="hidden"></input>
-		    <tr>
-			<td class="bug_field_title">Bug Description:</td>
-			<td> {{ .description}}</td>
-		    </tr>
 		</table>
-		<button> Save Changes </button>
-	    </form>
+	   
+		<div id="bug_description">
+			<p>Bug Description:</p>
+			<p> {{ .description}}</p>
+		 </div>
+		 <button> Save Changes </button>
+	     </form>
 	</div>
 {{end}}

@@ -1,47 +1,141 @@
 {{define "head"}}<title>Bug {{ .id}} - {{ .summary}}</title>{{end}}
 {{define "body"}}
 <div class="maincontent">
+    {{if .islogged}}
+        <div id="bug_details">
+	    <h2 id="bug_heading">Bug - {{ .id}} {{ .summary}}</h2>
+		<form name="bugdetail" action="/editbugpage/" method="POST">
+		<table class="left_table">
+		    <tr>
+			<td class="bug_field_title">Summary:</td>
+			<td><input name="bug_title" type="text" value="{{ .summary}}"></input></td>
+		    </tr>
+		    <tr>
+			<td class="bug_field_title">Whiteboard:</td>
+			<td><input name="bug_whiteboard" type="text" value="{{ .whiteboard}}"></input></td>
+		    <tr>
+			<td class="bug_field_title"> Severity: </td>
+			<td>
+			    <select name="bug_severity">
+				<option value="blocker" {{if eq .severity "blocker"}} selected {{end}}>Blocker</option>
+				<option value="critical" {{if eq .severity "critical"}} selected {{end}}>Critical</option>
+				<option value="trivial" {{if eq .severity "trivial"}} selected {{end}}>Trivial</option>
+				<option value="enhancement" {{if eq .severity "enhancement"}} selected {{end}}>Enhancement</option>
+				<option value="normal" {{if eq .severity "normal"}} selected {{end}}>Normal</option>
+			    </select>
+			</td>
+		    </tr>
+		    <tr>
+			<td class="bug_field_title"> Status:</td>
+			<td>
+			    <select name="bug_status">
+				<option value="new" {{if eq .status "new"}} selected {{end}}>New</option>
+				<option value="unconfirmed" {{if eq .status "unconfirmed"}} selected {{end}}>Unconfirmed</option>
+				<option value="worksforme" {{if eq .status "worksforme"}} selected {{end}}>Works For Me</option>
+				<option value="invalid" {{if eq .status "invalid"}} selected {{end}}>Invalid</option>
+				<option value="duplicate" {{if eq .status "duplicate"}} selected {{end}}>Duplicate</option>
+				<option value="fixed" {{if eq .status "fixed"}} selected {{end}}>Fixed</option>
+			    </select>
+			</td>
+		    </tr>
+		    <tr>
+			<td class="bug_field_title">Version: </td>
+			<td><input name="bug_version" type="text" value="{{ .version}}"></input></td>
+		    </tr>
+		    <tr>
+			<td class="bug_field_title">Hardware: </td>
+			<td><input name="bug_hardware" type="text" value="{{ .hardware}}"></input></td>
+		    <tr>
+			<td class="bug_field_title">Priority:</td>
+			<td><select name="bug_priority">
+				    <option value="high" {{if eq .priority "high"}} selected {{end}}>High</option>
+				    <option value="low" {{if eq .priority "low"}} selected {{end}}>Low</option>
+				    <option value="medium" {{if eq .priority "medium"}} selected {{end}}>Medium</option>
+				    <option value="critical" {{if eq .priority "critical"}} selected {{end}}>Critical</option>
+				</select>
+			</td>
+		    </tr>
+		  </table>
+		  <table class="right_table">
+		    <tr>
+			<td class="bug_field_title">Component:</td>
+			<td>{{ .component}}</td>
+		    </tr>
+		    <tr>
+			<td class="bug_field_title">Sub Component:</td>
+			<td>{{ .subcomponent}}</td>
+		    </tr>
+		    <tr>
+			<td class="bug_field_title">Reporter:</td>
+			<td> {{ .reporter}}</td>
+		    </tr>
+		    <tr>
+			<td class="bug_field_title">Reported:</td>
+			<td> {{ .reported}}</td>
+		    </tr>
+		    <tr>
+			<td class="bug_field_title">QA: </td>
+			<td>{{ .qa}}</td>
+		    </tr>
+		    <tr>
+			<td class="bug_field_title">Docs:</td>
+			<td> {{ .docs}}</td>
+		    </tr>
+		    <tr>
+			<td class="bug_field_title">Fixed in Version: </td>
+			<td><input name="bug_fixedinver" type="text" value="{{ .fixedinver}}"></input></td>
+		    <input name="bug_id" value="{{ .id}}" type="hidden"></input>
+		</table>
+	   
+		<div id="bug_description">
+			<p>Bug Description:</p>
+			<p> {{ .description}}</p>
+		 </div>
+		 <button> Save Changes </button>
+	     </form>
+	</div>
+    {{else}}
     <div id="bug_details">
 	    <h2 id="bug_heading">Bug - {{ .id}} {{ .summary}}</h2>
 	    
 	<table class="left_table">
 
 		<tr>
-		    <td class="bug_field_title"><b>Status</b></td>
+		    <td class="bug_field_title"><b>Status:</b></td>
 		    <td>{{ .status}}</td>
 		</tr>
 		<tr>
-		    <td class="bug_field_title"><b>Component</b></td>
+		    <td class="bug_field_title"><b>Component:</b></td>
 		    <td>{{ .component}}</td>
 		</tr>
 		<tr>
-		    <td class="bug_field_title"><b>Sub Component</b></td>
+		    <td class="bug_field_title"><b>Sub Component:</b></td>
 		    <td>{{ .subcomponent}}</td>
 		</tr>
 		<tr>
-		    <td class="bug_field_title"><b>Quality Assurance</b></td>
+		    <td class="bug_field_title"><b>Quality Assurance:</b></td>
 		    <td>{{ .qa}}</td>
 		</tr>
 		<tr>
-		    <td class="bug_field_title"><b>Docs Maintainter</b></td>
+		    <td class="bug_field_title"><b>Docs Maintainter:</b></td>
 		    <td>{{ .docs}}</td>
 		</tr>
 		<tr>
-		    <td class="bug_field_title"><b>Version</b></td>
+		    <td class="bug_field_title"><b>Version:</b></td>
 		    <td>{{ .version}}</td>
 		</tr>
 		<tr>
-		    <td class="bug_field_title"><b>Hardware</b></td>
+		    <td class="bug_field_title"><b>Hardware:</b></td>
 		    <td>{{ .hardware}}</td>
 		</tr>
 		<tr>
-		    <td class="bug_field_title"><b>Priority</b></td>
+		    <td class="bug_field_title"><b>Priority:</b></td>
 		    <td>{{ .priority}}</td>
 		</tr>
 	</table>
 	<table class="right_table">
 	    <tr>
-		<td class="bug_field_title"><b>CC List</b></td>
+		<td class="bug_field_title"><b>CC List:</b></td>
 		<td>
 		    {{range $val := .cclist}}
 			    {{ index $val }}
@@ -49,19 +143,19 @@
 		</td>
 	    </tr>
 	    <tr>
-		<td class="bug_field_title"><b>Reporter</b></td>
+		<td class="bug_field_title"><b>Reporter:</b></td>
 		<td>{{ .reporter}}</td>
 	    </tr>
 	    <tr>
-		<td class="bug_field_title"><b>WhiteBoard</b></td>
+		<td class="bug_field_title"><b>WhiteBoard:</b></td>
 		<td>{{ .whiteboard}}</td>
 	    </tr>
 	    <tr>
-		<td class="bug_field_title"><b>Reported at</b></td>
+		<td class="bug_field_title"><b>Reported at:</b></td>
 		<td>{{ .reported}}</td>
 	    </tr>
 	    <tr>
-		<td class="bug_field_title"><b>Fixed in Version</b></td>
+		<td class="bug_field_title"><b>Fixed in Version:</b></td>
 		<td>{{ .fixedinver}}</td>
 	    </tr>
 	</table>
@@ -70,6 +164,7 @@
 	<p><b>Bug Description</b></p>
 	<p>{{ .description}}</p>
     </div>
+    {{end}}
     <div id="bug_comments">
 	<h2>Comments</h2>
 	    {{range $key, $val := .comment_data}}

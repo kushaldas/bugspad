@@ -448,6 +448,12 @@ func update_bug(data map[string]interface{}) error {
 		buffer.WriteString(", severity=?")
 		vals = append(vals, val)
 	}
+	
+	val, ok = data["summary"]
+	if ok {
+		buffer.WriteString(", summary=?")
+		vals = append(vals, val)
+	}
 
 	val, ok = data["hardware"]
 	if ok {

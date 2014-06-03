@@ -163,7 +163,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 	//backend_bug(w,r)
 	il, useremail:= is_logged(r)
 	interface_data := make(map[string]interface{}) 
-	bug_id := r.URL.Path[len("/showbug/"):]
+	bug_id := r.URL.Path[len("/bugs/"):]
     	if (r.Method == "GET" && bug_id!="") {
 	    
 		interface_data = get_bug(bug_id)
@@ -331,11 +331,11 @@ An editing page for bug.
 */
 func editbugpage(w http.ResponseWriter, r *http.Request) {
 
-    	bug_id := r.URL.Path[len("/editbugpage/"):]
-	il, useremail := is_logged(r)
+    	//bug_id := r.URL.Path[len("/editbugpage/"):]
+	il, _ := is_logged(r)
 	interface_data := make(map[string]interface{})    	
 	if il{
-			if (r.Method == "GET" && bug_id!="") {
+			/*if (r.Method == "GET" && bug_id!="") {
 			    tml, err := template.ParseFiles("./templates/editbugpage.html","./templates/base.html")
 			    if err != nil {
 				checkError(err)
@@ -354,22 +354,24 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 			    tml.ExecuteTemplate(w,"bugdescription",bugdata)
 			    
 
-			} else if r.Method == "POST"{
+			} else*/ if r.Method == "POST"{
 			    	interface_data["id"]=r.FormValue("bug_id")
-				//fmt.Println(interface_data["id"])
+				fmt.Println(interface_data["id"])
 				interface_data["status"]=r.FormValue("bug_status")
 				interface_data["version"]=r.FormValue("bug_version")
 				interface_data["hardware"]=r.FormValue("bug_hardware")
 				interface_data["priority"]=r.FormValue("bug_priority")
 				interface_data["fixedinver"]=r.FormValue("bug_fixedinver")
-				interface_data["severity"]=r.FormValue("bug_fixedinver")
+				interface_data["severity"]=r.FormValue("bug_severity")
+				interface_data["summary"]=r.FormValue("bug_title")
 				
 				err := update_bug(interface_data)
 				if err!=nil{
 				    fmt.Fprintln(w,"Bug could not be updated!")
 				    return
 				}
-				fmt.Fprintln(w,"Bug successfully updated!")
+				//fmt.Fprintln(w,"Bug successfully updated!")
+				http.Redirect(w,r,"/bugs/"+r.FormValue("bug_id"),http.StatusFound)
 			
 			}
 	} else {
@@ -721,7 +723,7 @@ func main() {
 	http.HandleFunc("/register/", registeruser)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/logout/", logout)
-	http.HandleFunc("/showbug/", showbug)
+	http.HandleFunc("/bugs/", showbug)
 	http.HandleFunc("/commentonbug/", commentonbug)
 	http.HandleFunc("/filebug/", createbug)
 	http.HandleFunc("/filebug_product/", before_createbug)
@@ -736,5 +738,5 @@ func main() {
 	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources"))))
 	//http.Handle("/css/", http.FileServer(http.Dir("css/style.css")))
 	//http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css")))) 
-	http.ListenAndServe(":9999", nil)
+	http.ListenAndServe(":9955", nil)
 }
