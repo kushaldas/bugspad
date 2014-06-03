@@ -66,7 +66,10 @@ func component(w http.ResponseWriter, r *http.Request) {
 		desc := pdata["description"].(string)
 		product_id := int(pdata["product_id"].(float64))
 		owner := pdata["owner"].(string)
-		qa := pdata["qa"].(string)
+		qa:=""
+		if pdata["qa"]!=nil{
+		    qa = pdata["qa"].(string)
+		}
 		if authenticate_redis(user, password) {
 			owner_id := get_user_id(owner)
 			qa_id := get_user_id(qa)
