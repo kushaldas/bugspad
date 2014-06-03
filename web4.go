@@ -492,11 +492,12 @@ func editproductpage(w http.ResponseWriter, r *http.Request) {
 			    	interface_data["name"]=r.FormValue("productname")   
 				interface_data["description"]=r.FormValue("productdescription")
 				interface_data["id"]=r.FormValue("productid")
-				msg,err := update_product(interface_data)
+				_,err := update_product(interface_data)
 				if err!=nil{
 				    fmt.Fprintln(w,err)
 				}
-				fmt.Fprintln(w,msg)
+				http.Redirect(w,r,"/editproductpage/"+r.FormValue("productid"),http.StatusFound)
+				//fmt.Fprintln(w,msg)
 			}
 		    } else {
 			fmt.Fprintln(w,"You do not have sufficient rights!")
@@ -610,13 +611,13 @@ func addcomponentpage(w http.ResponseWriter, r *http.Request) {
 					if err != nil {
 					    checkError(err)
 					}
+					fmt.Print("inside")
 					interface_data := make(map[string]interface{})
 					interface_data["islogged"]=il
 					interface_data["useremail"]=useremail
 					interface_data["pagetitle"]="Add Component Page"
-					tml.ExecuteTemplate(w,"base",interface_data)
-					tml.ExecuteTemplate(w,"add_component",map[string]interface{}{"product_id":product_id})
-					
+					interface_data["product_id"]=product_id
+					err=tml.ExecuteTemplate(w,"base",interface_data)
 
 		    } else if r.Method == "POST"{
 			    qa := get_user_id(r.FormValue("qaname"))
@@ -628,14 +629,16 @@ func addcomponentpage(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprintln(w,"Invalid Owner name")
 			    }
 			    product_id,_ := strconv.Atoi(r.FormValue("productid"))
-			    id,err := insert_component(r.FormValue("name"), r.FormValue("description"), product_id, owner, qa)
+			    id,err := insert_component(r.FormValue("componentname"), r.FormValue("componentdescription"), product_id, owner, qa)
+			    fmt.Println("Component "+id+"added.")
 			    if err!=nil {
 				fmt.Fprintln(w,err)
 			    }
-			    fmt.Fprintln(w,"Component Successfully added. "+id)
+			http.Redirect(w,r,"/addcomponent/"+r.FormValue("productid"),http.StatusFound)
 		    }
 		} else {
 			fmt.Fprintln(w,"You do not have sufficient rights!")
+			
 		}
 	    
 	} else {

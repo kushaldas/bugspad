@@ -14,9 +14,6 @@
 	    </table>
 	    <input name="productid" type="hidden" value="{{ .product_id}}"></input>
 	    <button>Save Changes</button>
-	    <form name="addcomponent" action="/addcomponent/{{ .product_id}}" method="POST">
-		    <button>Add Component to this product</button>
-	    </form>
 	    <p>Components: 
 		<table>
 		{{range $key,$val := .components}}
@@ -53,6 +50,9 @@
 		</table>
 	    </p>
 	</form>
+	    <form name="addcomponent" action="/addcomponent/{{ .product_id}}" method="GET">
+		    <button>Add Component to this product</button>
+	    </form>
 
     </div>
 {{end}}
