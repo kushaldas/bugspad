@@ -66,10 +66,12 @@ func component(w http.ResponseWriter, r *http.Request) {
 		desc := pdata["description"].(string)
 		product_id := int(pdata["product_id"].(float64))
 		owner := pdata["owner"].(string)
+		qa := pdata["qa"].(string)
 		if authenticate_redis(user, password) {
 			owner_id := get_user_id(owner)
+			qa_id := get_user_id(qa)
 			fmt.Println(user, password, name, desc, product_id, owner_id)
-			id, _ := insert_component(name, desc, product_id, owner_id)
+			id, _ := insert_component(name, desc, product_id, owner_id, qa_id)
 			res := Result1{"id": id, "name": name, "description": desc}
 			res_json, _ := json.Marshal(res)
 			fmt.Fprintln(w, string(res_json))
