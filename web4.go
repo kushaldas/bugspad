@@ -55,7 +55,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	    fmt.Println(il)
 	    fmt.Println(useremail)
 	    interface_data["useremail"]=useremail
-	    interface_data["il"]=il
+	    interface_data["islogged"]=il
 	    interface_data["pagetitle"]="Home"
 		//fmt.Println(r.FormValue("username"))
 		    
@@ -217,7 +217,7 @@ func commentonbug(w http.ResponseWriter, r *http.Request) {
 		    checkError(err)
 		}
 		fmt.Println("hool")
-		http.Redirect(w,r,"/showbug/"+r.FormValue("bug_id"),http.StatusFound)
+		http.Redirect(w,r,"/bugs/"+r.FormValue("bug_id"),http.StatusFound)
 	    //fmt.Println( r.FormValue("com_content"));
 	    } else {
 		http.Redirect(w,r,"/login",http.StatusFound)
@@ -356,7 +356,6 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 
 			} else*/ if r.Method == "POST"{
 			    	interface_data["id"]=r.FormValue("bug_id")
-				fmt.Println(interface_data["id"])
 				interface_data["status"]=r.FormValue("bug_status")
 				interface_data["version"]=r.FormValue("bug_version")
 				interface_data["hardware"]=r.FormValue("bug_hardware")
@@ -364,7 +363,8 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 				interface_data["fixedinver"]=r.FormValue("bug_fixedinver")
 				interface_data["severity"]=r.FormValue("bug_severity")
 				interface_data["summary"]=r.FormValue("bug_title")
-				
+				fmt.Println(interface_data["status"])				
+				fmt.Println("dd")				
 				err := update_bug(interface_data)
 				if err!=nil{
 				    fmt.Fprintln(w,"Bug could not be updated!")
