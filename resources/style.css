@@ -1,24 +1,32 @@
+body {
+
+}
 ul.head_container  {
     display:inline;
-    //float:right;
 }
 
 ul.head_container > li {
     display: inline;
-   // float:right;
 }
 
-#home_options{
+.maincontent {
 
-    margin-left:30%;
+    margin-left:10%;
     margin-top:15%;
+    padding-bottom:100px;
+    padding-left:2%;
+    margin:2%;
+    border:1px solid;
+
 }
 
-.centered {
-    margin-left:67%;
-    /*float:right;*/
+.title_bar {
+    margin-left:2%;
 }
 
+.options_bar {
+    margin:0%;
+}
 .right_table{
     margin-left:15%;
     float:left;
@@ -42,9 +50,9 @@ td.bug_field_title{
 
 #bug_description{
     clear:both;
-    width:100%;
+    width:80%;
     border:3px solid;
-    margin-top:2%;
+    margin:2%;
 }
 
 #bug_details{
@@ -66,4 +74,8 @@ td.bug_field_title{
 .new_comment{
     width:63%;
     margin:2%;
+}
+
+#footer{
+    margin-left:2%;
 }
