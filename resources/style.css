@@ -93,8 +93,10 @@ color: rgb(65, 131, 196);
     margin-bottom:2%;
 }
 
-td.bug_field_title{
+td.field_title{
     text-align:right;
+    font-weight:bold;
+    color: rgb(65, 131, 196);
 }
 
 #bug_heading{

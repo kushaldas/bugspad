@@ -5,15 +5,15 @@
 	    <form action="/filebug/" method="POST" >
 		<table>
 		    <tr>
-			<td class="bug_field_title">Summary: </td>
+			<td class="field_title">Summary: </td>
 			<td><input name="bug_title" type="text"></input></td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Whiteboard: </td>
+			<td class="field_title">Whiteboard: </td>
 			<td><input name="bug_whiteboard" type="text"></input></td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Severity: </td>
+			<td class="field_title">Severity: </td>
 			<td>
 			    <select name="bug_severity">
 				<option value="blocker">Blocker</option>
@@ -25,15 +25,15 @@
 			</td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Version: </td>
+			<td class="field_title">Version: </td>
 			<td><input name="bug_version" type="text"></input></td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Hardware: </td>
+			<td class="field_title">Hardware: </td>
 			<td><input name="bug_hardware" type="text"></input></td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Priority:  </td>
+			<td class="field_title">Priority:  </td>
 			<td>	<select name="bug_priority">
 				    <option value="high">High</option>
 				    <option value="low" selected>Low</option>
@@ -43,7 +43,7 @@
 			</td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Component:  </td>
+			<td class="field_title">Component:  </td>
 			<td><select name="bug_component">
 					{{range $key, $val := .components}}
 					    <option value={{index $val 0}}>{{$key}}</option>
@@ -53,7 +53,7 @@
 		    </tr>
 		    <tr>
 
-			<td class="bug_field_title">Enter Bug Description: </td>
+			<td class="field_title">Enter Bug Description: </td>
 			<td><textarea name="bug_description" rows="13" cols="100" placeholder="Bug Description"></textarea></td>
 		    </tr>
 		</table>

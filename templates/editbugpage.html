@@ -6,17 +6,17 @@
 	<form name="bugdetail" action="/editbugpage/" method="POST">
 		<table class="left_table">
 		    <tr>
-			<td class="bug_field_title">Bug - {{ .id}}</td>
+			<td class="field_title">Bug - {{ .id}}</td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Summary:</td>
+			<td class="field_title">Summary:</td>
 			<td><input name="bug_title" type="text" value="{{ .summary}}"></input></td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Whiteboard:</td>
+			<td class="field_title">Whiteboard:</td>
 			<td><input name="bug_whiteboard" type="text" value="{{ .whiteboard}}"></input></td>
 		    <tr>
-			<td class="bug_field_title"> Severity: </td>
+			<td class="field_title"> Severity: </td>
 			<td>
 			    <select name="bug_severity">
 				<option value="blocker" {{if eq .severity "blocker"}} selected {{end}}>Blocker</option>
@@ -28,7 +28,7 @@
 			</td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title"> Status:</td>
+			<td class="field_title"> Status:</td>
 			<td>
 			    <select name="bug_status">
 				<option value="new" {{if eq .status "new"}} selected {{end}}>New</option>
@@ -41,14 +41,14 @@
 			</td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Version: </td>
+			<td class="field_title">Version: </td>
 			<td><input name="bug_version" type="text" value="{{ .version}}"></input></td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Hardware: </td>
+			<td class="field_title">Hardware: </td>
 			<td><input name="bug_hardware" type="text" value="{{ .hardware}}"></input></td>
 		    <tr>
-			<td class="bug_field_title">Priority:</td>
+			<td class="field_title">Priority:</td>
 			<td><select name="bug_priority">
 				    <option value="high" {{if eq .priority "high"}} selected {{end}}>High</option>
 				    <option value="low" {{if eq .priority "low"}} selected {{end}}>Low</option>
@@ -60,31 +60,31 @@
 		  </table>
 		  <table class="right_table">
 		    <tr>
-			<td class="bug_field_title">Component:</td>
+			<td class="field_title">Component:</td>
 			<td>{{ .component}}</td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Sub Component:</td>
+			<td class="field_title">Sub Component:</td>
 			<td>{{ .subcomponent}}</td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Reporter:</td>
+			<td class="field_title">Reporter:</td>
 			<td> {{ .reporter}}</td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Reported:</td>
+			<td class="field_title">Reported:</td>
 			<td> {{ .reported}}</td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">QA: </td>
+			<td class="field_title">QA: </td>
 			<td>{{ .qa}}</td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Docs:</td>
+			<td class="field_title">Docs:</td>
 			<td> {{ .docs}}</td>
 		    </tr>
 		    <tr>
-			<td class="bug_field_title">Fixed in Version: </td>
+			<td class="field_title">Fixed in Version: </td>
 			<td><input name="bug_fixedinver" type="text" value="{{ .fixedinver}}"></input></td>
 		    <input name="bug_id" value="{{ .id}}" type="hidden"></input>
 		</table>

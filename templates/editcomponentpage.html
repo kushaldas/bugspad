@@ -5,19 +5,19 @@
 	<form name="componentdetail" action="/editcomponentpage/" method="POST">
 	    <table>
 		<tr>
-		    <td class="bug_field_title">Component name: </td>
+		    <td class="field_title">Component name: </td>
 		    <td><input name="componentname" type="text" value="{{ .component_name}}"></input></td>
 		</tr>
 		<tr>
-		    <td class="bug_field_title">Description: </td>
+		    <td class="field_title">Description: </td>
 		    <td><textarea name="componentdescription" rows="6" columns="40">{{ .component_description}}</textarea></td>	    
 		</tr>
 		<tr>
-		    <td class="bug_field_title">Owner: </td>
+		    <td class="field_title">Owner: </td>
 		    <td><input name="componentowner" type="text" value="{{ .component_owner}}"></input></td>
 		</tr>
 		<tr>
-		    <td class="bug_field_title">QA: </td>
+		    <td class="field_title">QA: </td>
 		    <td><input name="componentqa" type="text" value="{{ .component_qa}}"></input></td>
 		</tr>
 	    </table>

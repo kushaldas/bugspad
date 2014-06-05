@@ -314,7 +314,7 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 			if newbug["emails"] != nil {
 				add_bug_cc(bug_id, newbug["emails"])
 			}
-			http.Redirect(w,r,"/showbug/"+id,http.StatusFound)
+			http.Redirect(w,r,"/bugs/"+id,http.StatusFound)
 
 
 		} else {

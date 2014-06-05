@@ -4,19 +4,19 @@
 	<form name="productdetail" action="/addcomponent/" method="POST">
 	    <table>
 		<tr>
-		    <td class="bug_field_title">Name: </td>
+		    <td class="field_title">Name: </td>
 		    <td><input name="componentname" type="text"></input></td>
 		</tr>
 		<tr>
-		    <td class="bug_field_title">Default Assignee: </td>
+		    <td class="field_title">Default Assignee: </td>
 		    <td><input name="ownername" type="text"></input></td>
 		</tr>
 		<tr>
-		    <td>QA: </td>
+		    <td class="field_title">QA: </td>
 		    <td><input name="qaname" type="text"></input></td>
 		</tr>
 		<tr>
-		    <td>Description: </td>
+		    <td class="field_title">Description: </td>
 		    <td><textarea name="componentdescription" rows="6" cols="40"></textarea></td>
 		</tr>
 	    <input name="productid" type="hidden" value="{{ .product_id}}"></input>
