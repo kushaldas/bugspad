@@ -178,6 +178,17 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		interface_data["useremail"]=useremail
 		interface_data["pagetitle"]="Bug - "+bug_id+" details"
 		//fmt.Println(bug_data["reporter"])
+		if il{
+		    bug_product_id := get_product_of_component(interface_data["component_id"].(int))
+		    if bug_product_id==-1{
+			fmt.Fprintln(w,"error occurred!")
+			return
+		    }
+		    allcomponents := get_components_by_id(bug_product_id)
+		    allsubcomponents := get_subcomponents_by_component(interface_data["component_id"].(int))
+		    interface_data["allcomponents"] = allcomponents
+		    interface_data["allsubcomponents"] = allsubcomponents
+		}
 		tml.ExecuteTemplate(w,"base", interface_data)
 //		fmt.Println(bug_data["cclist"])
 		
@@ -201,13 +212,13 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 /*
 Frontend function for handling the commenting on 
 a bug.
-*/
+
 func commentonbug(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST"{
-	    il, _ := is_logged(r)
+	    il, useremail := is_logged(r)
 	    if il{
-		user_id := get_user_id(r.FormValue("useremail"))
+		user_id := get_user_id(useremail)
 		bug_id,err := strconv.Atoi(r.FormValue("bug_id"))
 		if err!=nil{
 		    checkError(err)
@@ -227,7 +238,7 @@ func commentonbug(w http.ResponseWriter, r *http.Request) {
 	    
     
 }
-
+*/
 /*
 Function to handle product selection before filing a bug.
 */
@@ -279,7 +290,8 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 	    if il{
 	    fmt.Println(useremail)
 		//fmt.Println(r.FormValue("username"))
-		allcomponents := get_components_by_id(product_id)
+		prod_idint,_ := strconv.Atoi(product_id)
+		allcomponents := get_components_by_id(prod_idint)
 		interface_data["useremail"]=useremail
 		interface_data["islogged"]=il
 		interface_data["components"]=allcomponents
@@ -332,7 +344,7 @@ An editing page for bug.
 func editbugpage(w http.ResponseWriter, r *http.Request) {
 
     	//bug_id := r.URL.Path[len("/editbugpage/"):]
-	il, _ := is_logged(r)
+	il, useremail := is_logged(r)
 	interface_data := make(map[string]interface{})    	
 	if il{
 			/*if (r.Method == "GET" && bug_id!="") {
@@ -354,7 +366,7 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 			    tml.ExecuteTemplate(w,"bugdescription",bugdata)
 			    
 
-			} else*/ if r.Method == "POST"{
+			}*/if r.Method == "POST"{
 			    	interface_data["id"]=r.FormValue("bug_id")
 				interface_data["status"]=r.FormValue("bug_status")
 				interface_data["version"]=r.FormValue("bug_version")
@@ -363,13 +375,27 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 				interface_data["fixedinver"]=r.FormValue("bug_fixedinver")
 				interface_data["severity"]=r.FormValue("bug_severity")
 				interface_data["summary"]=r.FormValue("bug_title")
-				fmt.Println(interface_data["status"])				
-				fmt.Println("dd")				
+				interface_data["whiteboard"]=r.FormValue("bug_whiteboard")
+				//fmt.Println(interface_data["status"])				
+				//fmt.Println("dd")				
+				interface_data["post_user"]=get_user_id(useremail)
+				interface_data["com_content"]=r.FormValue("com_content")
+				comp_idint,_:=strconv.Atoi(r.FormValue("bug_component"))
+				subcomp_idint:=-1
+				if r.FormValue("bug_subcomponent")!=""{
+				    subcomp_idint,_=strconv.Atoi(r.FormValue("bug_subcomponent"))
+				}
+				fmt.Println(subcomp_idint)
+				interface_data["subcomponent_id"]=subcomp_idint
+				interface_data["component_id"]=comp_idint
+				interface_data["component"]=get_component_name_by_id(comp_idint)
+				interface_data["subcomponent"]=get_subcomponent_name_by_id(subcomp_idint)
 				err := update_bug(interface_data)
 				if err!=nil{
 				    fmt.Fprintln(w,"Bug could not be updated!")
 				    return
 				}
+				
 				//fmt.Fprintln(w,"Bug successfully updated!")
 				http.Redirect(w,r,"/bugs/"+r.FormValue("bug_id"),http.StatusFound)
 			
@@ -473,7 +499,8 @@ func editproductpage(w http.ResponseWriter, r *http.Request) {
 			    interface_data["productname"] = productdata["name"]
 			    interface_data["productdescription"] = productdata["description"]
 			    //productcomponents := 
-			    interface_data["components"] = get_components_by_id(product_id)
+			    prod_idint,_ := strconv.Atoi(product_id)
+			    interface_data["components"] = get_components_by_id(prod_idint)
 			    //fmt.Println(productdata["components"])
 			    interface_data["product_id"] = product_id
 			    interface_data["bugs"],err = get_bugs_by_product(product_id)
@@ -676,7 +703,8 @@ func editcomponentpage(w http.ResponseWriter, r *http.Request) {
 			    interface_data["component_qa"]=cdata["qa"]
 			    interface_data["component_owner"]=cdata["owner"]
 			    interface_data["component_description"]=cdata["description"]
-			    interface_data["component_subs"]=get_subcomponents_by_component(component_id)
+			    comp_idint,err := strconv.Atoi(component_id)
+			    interface_data["component_subs"]=get_subcomponents_by_component(comp_idint)
 			    //fmt.Println(componentdata["error_msg"])
 			    tml.ExecuteTemplate(w,"base",interface_data)
 			    
@@ -727,7 +755,7 @@ func main() {
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/logout/", logout)
 	http.HandleFunc("/bugs/", showbug)
-	http.HandleFunc("/commentonbug/", commentonbug)
+//	http.HandleFunc("/commentonbug/", commentonbug)
 	http.HandleFunc("/filebug/", createbug)
 	http.HandleFunc("/filebug_product/", before_createbug)
 	http.HandleFunc("/admin/", admin)

@@ -4,7 +4,7 @@
     {{if .islogged}}
         <div id="bug_details">
 	    <h2 id="bug_heading">Bug - {{ .id}} {{ .summary}}</h2>
-		<form name="bugdetail" action="/editbugpage/" method="POST">
+	    <form name="bugdetail" action="/editbugpage/" method="POST">
 		<table class="left_table">
 		    <tr>
 			<td class="field_title">Summary:</td>
@@ -66,8 +66,13 @@
 			</td>
 		    </tr>
 		    <tr>
-			<td class="field_title">Component:</td>
-			<td>{{ .component}}</td>
+			<td class="field_title">Component:{{.component}}</td>
+			<td><select name="bug_component">
+			        {{range $key, $val := .allcomponents}}
+				    <option value={{index $val 0}} {{if eq ".component" "$key"  }} selected {{end}}>{{$key}}</option>
+				{{end}}
+			   </select>
+			</td>
 		    </tr>
 		    <tr>
 			<td class="field_title">Sub Component:</td>
@@ -98,7 +103,18 @@
 		<div id="bug_description">
 			<p>Bug Description:</p>
 			<p> {{ .description}}</p>
-		 </div>
+		</div>
+		<div id="bug_comments">
+		    <h2>Comments</h2>
+		    {{range $key, $val := .comment_data}}
+			<div id={{ $key }} class="comment_box">
+			    <i>{{ index $val 0 }}  {{index $val 1}} {{index $val 3}}</i>
+			    <p>{{index $val 2}}</p>
+			    <br>
+			</div>
+		    {{end}}
+		    <textarea name="com_content" rows="5" cols="100"></textarea>
+		</div>			
 		 <button> Save Changes </button>
 	     </form>
 	</div>
@@ -172,7 +188,6 @@
 	<p><b>Bug Description</b></p>
 	<p>{{ .description}}</p>
     </div>
-    {{end}}
     <div id="bug_comments">
 	<h2>Comments</h2>
 	    {{range $key, $val := .comment_data}}
@@ -182,17 +197,9 @@
 		    <br>
 		</div>
 	    {{end}}
-	    <div class="new_comment">
-	    {{ if .islogged }}
-		<form  action="/commentonbug/" method="POST" name="add_comment" class="new_comment">
-		    <textarea name="com_content" rows="5" cols="100"></textarea>
-		    <input name="bug_id" type="hidden" value="{{ .id}}"></input>
-		    <button>Comment</button>
-		</form>
-	    {{ else }}
+
 		<p> You need to <a href="/login">log in</a> to comment on this bug.</p>
-	    {{ end }}
-	    </div>
     </div>
+    {{end}}
 </div>
 {{end}}
