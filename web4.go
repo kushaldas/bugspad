@@ -189,8 +189,9 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		    interface_data["allcomponents"] = allcomponents
 		    interface_data["allsubcomponents"] = allsubcomponents
 		}
-		tml.ExecuteTemplate(w,"base", interface_data)
-//		fmt.Println(bug_data["cclist"])
+		err=tml.ExecuteTemplate(w,"base", interface_data)
+
+		fmt.Println(err)
 		
 
 		//fmt.Println(comment_data)

@@ -11,6 +11,8 @@ import (
 	"github.com/vaughan0/go-ini"
 	"strconv"
 	"time"
+	"html/template"
+
 )
 
 var conn_str string
@@ -412,40 +414,48 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 	add_latest_created(bug_id)
 	return bug_id, err
 }
+
+/*
+HTMLify the string
+*/
+func htmlify(olddata string, newdata string, datatype string) string{
+	return "<p class=\"bugstatchange\"><label class=\"updatetype\">"+datatype+"</label>"+"<label class=\"oldstat\">"+olddata+"</label>"+"<label class=\"newstat\">"+newdata+"</label></p>"
+}
 /*
 Adds comments for each change made to the bug.
 */
 func add_bug_comments(olddata map[string]interface{},newdata map[string]interface{}) {
 	changes_comments:=""
 	if olddata["summary"] != newdata["summary"] {
-	    changes_comments = changes_comments+"<b>Bug Summary Updated from "+olddata["summary"].(string)+" to "+newdata["summary"].(string)+"</b>\n"
+	    changes_comments = changes_comments+htmlify(olddata["summary"].(string),newdata["summary"].(string),"summary")
 	}
 	if olddata["status"] != newdata["status"] {
-	    changes_comments = changes_comments+"Bug Status Updated from "+olddata["status"].(string)+" to "+newdata["status"].(string)+"\n"
+	    changes_comments = changes_comments+htmlify(olddata["status"].(string),newdata["status"].(string),"status")
 	}
 	if olddata["severity"] != newdata["severity"] {
-	    changes_comments = changes_comments+"Bug Severity Updated from "+olddata["severity"].(string)+" to "+newdata["severity"].(string)+"\n"
+	    changes_comments = changes_comments+htmlify(olddata["severity"].(string),newdata["severity"].(string),"severity")
 	}
 	if olddata["whiteboard"] !=newdata["whiteboard"] {
-	   changes_comments = changes_comments+"Bug Whiteboard Updated from "+olddata["whiteboard"].(string)+" to "+newdata["whiteboard"].(string)+"\n"
+	   changes_comments = changes_comments+htmlify(olddata["whiteboard"].(string),newdata["whiteboard"].(string),"whiteboard")
 	}
 	if olddata["version"] !=newdata["version"] {
-	   changes_comments = changes_comments+"Bug Version Updated from "+olddata["version"].(string)+" to "+newdata["version"].(string)+"\n"
+	   changes_comments = changes_comments+htmlify(olddata["version"].(string),newdata["version"].(string),"version")
 	}
 	if olddata["hardware"] !=newdata["hardware"] {
-	   changes_comments = changes_comments+"Bug Hardware Updated from "+olddata["hardware"].(string)+" to "+newdata["hardware"].(string)+"\n"
+	   changes_comments = changes_comments+htmlify(olddata["hardware"].(string),newdata["hardware"].(string),"hardware")
 	}
 	if olddata["priority"] != newdata["priority"] {
-	   changes_comments = changes_comments+"Bug Priority Updated from "+olddata["priority"].(string)+" to "+newdata["priority"].(string)+"\n"
+	   changes_comments = changes_comments+htmlify(olddata["priority"].(string),newdata["priority"].(string),"priority")
 	}
 	if olddata["component_id"] !=newdata["component_id"] {
-	   changes_comments = changes_comments+"Bug Component Updated from "+olddata["component"].(string)+" to "+newdata["component"].(string)+"\n"
+	   changes_comments = changes_comments+htmlify(olddata["component"].(string),newdata["component"].(string),"component")
+	    
 	}
 	if olddata["subcomponent_id"].(int) !=newdata["subcomponent_id"].(int) {
-	   changes_comments = changes_comments+"Bug Subcomponent Updated from "+olddata["subcomponent"].(string)+" to "+newdata["subcomponent"].(string)+"\n"
+	    changes_comments = changes_comments+htmlify(olddata["subcomponent"].(string),newdata["subcomponent"].(string),"subcomponent")
 	}
 	if olddata["fixedinver"] !=newdata["fixedinver"] {
-	   changes_comments = changes_comments+"Bug Version fix Updated from "+olddata["fixedinver"].(string)+" to "+newdata["fixedinver"].(string)+"\n"
+	    changes_comments = changes_comments+htmlify(olddata["fixedinver"].(string),newdata["fixedinver"].(string),"fixedinver")
 	}
 	bug_idint,_ := strconv.Atoi(newdata["id"].(string))
 	if changes_comments!=""{
@@ -806,9 +816,9 @@ func get_releases() []string {
 /*
 Retrieving comments of a bug.
 */
-func fetch_comments_by_bug(bug_id string) map[int64][4]string {
+func fetch_comments_by_bug(bug_id string) map[int64][4]template.HTML {
 
-	m := make(map[int64][4]string)
+	m := make(map[int64][4]template.HTML)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
 	rows, err := db.Query("SELECT users.email as useremail, users.name as username, comments.id as com_id, description, datec, bug FROM comments JOIN users WHERE bug=? and users.id=comments.user;", bug_id)
@@ -826,7 +836,7 @@ func fetch_comments_by_bug(bug_id string) map[int64][4]string {
 		//m = append(m,Comment{com_id, description, user, datec})
 		//user="jj"
 		//fmt.Println(datec)
-		m[com_id] = [4]string{useremail, username, description, time.Time.String(datec)}
+		m[com_id] = [4]template.HTML{template.HTML(useremail), template.HTML(username), template.HTML(description), template.HTML(time.Time.String(datec))}
 	}
 	return m
 }
