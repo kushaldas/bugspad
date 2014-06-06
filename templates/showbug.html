@@ -66,17 +66,24 @@
 			</td>
 		    </tr>
 		    <tr>
-			<td class="field_title">Component:{{.component}}</td>
+			<td class="field_title">Component:</td>
 			<td><select name="bug_component">
+				{{$comp := .component}}
 			        {{range $key, $val := .allcomponents}}
-				    <option value={{index $val 0}} {{if eq ".component" "$key"  }} selected {{end}}>{{$key}}</option>
+				    <option value={{index $val 0}} {{if eq $comp $key  }} selected {{end}}>{{$key}}</option>
 				{{end}}
 			   </select>
 			</td>
 		    </tr>
 		    <tr>
 			<td class="field_title">Sub Component:</td>
-			<td>{{ .subcomponent}}</td>
+			<td><select name="bug_component">
+				{{$comp := .subcomponent}}
+			        {{range $key, $val := .allsubcomponents}}
+				    <option value={{index $val 0}} {{if eq $comp $key  }} selected {{end}}>{{$key}}</option>
+				{{end}}
+			   </select>
+			</td>
 		    </tr>
 		    <tr>
 			<td class="field_title">Reporter:</td>
