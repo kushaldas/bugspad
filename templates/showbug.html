@@ -78,9 +78,9 @@
 		    <tr>
 			<td class="field_title">Sub Component:</td>
 			<td><select name="bug_component">
-				{{$comp := .subcomponent}}
+				{{$subcomp := .subcomponent}}
 			        {{range $key, $val := .allsubcomponents}}
-				    <option value={{index $val 0}} {{if eq $comp $key  }} selected {{end}}>{{$key}}</option>
+				    <option value={{index $val 0}} {{if eq $subcomp $key  }} selected {{end}}>{{$key}}</option>
 				{{end}}
 			   </select>
 			</td>
