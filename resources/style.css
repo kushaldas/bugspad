@@ -241,7 +241,7 @@ label.oldstat{
     margin-right:0.3em;
 }
 label.newstat{
-    font-weight:bold;
+    /*font-weight:bold;*/
 }
 label.updatetype{
     text-transform:uppercase;
