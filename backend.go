@@ -700,12 +700,16 @@ func add_bug_cc(bug_id int64, emails interface{}) bool {
 	defer db.Close()
 	for i := range email_list {
 		email := email_list[i].(string)
+		fmt.Println(email)
+		fmt.Println(bug_id)
 		user_id := get_user_id(email)
 		// If user_id is -1 means no such user
 		if user_id != -1 {
-			db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, user_id)
+			_,err := db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, user_id)
+			fmt.Println(err)
 		}
 	}
+	fmt.Print("addcc")
 	return true
 }
 

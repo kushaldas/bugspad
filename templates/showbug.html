@@ -60,7 +60,10 @@
 		    <tr>
 			<td class="field_title">CC List:</td>
 			<td>
-			    <input name="bug_cclist" type="text" value="{{range $val := .cclist}}{{ index $val }} ,{{end}}"></input>
+			    {{range $val := .cclist}}
+				    {{ index $val }},
+			    {{end}}
+			    <a href="/editbugcc/{{ .id}}"> Edit</a>
 			</td>
 		    </tr>
 		    <tr>

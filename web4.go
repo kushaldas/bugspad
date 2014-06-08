@@ -755,6 +755,53 @@ func editcomponentpage(w http.ResponseWriter, r *http.Request) {
     
 }
 
+func editbugcc (w http.ResponseWriter, r *http.Request) {
+
+    	bug_id := r.URL.Path[len("/editbugcc/"):]
+    	il, useremail := is_logged(r)
+	interface_data := make(map[string]interface{})    	
+	if il{
+		if (r.Method == "GET" && bug_id!="") {
+			    tml, err := template.ParseFiles("./templates/editbugcc.html","./templates/base.html")
+			    if err != nil {
+				checkError(err)
+			    }
+			    bug_idint,_:=strconv.Atoi(bug_id)
+			    interface_data["islogged"]=il
+			    interface_data["useremail"]=useremail
+			    interface_data["pagetitle"]="Edit Bug "+bug_id+" CC"
+			    interface_data["cclist"]=get_bugcc_list(bug_idint)
+			    interface_data["id"]=bug_id
+			    //productcomponents := 
+			    tml.ExecuteTemplate(w,"base",interface_data)
+			    
+
+		}
+		if r.Method == "POST"{
+				r.ParseForm()
+				emails_rem :=make([]interface{},0)
+				emails_add :=make([]interface{},0)
+				bug_idint64,_ := strconv.ParseInt(r.Form["bug_id"][0],10,64)
+				for index,_ := range(r.Form["ccentry"]) {
+				    emails_rem = append(emails_rem, r.Form["ccentry"][index])
+				}
+				emails_add = append(emails_add, r.Form["newccentry"][0])
+				if add_bug_cc(bug_idint64, emails_add) && remove_bug_cc(bug_idint64, emails_rem){
+				    http.Redirect(w,r,"/editbugcc/"+r.Form["bug_id"][0], http.StatusFound)
+				} else {
+				    fmt.Fprintln(w,"Bug CC could not be updated!")
+				    return
+				}
+				//fmt.Fprintln(w,"Bug successfully updated!")
+				//http.Redirect(w,r,"/editbugcc/"+bug_id, http.StatusFound)
+			
+		}
+	} else {
+		http.Redirect(w,r,"/login",http.StatusFound)
+
+	}
+}    	
+
 func main() {
         load_config("config/bugspad.ini")
         // Load the user details into redis.
@@ -773,6 +820,7 @@ func main() {
 	http.HandleFunc("/editproductpage/", editproductpage)
 	http.HandleFunc("/editproducts/", editproducts)
 	http.HandleFunc("/editbugpage/", editbugpage)
+	http.HandleFunc("/editbugcc/", editbugcc)
 	http.HandleFunc("/editcomponentpage/", editcomponentpage)
 	http.HandleFunc("/addcomponent/", addcomponentpage)
 	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources"))))
