@@ -52,8 +52,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 	    //fmt.Fprintln(w, "get")
 	    il, useremail := is_logged(r)
-	    fmt.Println(il)
-	    fmt.Println(useremail)
+	    //fmt.Println(il)
+	    //fmt.Println(useremail)
 	    interface_data["useremail"]=useremail
 	    interface_data["islogged"]=il
 	    interface_data["pagetitle"]="Home"
@@ -252,7 +252,7 @@ func before_createbug(w http.ResponseWriter, r *http.Request) {
 		checkError(err)
 	    }
 	    if il{
-	    	fmt.Println(useremail)
+	    	//fmt.Println(useremail)
 		//fmt.Println(r.FormValue("username"))
 		allproducts := get_all_products()
 				interface_data["useremail"]=useremail
@@ -522,9 +522,9 @@ func editproductpage(w http.ResponseWriter, r *http.Request) {
 			    
 
 			} else if r.Method == "POST"{
-				fmt.Println(r.FormValue("productname"))
-				fmt.Println(r.FormValue("productid"))
-				fmt.Println(r.FormValue("productdescription"))
+				//fmt.Println(r.FormValue("productname"))
+				//fmt.Println(r.FormValue("productid"))
+				//fmt.Println(r.FormValue("productdescription"))
 			    	interface_data["name"]=r.FormValue("productname")   
 				interface_data["description"]=r.FormValue("productdescription")
 				interface_data["id"]=r.FormValue("productid")

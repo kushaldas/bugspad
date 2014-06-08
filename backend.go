@@ -65,7 +65,7 @@ func add_user(name string, email string, user_type string, password string) stri
 	c := make(chan int)
 	id, _ := add_user_mysql(name, email, user_type, mdstr)
 	go update_redis(id, email, mdstr, user_type, c)
-	fmt.Println(mdstr)
+	//fmt.Println(mdstr)
 	 _ = <-c
 	return "User added."
 
@@ -457,8 +457,8 @@ func add_bug_comments(olddata map[string]interface{},newdata map[string]interfac
 	if olddata["fixedinver"] !=newdata["fixedinver"] {
 	    changes_comments = changes_comments+htmlify(olddata["fixedinver"].(string),newdata["fixedinver"].(string),"fixedinver")
 	}
-	fmt.Println(olddata["qaint"].(int))
-	fmt.Println(newdata["qa"].(int))
+	//fmt.Println(olddata["qaint"].(int))
+	//fmt.Println(newdata["qa"].(int))
 	if olddata["qaint"].(int) !=newdata["qa"].(int) && newdata["qa"].(int)!=-1 {
 	    changes_comments = changes_comments+htmlify(get_user_email(olddata["qaint"].(int)),get_user_email(newdata["qa"].(int)),"qa")
 	}
@@ -567,7 +567,7 @@ func update_bug(data map[string]interface{}) error {
 	}
 //*/
 	buffer.WriteString(" WHERE id=?")
-	fmt.Println(buffer.String())
+	//fmt.Println(buffer.String())
 
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
@@ -576,7 +576,7 @@ func update_bug(data map[string]interface{}) error {
 		return err
 	}
 	defer db.Close()
-	fmt.Println(data["id"].(string)+"lll")
+	//fmt.Println(data["id"].(string)+"lll")
 	vals = append(vals, data["id"])
 	_, err = db.Exec(buffer.String(), vals...)
 	if err != nil {
@@ -598,7 +598,7 @@ func update_bug(data map[string]interface{}) error {
 Get a bug details.
 */
 func get_bug(bug_id string) Bug {
-	fmt.Println(bug_id)
+	//fmt.Println(bug_id)
 	m := make(Bug)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
@@ -700,8 +700,8 @@ func add_bug_cc(bug_id int64, emails interface{}) bool {
 	defer db.Close()
 	for i := range email_list {
 		email := email_list[i].(string)
-		fmt.Println(email)
-		fmt.Println(bug_id)
+		//fmt.Println(email)
+		//fmt.Println(bug_id)
 		user_id := get_user_id(email)
 		// If user_id is -1 means no such user
 		if user_id != -1 {
@@ -709,7 +709,7 @@ func add_bug_cc(bug_id int64, emails interface{}) bool {
 			fmt.Println(err)
 		}
 	}
-	fmt.Print("addcc")
+	//fmt.Print("addcc")
 	return true
 }
 
@@ -893,7 +893,7 @@ func is_user_admin(email string) bool {
 		var t bool
 		for rows.Next() {
 			err = rows.Scan(&t)
-			fmt.Println(t)
+			//fmt.Println(t)
 			if t {
 				return true
 			} else {
@@ -922,7 +922,7 @@ func get_product_by_id(product_id string) map[string]interface{} {
 	err = row.Scan(&name, &description)
 	m["name"]=name
 	m["description"]=description
-	fmt.Println(m["name"])
+	//fmt.Println(m["name"])
 	return m
 
 }
@@ -930,7 +930,7 @@ func get_product_by_id(product_id string) map[string]interface{} {
 /* Finds all components for a given product id*/
 func get_components_by_id(product_id int) map[string][3]string {
 	m := make(map[string][3]string)
-	fmt.Print("dgffg")
+	//fmt.Print("dgffg")
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
 	rows, err := db.Query("SELECT id, name, description from components where product_id=? order by name", product_id)
@@ -1012,7 +1012,7 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 			//fmt.Println(string(f))
 			m[strconv.Itoa(id)] = [15]string{string(status), string(version), string(severity), string(hardware), string(priority), get_user_email(reporter), get_user_email(qaint), get_user_email(docsint), string(whiteboard), string(summary), string(description), reported.String(), string(fixedinver), component_name , subcomponent_name }
 		} else {
-		    fmt.Println("yaha hai")
+		    //fmt.Println("yaha hai")
 		    return m,err
 		    
 		}
@@ -1036,7 +1036,7 @@ func get_user_by_id(user_id string) map[string]interface{}{
 	m["name"] = name
 	m["email"] = email
 	m["type"] = u_type
-	fmt.Println(m["name"])
+	//fmt.Println(m["name"])
 	return m
 
 }
@@ -1269,7 +1269,7 @@ func update_component(data map[string]interface{}) (msg string, err error) {
 
 	
 	buffer.WriteString(" WHERE id=?")
-	fmt.Println(buffer.String())
+	//fmt.Println(buffer.String())
 
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
