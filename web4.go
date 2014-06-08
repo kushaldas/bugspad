@@ -391,6 +391,14 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 				interface_data["component_id"]=comp_idint
 				interface_data["component"]=get_component_name_by_id(comp_idint)
 				interface_data["subcomponent"]=get_subcomponent_name_by_id(subcomp_idint)
+				qaid := get_user_id(r.FormValue("bug_qa"))
+				docsid := get_user_id(r.FormValue("bug_docs"))
+				if (qaid ==-1 || docsid==-1) && (r.FormValue("bug_qa")!="") && (r.FormValue("bug_docs")!=""){
+				    fmt.Fprintln(w,"Bug could not be updated!")
+				    return
+				}
+				interface_data["qa"]=qaid
+				interface_data["docs"]=docsid
 				err := update_bug(interface_data)
 				if err!=nil{
 				    fmt.Fprintln(w,"Bug could not be updated!")

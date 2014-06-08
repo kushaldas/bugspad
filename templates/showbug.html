@@ -60,9 +60,7 @@
 		    <tr>
 			<td class="field_title">CC List:</td>
 			<td>
-			    {{range $val := .cclist}}
-				    {{ index $val }}
-			    {{end}}
+			    <input name="bug_cclist" type="text" value="{{range $val := .cclist}}{{ index $val }} ,{{end}}"></input>
 			</td>
 		    </tr>
 		    <tr>
@@ -95,11 +93,11 @@
 		    </tr>
 		    <tr>
 			<td class="field_title">QA: </td>
-			<td>{{ .qa}}</td>
+			<td><input name="bug_qa" type="text" value="{{ .qa}}"></input></td>
 		    </tr>
 		    <tr>
 			<td class="field_title">Docs:</td>
-			<td> {{ .docs}}</td>
+			<td><input name="bug_docs" type="text" value="{{ .docs}}"></input></td>
 		    </tr>
 		    <tr>
 			<td class="field_title">Fixed in Version: </td>

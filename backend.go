@@ -447,7 +447,7 @@ func add_bug_comments(olddata map[string]interface{},newdata map[string]interfac
 	if olddata["priority"] != newdata["priority"] {
 	   changes_comments = changes_comments+htmlify(olddata["priority"].(string),newdata["priority"].(string),"priority")
 	}
-	if olddata["component_id"] !=newdata["component_id"] {
+	if olddata["component_id"].(int) !=newdata["component_id"].(int) {
 	   changes_comments = changes_comments+htmlify(olddata["component"].(string),newdata["component"].(string),"component")
 	    
 	}
@@ -456,6 +456,14 @@ func add_bug_comments(olddata map[string]interface{},newdata map[string]interfac
 	}
 	if olddata["fixedinver"] !=newdata["fixedinver"] {
 	    changes_comments = changes_comments+htmlify(olddata["fixedinver"].(string),newdata["fixedinver"].(string),"fixedinver")
+	}
+	fmt.Println(olddata["qaint"].(int))
+	fmt.Println(newdata["qa"].(int))
+	if olddata["qaint"].(int) !=newdata["qa"].(int) && newdata["qa"].(int)!=-1 {
+	    changes_comments = changes_comments+htmlify(get_user_email(olddata["qaint"].(int)),get_user_email(newdata["qa"].(int)),"qa")
+	}
+	if olddata["docsint"].(int) !=newdata["docs"].(int) && newdata["docs"].(int)!=-1 {
+	    changes_comments = changes_comments+htmlify(get_user_email(olddata["docsint"].(int)),get_user_email(newdata["docs"].(int)),"docs")
 	}
 	bug_idint,_ := strconv.Atoi(newdata["id"].(string))
 	if changes_comments!=""{
@@ -640,6 +648,8 @@ func get_bug(bug_id string) Bug {
 		m["fixedinver"] = string(fixedinver)
 		m["qa"] = qa_name
 		m["docs"] = docs_name
+		m["qaint"] = qaint
+		m["docsint"] = docsint
 		m["cclist"] = get_bugcc_list(bugs_idint)
 
 	} else {
