@@ -187,6 +187,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		    allcomponents := get_components_by_id(bug_product_id)
 		    allsubcomponents := get_subcomponents_by_component(interface_data["component_id"].(int))
 		    interface_data["allcomponents"] = allcomponents
+		    interface_data["versions"] = get_product_versions(bug_product_id)
 		    interface_data["allsubcomponents"] = allsubcomponents
 		}
 		err=tml.ExecuteTemplate(w,"base", interface_data)
@@ -297,8 +298,8 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 		interface_data["islogged"]=il
 		interface_data["components"]=allcomponents
 		interface_data["pagetitle"]="File Bug"
-		
-		//fmt.Println(allcomponents)
+		interface_data["versions"]=get_product_versions(prod_idint)
+		fmt.Println(get_product_versions(prod_idint))
 		tml.ExecuteTemplate(w,"base",interface_data)
 		return
 	    } else {
@@ -311,11 +312,15 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 		newbug["whiteboard"]=r.FormValue("bug_whiteboard")
 		newbug["severity"]=r.FormValue("bug_severity")
 		newbug["hardware"]=r.FormValue("bug_hardware")
-		newbug["version"]=r.FormValue("bug_version")
 		newbug["description"]=r.FormValue("bug_description")
 		newbug["priority"]=r.FormValue("bug_priority")
 		newbug["component_id"]=r.FormValue("bug_component")
 		newbug["reporter"]=get_user_id(useremail)
+		comp_idint,_ := strconv.Atoi(r.FormValue("bug_component"))
+		version_int,_ := strconv.Atoi(r.FormValue("bug_version"))
+		fmt.Println(version_int)
+		newbug["assigned_to"]=get_component_owner(comp_idint)
+ 		newbug["version"]=version_int
 		id,err := new_bug(newbug)
 		
 		if err != nil {
@@ -370,7 +375,6 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 			}*/if r.Method == "POST"{
 			    	interface_data["id"]=r.FormValue("bug_id")
 				interface_data["status"]=r.FormValue("bug_status")
-				interface_data["version"]=r.FormValue("bug_version")
 				interface_data["hardware"]=r.FormValue("bug_hardware")
 				interface_data["priority"]=r.FormValue("bug_priority")
 				interface_data["fixedinver"]=r.FormValue("bug_fixedinver")
@@ -393,12 +397,18 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 				interface_data["subcomponent"]=get_subcomponent_name_by_id(subcomp_idint)
 				qaid := get_user_id(r.FormValue("bug_qa"))
 				docsid := get_user_id(r.FormValue("bug_docs"))
-				if (qaid ==-1 || docsid==-1) && (r.FormValue("bug_qa")!="") && (r.FormValue("bug_docs")!=""){
+				assignid := get_user_id(r.FormValue("bug_assigned_to"))
+				if (qaid ==-1 || docsid==-1 || assignid==-1) && (r.FormValue("bug_qa")!="") && (r.FormValue("bug_docs")!=""  && (r.FormValue("bug_assigned_to")!="")){
 				    fmt.Fprintln(w,"Bug could not be updated!")
 				    return
 				}
+				fixversion_id,_:=strconv.Atoi(r.FormValue("bug_fixedinver"))
+				version_id,_:=strconv.Atoi(r.FormValue("bug_version"))
 				interface_data["qa"]=qaid
 				interface_data["docs"]=docsid
+				interface_data["assigned_to"]=assignid
+				interface_data["version"]=version_id
+				interface_data["fixedinver"]=fixversion_id
 				err := update_bug(interface_data)
 				if err!=nil{
 				    fmt.Fprintln(w,"Bug could not be updated!")

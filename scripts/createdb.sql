@@ -1,8 +1,8 @@
--- MySQL dump 10.14  Distrib 5.5.31-MariaDB, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.34, for debian-linux-gnu (i686)
 --
 -- Host: localhost    Database: bugzilla
 -- ------------------------------------------------------
--- Server version	5.5.31-MariaDB
+-- Server version	5.5.34-0ubuntu0.13.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -49,7 +49,7 @@ DROP TABLE IF EXISTS `bugs`;
 CREATE TABLE `bugs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `status` varchar(10) DEFAULT 'new',
-  `version` varchar(10) DEFAULT NULL,
+  `version` int(11) DEFAULT NULL,
   `severity` varchar(45) DEFAULT 'medium',
   `hardware` varchar(45) DEFAULT NULL,
   `priority` varchar(45) DEFAULT 'medium',
@@ -60,21 +60,24 @@ CREATE TABLE `bugs` (
   `summary` varchar(450) NOT NULL,
   `description` longtext NOT NULL,
   `reported` datetime NOT NULL,
-  `fixedinver` varchar(255) DEFAULT NULL,
+  `fixedinver` int(11) DEFAULT NULL,
   `component_id` int(11) NOT NULL,
   `subcomponent_id` int(11) DEFAULT NULL,
+  `assigned_to` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_bugs_reporter_idx` (`reporter`),
   KEY `fk_bugs_qa_idx` (`qa`),
   KEY `fk_bugs_docs_idx` (`docs`),
   KEY `fk_bugs_component_id_idx` (`component_id`),
   KEY `fk_bugs_subcomponent_id_idx` (`subcomponent_id`),
-  CONSTRAINT `fk_bugs_subcomponent_id` FOREIGN KEY (`subcomponent_id`) REFERENCES `subcomponent` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  KEY `assigned_to` (`assigned_to`),
+  CONSTRAINT `bugs_ibfk_1` FOREIGN KEY (`assigned_to`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_bugs_component_id` FOREIGN KEY (`component_id`) REFERENCES `components` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_bugs_docs` FOREIGN KEY (`docs`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_bugs_qa` FOREIGN KEY (`qa`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_bugs_reporter` FOREIGN KEY (`reporter`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+  CONSTRAINT `fk_bugs_reporter` FOREIGN KEY (`reporter`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT `fk_bugs_subcomponent_id` FOREIGN KEY (`subcomponent_id`) REFERENCES `subcomponent` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -113,7 +116,7 @@ CREATE TABLE `comments` (
   KEY `fk_comments_bug_idx` (`bug`),
   CONSTRAINT `fk_comments_bug` FOREIGN KEY (`bug`) REFERENCES `bugs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_comments_user` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=140 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -155,7 +158,7 @@ CREATE TABLE `components` (
   CONSTRAINT `fk_components_1` FOREIGN KEY (`owner`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_components_2` FOREIGN KEY (`qa`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_components_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=18483 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -204,7 +207,7 @@ CREATE TABLE `products` (
   `name` varchar(255) DEFAULT NULL,
   `description` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -218,7 +221,7 @@ CREATE TABLE `releases` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(10) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -272,7 +275,25 @@ CREATE TABLE `users` (
   `type` varchar(19) DEFAULT '1',
   `password` varchar(255) CHARACTER SET latin1 NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `versions`
+--
+
+DROP TABLE IF EXISTS `versions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `versions` (
+  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+  `value` varchar(64) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `isactive` tinyint(4) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  KEY `fk_product_id` (`product_id`),
+  CONSTRAINT `fk_product_id` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -284,4 +305,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-08-28 21:35:40
+-- Dump completed on 2014-06-10 11:27:53

@@ -40,7 +40,15 @@
 		    </tr>
 		    <tr>
 			<td class="field_title">Version: </td>
-			<td><input name="bug_version" type="text" value="{{ .version}}"></input></td>
+			       
+
+			<td><select name="bug_version">
+				{{$ver := .version_id}}
+			        {{range $key, $val := .versions}}
+				    <option value={{$val}} {{if eq $ver $val }} selected {{end}}>{{$key}}</option>
+				{{end}}
+			   </select>
+			</td>
 		    </tr>
 		    <tr>
 			<td class="field_title">Hardware: </td>
@@ -99,12 +107,33 @@
 			<td><input name="bug_qa" type="text" value="{{ .qa}}"></input></td>
 		    </tr>
 		    <tr>
+			<td class="field_title">Assigned to: </td>
+			<td><input name="bug_assigned_to" type="text" value="{{ .assigned_to}}"></input></td>
+		    </tr>
+		    <tr>
 			<td class="field_title">Docs:</td>
 			<td><input name="bug_docs" type="text" value="{{ .docs}}"></input></td>
 		    </tr>
+		    {{if eq .status "fixed"}}
 		    <tr>
 			<td class="field_title">Fixed in Version: </td>
-			<td><input name="bug_fixedinver" type="text" value="{{ .fixedinver}}"></input></td>
+			<td><select name="bug_fixedinver">
+				{{if ne .fixedinver_id (-1)}}
+				    {{$ver := .fixedinver_id}}
+				    {{range $key, $val := .versions}}
+					<option value={{$val}}  {{if eq $ver $val  }} selected {{end}}>{{$key}}</option>
+				    {{end}}
+				{{else}}
+				    <option value="-1" selected>--</option>
+				    {{range $key, $val := .versions}}
+					<option value={{$val}}>{{$key}}</option>
+				    {{end}}
+				{{end}}
+			   </select>
+			 </td>
+		    
+		    </tr>
+		    {{end}}
 		    <input name="bug_id" value="{{ .id}}" type="hidden"></input>
 		</table>
 	   
@@ -147,6 +176,10 @@
 		<tr>
 		    <td class="field_title">Quality Assurance:</td>
 		    <td>{{ .qa}}</td>
+		</tr>
+		<tr>
+		    <td class="field_title">Assigned to:</td>
+		    <td>{{ .assigned_to}}</td>
 		</tr>
 		<tr>
 		    <td class="field_title">Docs Maintainter:</td>

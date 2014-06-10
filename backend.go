@@ -349,6 +349,13 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 		buffer2.WriteString(",?")
 		vals = append(vals, val)
 	}
+	
+	val, ok = data["assigned_to"]
+	if ok {
+		buffer.WriteString(", assigned_to")
+		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	}
 
 	val, ok = data["subcomponent_id"]
 	if ok {
@@ -438,9 +445,6 @@ func add_bug_comments(olddata map[string]interface{},newdata map[string]interfac
 	if olddata["whiteboard"] !=newdata["whiteboard"] {
 	   changes_comments = changes_comments+htmlify(olddata["whiteboard"].(string),newdata["whiteboard"].(string),"whiteboard")
 	}
-	if olddata["version"] !=newdata["version"] {
-	   changes_comments = changes_comments+htmlify(olddata["version"].(string),newdata["version"].(string),"version")
-	}
 	if olddata["hardware"] !=newdata["hardware"] {
 	   changes_comments = changes_comments+htmlify(olddata["hardware"].(string),newdata["hardware"].(string),"hardware")
 	}
@@ -454,14 +458,22 @@ func add_bug_comments(olddata map[string]interface{},newdata map[string]interfac
 	if olddata["subcomponent_id"].(int) !=newdata["subcomponent_id"].(int) {
 	    changes_comments = changes_comments+htmlify(olddata["subcomponent"].(string),newdata["subcomponent"].(string),"subcomponent")
 	}
-	if olddata["fixedinver"] !=newdata["fixedinver"] {
-	    changes_comments = changes_comments+htmlify(olddata["fixedinver"].(string),newdata["fixedinver"].(string),"fixedinver")
+	if olddata["fixedinver_id"].(int) !=newdata["fixedinver"].(int) {
+	    changes_comments = changes_comments+htmlify(get_version_text(olddata["fixedinver_id"].(int)),get_version_text(newdata["fixedinver"].(int)),"fixedinver")
+	}
+	if olddata["version_id"].(int) !=newdata["version"].(int) {
+	    changes_comments = changes_comments+htmlify(get_version_text(olddata["version_id"].(int)),get_version_text(newdata["version"].(int)),"version")
 	}
 	//fmt.Println(olddata["qaint"].(int))
 	//fmt.Println(newdata["qa"].(int))
 	if olddata["qaint"].(int) !=newdata["qa"].(int) && newdata["qa"].(int)!=-1 {
 	    changes_comments = changes_comments+htmlify(get_user_email(olddata["qaint"].(int)),get_user_email(newdata["qa"].(int)),"qa")
 	}
+	
+	if olddata["assigned_toid"].(int) !=newdata["assigned_to"].(int) && newdata["assigned_to"].(int)!=-1 {
+	    changes_comments = changes_comments+htmlify(get_user_email(olddata["assigned_toid"].(int)),get_user_email(newdata["assigned_to"].(int)),"assigned_to")
+	}
+
 	if olddata["docsint"].(int) !=newdata["docs"].(int) && newdata["docs"].(int)!=-1 {
 	    changes_comments = changes_comments+htmlify(get_user_email(olddata["docsint"].(int)),get_user_email(newdata["docs"].(int)),"docs")
 	}
@@ -547,6 +559,12 @@ func update_bug(data map[string]interface{}) error {
 		buffer.WriteString(", whiteboard=?")
 		vals = append(vals, val)
 	}
+	
+	val, ok = data["assigned_to"]
+	if ok {
+		buffer.WriteString(", assigned_to=?")
+		vals = append(vals, val)
+	}
 // * Since this canot be changes.
 	val, ok = data["subcomponent_id"]
 	if ok && val!=-1{
@@ -594,6 +612,27 @@ func update_bug(data map[string]interface{}) error {
 	return nil
 }
 
+func get_version_text(id int) string {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return ""
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT value from versions where id = ?", id)
+	if err == nil {
+		var vertext string
+		for rows.Next() {
+			err = rows.Scan(&vertext)
+			if vertext != "" {
+				return vertext
+			}
+		}
+	}
+	return ""
+}
+
 /*
 Get a bug details.
 */
@@ -602,18 +641,22 @@ func get_bug(bug_id string) Bug {
 	m := make(Bug)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
-	row := db.QueryRow("SELECT status, description, version, severity, hardware, priority, whiteboard, reported, component_id, subcomponent_id, reporter, summary, fixedinver, qa, docs from bugs where id=?", bug_id)
-	var status, description, version, severity, hardware, priority, whiteboard,  summary, fixedinver []byte
-	var reporter, component_id int
-	var qa, docs, subcomponent_id sql.NullInt64
+	row := db.QueryRow("SELECT status, description, version, severity, hardware, priority, whiteboard, reported, component_id, subcomponent_id, reporter, summary, fixedinver, qa, docs, assigned_to from bugs where id=?", bug_id)
+	var status, description, severity, hardware, priority, whiteboard,  summary []byte
+	var reporter, component_id, assigned_to, version int
+	var qa, docs, subcomponent_id, fixedinver sql.NullInt64
 	var reported time.Time
-	err = row.Scan(&status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &subcomponent_id, &reporter, &summary, &fixedinver, &qa, &docs)
+	err = row.Scan(&status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &subcomponent_id, &reporter, &summary, &fixedinver, &qa, &docs, &assigned_to)
 	if err == nil {
 	    	    qaint := -1
 		    docsint := -1
 		    subcint := -1
+		    fixedinverint := -1
 		    if qa.Valid{
 			qaint = int(qa.Int64)
+		    }
+		    if fixedinver.Valid{
+			fixedinverint = int(fixedinver.Int64)
 		    }
 		    if docs.Valid{
 			docsint = int(docs.Int64)
@@ -645,11 +688,16 @@ func get_bug(bug_id string) Bug {
 		m["component_id"] = component_id
 		m["subcomponent"] = get_subcomponent_name_by_id(subcint)
 		m["subcomponent_id"] = subcint
-		m["fixedinver"] = string(fixedinver)
+		m["fixedinver"] = get_version_text(fixedinverint)
+		m["fixedinver_id"] = fixedinverint
+		m["version_id"] = version
+		m["version"] = get_version_text(version)
 		m["qa"] = qa_name
 		m["docs"] = docs_name
 		m["qaint"] = qaint
 		m["docsint"] = docsint
+		m["assigned_toid"] = assigned_to
+		m["assigned_to"] = get_user_email(assigned_to)
 		m["cclist"] = get_bugcc_list(bugs_idint)
 
 	} else {
@@ -784,6 +832,55 @@ func get_user_id(email string) int {
 	return -1
 }
 
+/*
+Get owner of component.
+*/
+func get_component_owner(id int) int {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return -1
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT owner from components where id = ?", id)
+	if err == nil {
+		var id int
+		for rows.Next() {
+			err = rows.Scan(&id)
+			if id != 0 {
+				return id
+			}
+		}
+	}
+	return -1
+}
+
+/*
+Get product versions.
+*/
+func get_product_versions(product_id int) map[string]int {
+	
+	m := make(map[string]int)
+	//fmt.Print("dgffg")
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	rows, err := db.Query("SELECT id, value from versions where product_id=? order by value", product_id)
+	if err != nil {
+		fmt.Println(err)
+		return m
+	}
+	defer rows.Close()
+	var description string
+	var v_id int
+	for rows.Next() {
+		err = rows.Scan(&v_id, &description)
+		//fmt.Println(c_id, name, description)
+		m[description] = v_id
+	}
+	return m
+    
+}
 /*Adds release information.*/
 func add_release(name string) {
 	db, err := sql.Open("mysql", conn_str)
@@ -979,9 +1076,9 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 	if err != nil {
 		return m,err
 	}
-	var status, description, version, severity, hardware, priority, whiteboard,  summary, fixedinver []byte
-	var id, reporter, component_id int
-	var qa, docs, subcomponent_id sql.NullInt64
+	var status, description,  severity, hardware, priority, whiteboard,  summary []byte
+	var id, reporter, component_id, version int
+	var qa, docs, subcomponent_id, fixedinver sql.NullInt64
 	var reported time.Time
 	for rows.Next() {
 		err = rows.Scan(&id, &status, &version, &severity, &hardware, &priority, &reporter, &qa, &docs, &whiteboard, &summary, &description, &reported, &fixedinver, &component_id, &subcomponent_id)
@@ -989,8 +1086,12 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 		    qaint := -1
 		    docsint := -1
 		    subcint := -1
+		    fixedinverint := -1
 		    if qa.Valid{
 			qaint = int(qa.Int64)
+		    }
+		    if fixedinver.Valid{
+			fixedinverint = int(qa.Int64)
 		    }
 		    if docs.Valid{
 			docsint = int(docs.Int64)
@@ -1010,7 +1111,7 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 		    }
 			
 			//fmt.Println(string(f))
-			m[strconv.Itoa(id)] = [15]string{string(status), string(version), string(severity), string(hardware), string(priority), get_user_email(reporter), get_user_email(qaint), get_user_email(docsint), string(whiteboard), string(summary), string(description), reported.String(), string(fixedinver), component_name , subcomponent_name }
+			m[strconv.Itoa(id)] = [15]string{string(status), string(get_version_text(version)), string(severity), string(hardware), string(priority), get_user_email(reporter), get_user_email(qaint), get_user_email(docsint), string(whiteboard), string(summary), string(description), reported.String(), string(get_version_text(fixedinverint)), component_name , subcomponent_name }
 		} else {
 		    //fmt.Println("yaha hai")
 		    return m,err

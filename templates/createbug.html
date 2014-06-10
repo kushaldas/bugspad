@@ -3,6 +3,7 @@
 	<div class="maincontent">
 	    <center><h2>New Bug</h2></center>
 	    <form action="/filebug/" method="POST" >
+		<input type="hidden" value="{{ .bugproductid}}"></input>
 		<table>
 		    <tr>
 			<td class="field_title">Summary: </td>
@@ -26,7 +27,12 @@
 		    </tr>
 		    <tr>
 			<td class="field_title">Version: </td>
-			<td><input name="bug_version" type="text"></input></td>
+			<td><select name="bug_version">
+				{{range $key, $val := .versions}}
+				    <option value={{$val}}>{{$key}}</option>
+				{{end}}
+			    </select>
+			</td>
 		    </tr>
 		    <tr>
 			<td class="field_title">Hardware: </td>
