@@ -167,6 +167,10 @@ func showbug(w http.ResponseWriter, r *http.Request) {
     	if (r.Method == "GET" && bug_id!="") {
 	    
 		interface_data = get_bug(bug_id)
+		if interface_data["id"] == nil {
+		    	fmt.Fprintln(w,"Bug does not exist!")
+			return
+		}
 		tml, err := template.ParseFiles("./templates/showbug.html","./templates/base.html")
 		if err != nil {
 			checkError(err)
@@ -181,7 +185,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		if il{
 		    bug_product_id := get_product_of_component(interface_data["component_id"].(int))
 		    if bug_product_id==-1{
-			fmt.Fprintln(w,"error occurred!")
+			fmt.Fprintln(w,"Please specify the product!")
 			return
 		    }
 		    allcomponents := get_components_by_id(bug_product_id)
@@ -511,6 +515,10 @@ func editproductpage(w http.ResponseWriter, r *http.Request) {
 			    interface_data["useremail"]=useremail
 			    interface_data["pagetitle"]="Edit Product Page"
 			    productdata := get_product_by_id(product_id)
+			    if productdata["id"] == nil {
+				fmt.Fprintln(w, "Product does not exist!")
+				return
+			    }
 			    if productdata["error_msg"]!=nil{
 				fmt.Fprintln(w,productdata["error_msg"])
 				return
@@ -610,7 +618,10 @@ func edituserpage(w http.ResponseWriter, r *http.Request) {
 				interface_data["useremail"]=useremail
 				interface_data["pagetitle"]="Edit User Page"
 				userdata := get_user_by_id(user_id)
-				userdata["id"]=user_id
+				if userdata["id"] == nil {
+				    fmt.Fprintln(w, "User does not exist!")
+				    return
+				}
 				if userdata["error_msg"]!=nil{
 				    fmt.Fprintln(w,userdata["error_msg"])
 				    return
@@ -714,6 +725,10 @@ func editcomponentpage(w http.ResponseWriter, r *http.Request) {
 			    interface_data["pagetitle"]="Edit Component Page"
 			    interface_data["component_id"]=component_id
 			    cdata := get_component_by_id(component_id)
+			    if cdata["id"] == nil {
+				fmt.Fprintln(w,"Component does not exist!")
+				return 
+			    }
 			    if cdata["error_msg"]!=nil{
 				fmt.Fprintln(w,cdata["error_msg"])
 				return
@@ -777,6 +792,11 @@ func editbugcc (w http.ResponseWriter, r *http.Request) {
 				checkError(err)
 			    }
 			    bug_idint,_:=strconv.Atoi(bug_id)
+			    tmp:=get_bug(bug_id)
+			    if tmp["id"] !=nil {
+				fmt.Fprintln(w,"Bug does not exist!")
+				return
+			    }
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
 			    interface_data["pagetitle"]="Edit Bug "+bug_id+" CC"

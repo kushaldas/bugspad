@@ -1017,9 +1017,13 @@ func get_product_by_id(product_id string) map[string]interface{} {
 	}
 	var name, description string
 	err = row.Scan(&name, &description)
-	m["name"]=name
-	m["description"]=description
-	//fmt.Println(m["name"])
+	if err==nil{
+	    m["id"]=product_id
+	    m["name"]=name
+	    m["description"]=description
+	    //fmt.Println(m["name"])
+	}
+	
 	return m
 
 }
@@ -1134,6 +1138,7 @@ func get_user_by_id(user_id string) map[string]interface{}{
 	    m["error_msg"]=err
 	    return m
 	}
+	m["id"] = user_id
 	m["name"] = name
 	m["email"] = email
 	m["type"] = u_type
