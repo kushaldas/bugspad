@@ -183,6 +183,8 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		interface_data["islogged"]=il
 		interface_data["useremail"]=useremail
 		interface_data["pagetitle"]="Bug - "+bug_id+" details"
+		interface_data["dependencylist"] = bugs_dependent_on(bug_id)
+		interface_data["blockedlist"] = bugs_blocked_by(bug_id)
 		//fmt.Println(bug_data["reporter"])
 		if il{
 		    bug_product_id := get_product_of_component(interface_data["component_id"].(int))
@@ -380,7 +382,6 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 			    
 
 			}*/if r.Method == "POST"{
-				r.ParseForm()
 			    	interface_data["id"]=r.FormValue("bug_id")
 				interface_data["status"]=r.FormValue("bug_status")
 				interface_data["hardware"]=r.FormValue("bug_hardware")
@@ -426,7 +427,54 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 				    fmt.Fprintln(w,"Bug could not be updated!")
 				    return
 				}
-				
+				//update dependencies
+				currentbug_idint, _ := strconv.Atoi(r.FormValue("bug_id"))
+
+				clear_dependencies(currentbug_idint,"blocked")
+				dependbugs:=strings.SplitAfter(r.FormValue("dependencylist"),",")
+				//fmt.Println(dependbugs)
+				for index,_ := range(dependbugs) {
+					//fmt.Println(dependbug)
+					if dependbugs[index]!=""{
+					    dependbug_idint, _ := strconv.Atoi(strings.Trim(dependbugs[index],","))
+					   // fmt.Println(dependbug_idint)
+					    valid,val:=is_valid_bugdependency(currentbug_idint, dependbug_idint)
+					    fmt.Println(val)
+					    if valid {
+						err:=add_bug_dependency(currentbug_idint, dependbug_idint)
+						if err!=nil{
+						    fmt.Fprintln(w,err)
+						    return
+						}
+					    } else {
+						fmt.Fprintln(w,val)
+						return
+					    }
+					}
+					
+				}
+
+				clear_dependencies(currentbug_idint,"dependson")
+				blockedbugs:=strings.SplitAfter(r.FormValue("blockedlist")," ")
+				//fmt.Println(blockedbugs)
+				for index,_ := range(blockedbugs) {
+					if blockedbugs[index]!="" {
+					    blockedbug_idint, _ := strconv.Atoi(strings.Trim(blockedbugs[index],","))
+					    valid,val:=is_valid_bugdependency(blockedbug_idint, currentbug_idint)
+					    if valid {
+						err:=add_bug_dependency(blockedbug_idint, currentbug_idint)
+						if err!=nil{
+						    fmt.Fprintln(w,err)
+						    return
+						}
+					    } else {
+						fmt.Fprintln(w,val)
+						return
+					    }
+					}
+					
+				}
+				interface_data["blockedlist"]=r.FormValue
 				//fmt.Fprintln(w,"Bug successfully updated!")
 				http.Redirect(w,r,"/bugs/"+r.FormValue("bug_id"),http.StatusFound)
 			

@@ -63,6 +63,28 @@
 				</select>
 			</td>
 		    </tr>
+		    <tr>
+			<td class="field_title">Depends on: </td>
+			<td>
+			    {{range $val := .dependencylist}}
+				    <a href="/bugs/{{ index $val }}">{{ index $val }} </a>
+			    {{end}}
+			</td>
+			<td>
+			    <input name="dependencylist" value="{{range $val := .dependencylist}}{{ index $val }},{{end}}" type="text"></input>
+			</td>
+		    </tr>
+		    <tr>
+			<td class="field_title">Blocks: </td>
+			<td>
+			    {{range $val := .blockedlist}}
+				    <a href="/bugs/{{ index $val }}">{{ index $val }} </a>
+			    {{end}}
+			</td>
+			<td>
+			    <input name="blockedlist" value="{{range $val := .blockedlist}}{{ index $val }},{{end}}" type="text"></input>
+			</td>
+		    </tr>
 		  </table>
 		  <table class="right_table">
 		    <tr>
@@ -208,6 +230,22 @@
 		    <td class="field_title">Priority:</td>
 		    <td>{{ .priority}}</td>
 		</tr>
+		<tr>
+		    <td class="field_title">Depends on: </td>
+		    <td>
+			{{range $val := .dependencylist}}
+			    <a href="/bugs/{{ index $val }}">{{ index $val }} </a>
+			{{end}}
+		    </td>
+		 </tr>
+		 <tr>
+		    <td class="field_title">Blocks: </td>
+		    <td>
+			{{range $val := .blockedlist}}
+			    <a href="/bugs/{{ index $val }}">{{ index $val }} </a>
+			{{end}}
+		    </td>
+		 </tr>
 	</table>
 	<table class="right_table">
 	    <tr>

@@ -9,7 +9,7 @@
 		<p class="field_title">All attachments:</p>
 		{{range $key, $val := .attachments}}
 		<div id={{ $key }} class="attachment_box">
-		    <input type="checkbox" name="attachments_obsolete" value="{{ $key }}">{{ index $val 2}}</input>
+		    <input type="checkbox" name="attachments_obsolete" value="{{ $key }}">Mark Obsolete</input>
 		    <p><a href="{{index $val 0}}">{{index $val 2}}</a><p>
 		    <p>Description: {{index $val 1}}<p>
 		    <p>Submitter: {{index $val 2}}<p>

@@ -589,6 +589,140 @@ func make_attachments_obsolete(attachment_ids []string) error{
 }
 
 /*
+Getting all bug ids blocked by the given bug.
+*/
+func bugs_blocked_by(bug_id string) []int {
+    	m := make([]int,0)
+	//fmt.Print("dgffg")
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+	    fmt.Print(err)
+	    return m
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT blocked from dependencies where dependson=?", bug_id)
+	if err != nil {
+		fmt.Println(err)
+		return m
+	}
+	defer rows.Close()
+	var b_id int
+	for rows.Next() {
+		err = rows.Scan(&b_id)
+		m=append(m,b_id)
+		//fmt.Println(c_id, name, description)
+	}
+	return m
+    
+}
+
+/*
+Getting all bugs which the given bug is dependent on.
+*/
+func bugs_dependent_on(bug_id string) []int {
+    	m := make([]int,0)
+	//fmt.Print("dgffg")
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+	    fmt.Print(err)
+	    return m
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT dependson from dependencies where blocked=?", bug_id)
+	if err != nil {
+		fmt.Println(err)
+		return m
+	}
+	defer rows.Close()
+	var b_id int
+	for rows.Next() {
+		err = rows.Scan(&b_id)
+		m=append(m,b_id)
+		//fmt.Println(c_id, name, description)
+	}
+	return m
+    
+}
+
+/*
+Check is the bug dependency is valid
+*/
+func is_valid_bugdependency(blocked int, dependson int) (bool,string){
+	//bug cannot depend on itself.
+	if blocked == dependson {
+	    return false,"Both blocked and depends can't be the same"
+	}
+	//checking for circular dependency
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+	    fmt.Print(err)
+	    return false,err.Error()
+	}
+	defer db.Close()
+	rows,err := db.Query("SELECT * from dependencies where dependson=? and blocked=?",blocked,dependson)
+	for rows.Next() {
+	    return false,"Circular Dependency cannot exist."
+	}
+	return true,"Valid"
+}
+
+func clear_dependencies(bug int, bugtype string) error {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+	    fmt.Print(err)
+	    return err
+	}
+	defer db.Close()
+	_,err = db.Exec("DELETE from dependencies where "+bugtype+"=?",bug)
+	 return err
+    
+}
+
+/*
+Add a bug dependency
+*/
+func add_bug_dependency(blocked int, dependson int) error{
+	//fmt.Println("blocked")
+	fmt.Println(blocked)
+	//fmt.Println("dependson")
+	fmt.Println(dependson)
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+	    fmt.Print(err)
+	    return err
+	}
+	defer db.Close()
+	_, err = db.Exec("INSERT into dependencies (blocked,dependson) VALUES (?,?)", blocked, dependson)
+	fmt.Println(err)
+	return err
+}
+
+/*
+Checking if an entry exists in a table
+*/
+func entry_exists(tablename string, fieldname string, fieldvalue string) bool {
+
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+	    fmt.Print(err)
+	    return false
+	}
+	defer db.Close()
+	rows,err := db.Query("SELECT * from "+tablename+" where "+fieldname+"="+fieldvalue)
+	fmt.Println(err)
+	for rows.Next() {
+	    
+	    return false
+	}
+	return true
+    
+}
+
+/*
 Updates a given bug based on input
 */
 func update_bug(data map[string]interface{}) error {
@@ -966,6 +1100,11 @@ func get_product_versions(product_id int) map[string]int {
 	m := make(map[string]int)
 	//fmt.Print("dgffg")
 	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+	    fmt.Print(err)
+	    return m
+	}
 	defer db.Close()
 	rows, err := db.Query("SELECT id, value from versions where product_id=? order by value", product_id)
 	if err != nil {

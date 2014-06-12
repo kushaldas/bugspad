@@ -171,7 +171,7 @@ DROP TABLE IF EXISTS `dependencies`;
 CREATE TABLE `dependencies` (
   `blocked` int(11) NOT NULL,
   `dependson` int(11) NOT NULL,
-  PRIMARY KEY (`blocked`),
+  KEY `fk_dependencies_block_idx` (`blocked`),
   KEY `fk_dependencies_dep_idx` (`dependson`),
   CONSTRAINT `fk_dependencies_block` FOREIGN KEY (`blocked`) REFERENCES `bugs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_dependencies_dep` FOREIGN KEY (`dependson`) REFERENCES `bugs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
