@@ -466,16 +466,20 @@ func add_bug_comments(olddata map[string]interface{},newdata map[string]interfac
 	}
 	//fmt.Println(olddata["qaint"].(int))
 	//fmt.Println(newdata["qa"].(int))
-	if olddata["qaint"].(int) !=newdata["qa"].(int) && newdata["qa"].(int)!=-1 {
-	    changes_comments = changes_comments+htmlify(get_user_email(olddata["qaint"].(int)),get_user_email(newdata["qa"].(int)),"qa")
+	if newdata["qaint"] != nil {
+	    if olddata["qaint"].(int) !=newdata["qa"].(int) && newdata["qa"].(int)!=-1 {
+		changes_comments = changes_comments+htmlify(get_user_email(olddata["qaint"].(int)),get_user_email(newdata["qa"].(int)),"qa")
+	    }
 	}
-	
+
 	if olddata["assigned_toid"].(int) !=newdata["assigned_to"].(int) && newdata["assigned_to"].(int)!=-1 {
 	    changes_comments = changes_comments+htmlify(get_user_email(olddata["assigned_toid"].(int)),get_user_email(newdata["assigned_to"].(int)),"assigned_to")
 	}
 
-	if olddata["docsint"].(int) !=newdata["docs"].(int) && newdata["docs"].(int)!=-1 {
-	    changes_comments = changes_comments+htmlify(get_user_email(olddata["docsint"].(int)),get_user_email(newdata["docs"].(int)),"docs")
+	if newdata["docsint"] != nil {
+	    if olddata["docsint"].(int) !=newdata["docs"].(int) && newdata["docs"].(int)!=-1 {
+		changes_comments = changes_comments+htmlify(get_user_email(olddata["docsint"].(int)),get_user_email(newdata["docs"].(int)),"docs")
+	    }
 	}
 	bug_idint,_ := strconv.Atoi(newdata["id"].(string))
 	if changes_comments!=""{
@@ -487,6 +491,101 @@ func add_bug_comments(olddata map[string]interface{},newdata map[string]interfac
 	}
 	
 	
+}
+
+/*
+Adds attachment to a bug
+*/
+func add_attachment(data map[string]interface{}) error {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return err
+	}
+	defer db.Close()
+	
+	_,err = db.Exec("INSERT INTO attachments (bug_id, datec, description, filename, systempath, submitter) VALUES (?,NOW(),?,?,?,?)", data["bug_id"].(string), data["description"].(string), data["filename"].(string), data["systempath"].(string), data["submitter"].(int))
+	if err!=nil{
+	    fmt.Println(err)
+	}
+	return err
+    
+}
+
+/*
+Gets the total number of attachments.
+*/
+func count_entries(table_name string) int {
+    	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	if err != nil {
+	    return -1
+	}
+	row := db.QueryRow("SELECT count(*) from "+table_name)
+	var entries int
+	err = row.Scan(&entries)
+	fmt.Println(err)
+	if err == nil {
+	    return entries
+	}
+	return -1
+    
+}
+/*
+Fetches all the attachments of a bug.
+*/
+func get_bug_attachments(bug_id string) map[int][5]string{
+	m := make(map[int][5]string)
+	db, err := sql.Open("mysql", conn_str)
+	defer db.Close()
+	if err != nil {
+	    fmt.Println(err)
+	    return m
+	}
+	rows, err := db.Query("SELECT id, datec, description, filename, systempath, submitter from attachments where isobsolete=0 and bug_id=?", bug_id)
+	if err != nil {
+		fmt.Println(err)
+		return m
+	}
+	var description,  systempath, filename string
+	var id, submitter int
+	var datec time.Time
+	for rows.Next() {
+		err = rows.Scan(&id, &datec, &description, &filename, &systempath, &submitter)
+		if err == nil {
+		    m[id]=[5]string{systempath, description, filename, get_user_email(submitter), time.Time.String(datec)}
+		} else {
+		    fmt.Println(err)
+		    return make(map[int][5]string)
+		}
+	}
+	//fmt.Println("ad")
+	return m
+    
+}
+
+/*
+Makes attachments obsolete
+*/
+func make_attachments_obsolete(attachment_ids []string) error{
+
+    db, err := sql.Open("mysql", conn_str)
+    if err != nil {
+	    // handle error
+	fmt.Print(err)
+	return err
+    }
+    defer db.Close()
+    for _,x := range(attachment_ids) {
+	_,err = db.Exec("UPDATE attachments set isobsolete=1 where id=?",x)
+	if err!=nil{
+	    fmt.Println(err)
+	    return err
+	}
+    }
+    return err
+    
 }
 
 /*
@@ -612,6 +711,9 @@ func update_bug(data map[string]interface{}) error {
 	return nil
 }
 
+/*
+Fetches the version value.
+*/
 func get_version_text(id int) string {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {

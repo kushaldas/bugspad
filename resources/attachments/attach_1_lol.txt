@@ -1,0 +1,1000 @@
+ 1014  make -j3
+ 1015  sudo make install
+ 1016  cd ..
+ 1017  cd telepathy-farstream
+ 1018  cd ..
+ 1019  cd telepathy-farstream-0.4.0/
+ 1020  ls
+ 1021  ./configure
+ 1022  make -j3
+ 1023  sudo make install
+ 1024  cd ..
+ 1025  ls
+ 1026  cd ktp-call-ui
+ 1027  ls
+ 1028  cd build/
+ 1029  make -j3
+ 1030  cd ..
+ 1031  cd telepathy-farstream
+ 1032  ls
+ 1033  ./configure
+ 1034  cd ..
+ 1035  telepathy-farstream-0.4.0/
+ 1036  CD telepathy-farstream-0.4.0/
+ 1037  cd telepathy-farstream-0.4.0/
+ 1038  ls
+ 1039  ./configure
+ 1040  make -j3
+ 1041  sudo make install
+ 1042  ls
+ 1043  make -j3
+ 1044  sudo make install
+ 1045  cd ..
+ 1046  ls
+ 1047  cd farstream-0.2.0/
+ 1048  cd ..
+ 1049  rm -r farstream-0.2.0/
+ 1050  ls
+ 1051  cd farstream-0.1.2/
+ 1052  ls
+ 1053  ./configure
+ 1054  make -j3
+ 1055  ls
+ 1056  nano README 
+ 1057  ./configure
+ 1058  make -j3
+ 1059  nano INSTALL 
+ 1060  make -j3
+ 1061  cd ..
+ 1062  cd farstream-0.1.9
+ 1063  cd farstream-0.1.92
+ 1064  cd farstream-0.1.91
+ 1065  ls
+ 1066  ./configure
+ 1067  make -j3
+ 1068  sudo make install
+ 1069  cd ..
+ 1070  ls
+ 1071  cd telepathy-farstream-0.2.2/
+ 1072  ls
+ 1073  ./configure
+ 1074  sudo make install
+ 1075  cd ..
+ 1076  cd telepathy-farstream-0.4.0/
+ 1077  ls
+ 1078  ./autogen.sh
+ 1079  make -j3
+ 1080  sudo apt-get remove telepathy-glib*
+ 1081  sudo apt-get purge telepathy-glib*
+ 1082  sudo apt-get install telepathy-glib*
+ 1083  sudo apt-get install telepathy-glib* --fix-missing
+ 1084  sudo apt-get install  --fix-missing
+ 1085  sudo rm /var/lib/dpkg/lock
+ 1086  sudo apt-get install  --fix-missing
+ 1087  sudo apt-get install telepathy-glib* --fix-missing
+ 1088  sudo rm /var/cache/apt/archives/lock
+ 1089  sudo apt-get install telepathy-glib* --fix-missing
+ 1090  sudo apt-get install openjdk-6-jre-headless
+ 1091  sudo apt-get install openjdk-6-jre-headless --fix-missing
+ 1092  sudo apt-get install openjdk-6-jre-headless
+ 1093  wget http://www.nic.funet.fi/pub/mirrors/apache.org/lucene/solr/3.6.0/apache-solr-3.6.0.tgz
+ 1094  wget http://mirror.apache-kr.org/lucene/solr/4.0.0/apache-solr-4.0.0.tgz
+ 1095  wget http://mirrors.linsrv.net/apache/lucene/solr/4.4.0/solr-4.4.0.tgz
+ 1096  wget https://mirrors.linsrv.net/apache/lucene/solr/4.4.0/solr-4.4.0.tgz
+ 1097  wget http://mirrors.linsrv.net/apache/lucene/solr/4.4.0/solr-4.4.0.tgz
+ 1098  wget http://www.nic.funet.fi/pub/mirrors/apache.org/lucene/solr/3.6.0/apache-solr-3.6.0.tgz
+ 1099  cd .
+ 1100  cd ..
+ 1101  cd solr-4.7.0/
+ 1102  ls
+ 1103  nano README.txt 
+ 1104  ant compile
+ 1105  sudo apt-get install ant
+ 1106  cd ..
+ 1107  cd ktp-call-ui
+ 1108  ls
+ 1109  cd build/
+ 1110  make -j3
+ 1111  cd ..
+ 1112  cd farstream
+ 1113  cd ..
+ 1114  cd farstream-0.2.0/
+ 1115  sudo make uninstall
+ 1116  cd ..
+ 1117  cd ktp-call-ui
+ 1118  ls
+ 1119  cd build/
+ 1120  make -j3
+ 1121  cd ..
+ 1122  ls
+ 1123  cd cmake/
+ 1124  ls
+ 1125  cd ..
+ 1126  cd build
+ 1127  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_TYPE=debugfull ..
+ 1128  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=debugfull ..
+ 1129  make -j3
+ 1130  sudo rm -r /usr/local/include/telepathy-1.0/
+ 1131  make -j3
+ 1132  cd ..
+ 1133  cd ktp-contact-list/
+ 1134  cd build/
+ 1135  ./ktp-contactlist
+ 1136  cd ..
+ 1137  l
+ 1138  ls
+ 1139  cd ktp-call-ui
+ 1140  ls
+ 1141  cd build/
+ 1142  ls
+ 1143  make -j3
+ 1144  cd ..
+ 1145  cd telepathy-farstream
+ 1146  ls
+ 1147  cd ..
+ 1148  cd telepathy-farstream
+ 1149  ls
+ 1150  cd ..
+ 1151  cd telepathy-farstream-0.
+ 1152  cd telepathy-farstream-0.4.0/
+ 1153  cd bui
+ 1154  sudo make install
+ 1155  ./configure
+ 1156  make -j3
+ 1157  sudo apt-get install libtelepathy-glib-dev
+ 1158  sudo apt-cache search telepathy-glib
+ 1159  sudo apt-get install gir1.2-telepathyglib-0.12
+ 1160  sudo apt-get install libtelepathy-glib0
+ 1161  make -j3
+ 1162  sudo apt-cache search telepathy-glib
+ 1163  sudo apt-get install telepathy-glib*
+ 1164  make -j3
+ 1165  ./configure
+ 1166  sudo apt-get install telepathy-glib*
+ 1167  sudo rm -r /var/lib/dpkg/lock
+ 1168  sudo apt-get install telepathy-glib*
+ 1169  sudo rm -r /var/cache/apt/archives/lock
+ 1170  sudo apt-get install telepathy-glib*
+ 1171  cd ..
+ 1172  ack-grep -r "setupGUI"
+ 1173  ack-grep -r "videoContentHandler"
+ 1174  ack-grep -r "VideoContentHandler"
+ 1175  ack-grep -r "TfVideoContentHandler"
+ 1176  ls
+ 1177  ./configure
+ 1178  make -j3
+ 1179  cd ..
+ 1180  cd telepathy-farstream-0.4.0/
+ 1181  ls
+ 1182  make -j3
+ 1183  sudo make install
+ 1184  cd ..
+ 1185  cd ktp-contact-list/
+ 1186  cd build/
+ 1187  make -j3
+ 1188  sudo make uninstall
+ 1189  make -j3
+ 1190  sudo rm -r /usr/lib/i386-linux-gnu/cmake/TelepathyQt4/
+ 1191  make -j3
+ 1192  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=debugfull ..
+ 1193  sudo make install
+ 1194  make -j3 
+ 1195  sudo make install
+ 1196  ./ktp-contactlist
+ 1197  make -j3
+ 1198  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=debugfull ..
+ 1199  make -j3
+ 1200  ./ktp-contactlist
+ 1201  cd ..
+ 1202  cd ktp-accounts-kcm-0.6.80/
+ 1203  ls
+ 1204  cd build/
+ 1205  ls
+ 1206  make -j3
+ 1207  sudo make install
+ 1208  cd solr-4.7.0/
+ 1209  ls
+ 1210  nano README.txt 
+ 1211  ant compile
+ 1212  sudo apt-cache search ivy
+ 1213  sudo apt-get install ivy
+ 1214  sudo dpkg --configure -a
+ 1215  sudo apt-get install ivy
+ 1216  ant compile
+ 1217  cd ..
+ 1218  cd ktppackg/
+ 1219  cd ktp-contact-list/
+ 1220  cd build/
+ 1221  ./ktp-contactlist
+ 1222  cd ..
+ 1223  ls
+ 1224  sudo apt-get remove farstream*
+ 1225  cd ..
+ 1226  cd ktppackg/
+ 1227  ls
+ 1228  cd telepathy-farstream-0.4.0/
+ 1229  ls
+ 1230  ./configure
+ 1231  make -j3
+ 1232  sudo make install
+ 1233  make -j3
+ 1234  python
+ 1235  cd ..
+ 1236  ack-grep -r "fs-conference"
+ 1237  ack-grep -r "fs-participant"
+ 1238  ack-grep -r "fsparticipant"
+ 1239  ack-grep -r "fsconference"
+ 1240  sudo apt-get purge gstreamer*
+ 1241  sudo apt-cache search gstreamer
+ 1242  sudo apt-get remove gstreamer
+ 1243  sudo apt-get remove gstreamer*
+ 1244  sudo apt-get remove *gstreamer*
+ 1245  sudo apt-get remove glib*
+ 1246  sudo apt-get install glib*
+ 1247  sudo apt-get install telepathy-glib*
+ 1248  cd telepathy-farstream-0.4.0/
+ 1249  ls
+ 1250  sudo make install
+ 1251  make -j3
+ 1252  cd ..
+ 1253  cd telepathy-farstream
+ 1254  ls
+ 1255  make -j3
+ 1256  locate glib.h
+ 1257  nano config.log
+ 1258  locate glib.h
+ 1259  sudo cp -r /usr/include/telepathy-1.0 /usr/local/include/telepathy-1.0
+ 1260  cd ..
+ 1261  cd telepathy-farstream-0.4.0/
+ 1262  ./configure
+ 1263  make -j3
+ 1264  sudo make install
+ 1265  cd ..
+ 1266  cd ktp-call-ui
+ 1267  cd build/
+ 1268  make -j3
+ 1269  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_TYPE=debugfull ..
+ 1270  cd ..
+ 1271  ls
+ 1272  cd telepathy-qt
+ 1273  ls
+ 1274  cd build/
+ 1275  sudo make instal
+ 1276  sudo make install
+ 1277  sudo apt-get remove libtelepathy-glib
+ 1278  sudo apt-cache search libtelepathy-glib
+ 1279  sudo apt-get install libtelepathy-glib-dev
+ 1280  locate libtelepathy-glib.so
+ 1281  sudo cp /usr/lib/i386-linux-gnu/libtelepathy-glib.so  usr/local/lib/libtelepathy-glib.so
+ 1282  sudo cp /usr/lib/i386-linux-gnu/libtelepathy-glib.so  /usr/local/lib/libtelepathy-glib.so
+ 1283  make -j3
+ 1284  sudo make install
+ 1285  cd ..
+ 1286  cd ktp-contact-list/
+ 1287  cd build/
+ 1288  sudo make uninstall
+ 1289  cd ..
+ 1290  cd telepathy-
+ 1291  cd telepathy-qt/
+ 1292  ls
+ 1293  cd build/
+ 1294  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_TYPE=debugfull ..
+ 1295  make -j3
+ 1296  sudo make install
+ 1297  cd ..
+ 1298  cd ktp-contact-list/
+ 1299  cd build/
+ 1300  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_TYPE=debugfull ..
+ 1301  cd ..
+ 1302  cd ktp-call-ui
+ 1303  ls
+ 1304  cd build/
+ 1305  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_TYPE=debugfull ..
+ 1306  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=debugfull ..
+ 1307  make -j3
+ 1308  cd ..
+ 1309  cd telepathy-qt/
+ 1310  ls
+ 1311  cd build/
+ 1312  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=debugfull ..
+ 1313  make -j3
+ 1314  sudo make install
+ 1315  proxychains google-chrome
+ 1316  cd ..
+ 1317  cd ktp-contact-list/
+ 1318  ls
+ 1319  cd build/
+ 1320  ./ktp-contactlist
+ 1321  cd ..
+ 1322  cd telepathy-farstream-0.4.0/
+ 1323  ls
+ 1324  make -j3
+ 1325  sudo make install
+ 1326  cd ..
+ 1327  ls
+ 1328  cd ktp-contact-list/
+ 1329  ls
+ 1330  cd build/
+ 1331  make -j3
+ 1332  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_TYPE=debugfull ..
+ 1333  cd ..
+ 1334  cd telepathy-qt/
+ 1335  ls
+ 1336  cd ..
+ 1337  cd ktp-contact-list/
+ 1338  locate TelepathyQt4Targets.cmake
+ 1339  sudo cp -r /usr/lib/cmake/TelepathyQt4 /usr/lib/i386-linux-gnu/cmake/TelepathyQt4/
+ 1340  cd build/
+ 1341  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_TYPE=debugfull ..
+ 1342  locate libtelepathy-qt4.so.2.0.9.3.1
+ 1343  cd ..
+ 1344  sudo apt-get install --fix-missing
+ 1345  sudo apt-get 
+ 1346  sudo apt-get install --fix-missing
+ 1347  locate libtelepathy-qt4.so.2.0.9.3.1
+ 1348  locate TelepathyQt4Targets.cmake
+ 1349  export LIBRARY_PATH=/usr/lib/
+ 1350  export C_INCLUDE_PATH=/usr/lib/
+ 1351  export CPLUS_INCLUDE_PATH=/usr/lib/
+ 1352  locate TelepathyQt4Targets.cmake
+ 1353  ls
+ 1354  export LIBRARY_PATH=/usr/lib/i386-linux-gnu
+ 1355  export CPLUS_INCLUDE_PATH=/usr/lib/i386-linux-gnu
+ 1356  export C_INCLUDE_PATH=/usr/lib/i386-linux-gnu
+ 1357  sudo apt-cache search telepathy-qt
+ 1358  sudo apt-get install telepathy-qt4*
+ 1359  cd telepathy-farstream
+ 1360  l
+ 1361  ls
+ 1362  make -j3
+ 1363  cd ..
+ 1364  cd telepathy-farstream-0.4.0/
+ 1365  make -j3
+ 1366  sudo make install
+ 1367  cd ..
+ 1368  cd ktp-accounts-kcm-0.
+ 1369  ls
+ 1370  cd ktp-contact-list/
+ 1371  cd build/
+ 1372  ./ktp-contactlist
+ 1373  sudo apt-get install telepathy-gabble
+ 1374  sudo apt-get install telepathy-haze
+ 1375  ./ktp-contactlist
+ 1376  sudo apt-get install telepathy-gabble
+ 1377  sudo apt-get install telepathy-logger
+ 1378  ./ktp-contactlist
+ 1379  sudo apt-get install gabble
+ 1380  sudo apt-cache search gabble
+ 1381  ./ktp-contactlist
+ 1382  make -j3
+ 1383  cd ..
+ 1384  cd ktppackg/
+ 1385  git clone http://anongit.freedesktop.org/git/telepathy/telepathy-gabble.git
+ 1386  cd tele
+ 1387  cd telepathy-gabble/
+ 1388  ls
+ 1389  ./autogen.sh
+ 1390  cd ..
+ 1391  sudo rm -r build/
+ 1392  cd ktppackg/
+ 1393  cd telepathy-
+ 1394  cd telepathy-qt/
+ 1395  ls
+ 1396  cd build/
+ 1397  sudo make install
+ 1398  sudo apt-cache search telepathy-mission-control-5 
+ 1399  sudo apt-get install telepathy-mission-control-5
+ 1400  sudo apt-get install telepathy-rakia
+ 1401  cd ..
+ 1402  cd ktp-accounts-kcm-0.6.80/
+ 1403  ls
+ 1404  cd build/
+ 1405  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=debugfull ..
+ 1406  make -j3
+ 1407  sudo make install
+ 1408  make -j3
+ 1409  sudo make install
+ 1410  gdb telepathy-gabble
+ 1411  sudo apt-get install telepathy-gabble*
+ 1412  sudo service telepathy-mission-control-5 restart
+ 1413  sudo service dbus restart
+ 1414  sudo service mission restart
+ 1415  sudo service gabble restart
+ 1416  sudo service telepathy-gabble restart
+ 1417  service --status-all
+ 1418  sudo apt-get install doxygen graphviz libfarstream-0.1-dev libgstreamer-plugins-base0.10-dev libgstreamer0.10-dev libqt4-dev libtelepathy-farstream-0.4-dev libtelepathy-glib-dev pkg-config cmake debhelper kdelibs5-dev libtelepathy-logger-dev libtelepathy-logger-qt4-dev libtelepathy-qt4-dev pkg-kde-tools bison cmake flex libqt4-dev libqtgstreamer-dev libtelepathy-glib-dev libtelepathy-logger-dev libxml2-dev python python-dev libxml-parser-perl librpc-xml-perl libqjson-dev libqca2-dev libqca2-plugin-ossl
+ 1419  cd ktp-contact-list/
+ 1420  ls
+ 1421  cd build/
+ 1422  ./ktp-contactlist
+ 1423  sudo service dbus restart
+ 1424  ./ktp-contactlist
+ 1425  cd ktppackg/
+ 1426  cd ktp-con
+ 1427  cd ktp-contact-list/
+ 1428  cd build/
+ 1429  ./ktp-contactlist
+ 1430  cd ..
+ 1431  cd ktp-call-ui
+ 1432  ls
+ 1433  cd build/
+ 1434  ls
+ 1435  make -j3
+ 1436  cd ..
+ 1437  git clone git://anongit.kde.org/ktp-text-ui
+ 1438  cd ktp-
+ 1439  cd ktp-text-ui/
+ 1440  ls
+ 1441  mkdir build && cd build
+ 1442  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=debugfull ..
+ 1443  make -j3
+ 1444  sudo make install
+ 1445  sudo service dbus restart
+ 1446  nano /tmp/gabble.log
+ 1447  pkill telepathy-gabble
+ 1448  sudo apt-get install telepathy-auth-handler
+ 1449  sudo apt-cache search telepathy-auth-handler
+ 1450  sudo apt-get install kde-telepathy-auth-handler
+ 1451  sudo service dbus restart
+ 1452  ./ktp-contactlist
+ 1453  cd ..
+ 1454  cd ktp-call-ui
+ 1455  ls
+ 1456  cd build/
+ 1457  sudo make install
+ 1458  cd ..
+ 1459  cd ktp-call-ui-0.6.0/
+ 1460  cd build/
+ 1461  sudo make install
+ 1462  cd ..
+ 1463  cd ktp-call-ui
+ 1464  ls
+ 1465  cd ktppackg/
+ 1466  ls
+ 1467  cd ktp-call-ui-0.6.0/
+ 1468  ls
+ 1469  cd build/
+ 1470  make -j3
+ 1471  cd ktp
+ 1472  cd install/
+ 1473  cd bin/
+ 1474  ./ktp-contactlist 
+ 1475  locate ktp-env.sh
+ 1476  nano /etc/profile.d/ktp-env.sh
+ 1477  ls
+ 1478  ./ktp-send-file 
+ 1479  cd ..
+ 1480  ls
+ 1481  cd ktp
+ 1482  ack-grep -r "KFileDialog"
+ 1483  cd ktp-common-internals/
+ 1484  ls
+ 1485  cd KTp/
+ 1486  ack-grep -r "Add New Contacts"
+ 1487  ack-grep -r "Add"
+ 1488  sudo service dbus restart
+ 1489  cd ..
+ 1490  cd Documents/
+ 1491  ls
+ 1492  g++ -o h h.cpp
+ 1493  time ./h
+ 1494  cd ..
+ 1495  cd ktp/ktp
+ 1496  ls
+ 1497  cd ktp-send-file/
+ 1498  ls
+ 1499  mkdir build && cd build
+ 1500  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=debugfull ..
+ 1501  make -j3
+ 1502  ls
+ 1503  ./ktp-send-file
+ 1504  make -j3
+ 1505  ./ktp-send-file
+ 1506  make -j3
+ 1507  cd ..
+ 1508  git diff
+ 1509  git diff >/home/mj/sol.diff
+ 1510  cd build/
+ 1511  make -j3
+ 1512  git diff 
+ 1513  ./ktp-send-file
+ 1514  git diff >/home/mj/sol.diff
+ 1515  git diff 
+ 1516  cd ..
+ 1517  git add sendfiledialog.cpp sendfiledialog.h
+ 1518  git diff
+ 1519  git status
+ 1520  git add -N sendfiledialog.cpp sendfiledialog.h
+ 1521  git diff
+ 1522  git status
+ 1523  git add -N sendfiledialog.cpp sendfiledialog.h
+ 1524  git diff
+ 1525  git diff --cached
+ 1526  git add -N sendfiledialog.cpp sendfiledialog.h main.cpp CMakeLists.txt
+ 1527  git diff --cached
+ 1528  git diff 
+ 1529  git status
+ 1530  git add sendfiledialog.cpp sendfiledialog.h main.cpp CMakeLists.txt
+ 1531  git status
+ 1532  git diff 
+ 1533  git diff --cached
+ 1534  git diff --cached>/home/mj/sol.diff
+ 1535  git add sendfiledialog.cpp sendfiledialog.h main.cpp CMakeLists.txt
+ 1536  git diff --cached
+ 1537  git diff --cached>/home/mj/sol.diff
+ 1538  git add sendfiledialog.cpp sendfiledialog.h main.cpp CMakeLists.txt
+ 1539  git diff --cached>/home/mj/sol.diff
+ 1540  git add sendfiledialog.cpp sendfiledialog.h main.cpp CMakeLists.txt
+ 1541  git diff --cached>/home/mj/sol.diff
+ 1542  sudo apt-get remove knoversation
+ 1543  sudo apt-get remove konversation
+ 1544  konversation
+ 1545  sudo apt-get install konversation
+ 1546  konversation 
+ 1547  sudo apt-get install quassel
+ 1548  cd solr-4.7.0/
+ 1549  ls
+ 1550  cd example/
+ 1551  java -jar start.jar
+ 1552  cd /var/www/core/
+ 1553  ls
+ 1554  cd extensions/
+ 1555  ls
+ 1556  cd ..
+ 1557  cd maintenance/
+ 1558  ls
+ 1559  cd ..
+ 1560  cd extensions/
+ 1561  php Translate/scripts/ttmserver-export.php --threads 2
+ 1562  ack-grep -r "$wgTranslateTranslationServices"
+ 1563  ack-grep -r "wgTranslateTranslationServices"
+ 1564  ack-grep -r "tux-sst-solr-offline-body"
+ 1565  cd /home/mj
+ 1566  cd waartaa/
+ 1567  ls
+ 1568  cd waartaa/
+ 1569  ls
+ 1570  meteor
+ 1571  ls
+ 1572  ls -a
+ 1573  sudo chmod -R 777 .meteor
+ 1574  meteor
+ 1575  cd ..
+ 1576  nano README.md 
+ 1577  npm install meteorite
+ 1578  cd waartaa/
+ 1579  ls
+ 1580  npm install meteorite
+ 1581  meteor 
+ 1582  meteor
+ 1583  npm install meteorite
+ 1584  meteor
+ 1585  cd ..
+ 1586  nano README.md 
+ 1587  cd ..
+ 1588  ls
+ 1589  cd waartaa/
+ 1590  cd .git
+ 1591  ls
+ 1592  nano config 
+ 1593  cd ..
+ 1594  sudo rm -r waartaa/
+ 1595  git clone https://github.com/mjnovice/waartaa
+ 1596  cd waartaa/
+ 1597  ls
+ 1598  nano README.md 
+ 1599  cd waartaa/
+ 1600  cp server/settings-local.js-dist server/settings-local.js
+ 1601  cd ..
+ 1602  cd waartaa/
+ 1603  ls
+ 1604  cd ..
+ 1605  nano README.md 
+ 1606  cd ..
+ 1607  mkdir -p .meteor/local/build/server; cd .meteor/local/build/server; npm install irc; cd waartaa/waartaa/;
+ 1608  mkdir -p .meteor/local/build/server; cd .meteor/local/build/server; npm install irc; cd /home/mj/waartaa/waartaa/;
+ 1609  ls
+ 1610  ls -a
+ 1611  cd ..
+ 1612  cd waartaa/
+ 1613  cp server/settings-local.js-dist server/settings-local.js
+ 1614  cd ..
+ 1615  sudo rm -r .meteor
+ 1616  sudo rm -r waartaa
+ 1617  git clone https://github.com/mjnovice/waartaa
+ 1618  cd waartaa/
+ 1619  curl https://install.meteor.com | sh
+ 1620  cd ..
+ 1621  curl https://install.meteor.com | sh
+ 1622  cd waartaa
+ 1623  cp waartaa/server/settings-local.js-dist waartaa/server/settings-local.js
+ 1624  cd ..
+ 1625  mkdir -p .meteor/local/build/server; cd .meteor/local/build/server; npm install irc; cd /home/mj/waartaa/waartaa/;
+ 1626  npm install irc
+ 1627  nano npm-debug.log 
+ 1628  npm cache clear
+ 1629  npm install irc
+ 1630  npm config set registry http://registry.npmjs.org/
+ 1631  npm install irc
+ 1632  meteor
+ 1633  cd ..
+ 1634  meteor
+ 1635  cd meteor
+ 1636  cd waartaa/
+ 1637  meteor
+ 1638  ls
+ 1639  cd server/
+ 1640  ls
+ 1641  nano settings-local.js
+ 1642  cd ..
+ 1643  meteor
+ 1644  npm install meteorite
+ 1645  npm install nodwe
+ 1646  npm install node
+ 1647  npm install meteorite
+ 1648  meteor update
+ 1649  npm install meteorite
+ 1650  sudo apt-get install nodejs
+ 1651  sudo apt-get uninstall nodejs
+ 1652  sudo apt-get purge nodejs
+ 1653  npm install meteorite
+ 1654  sudo apt-get install npm
+ 1655  npm install meteorite
+ 1656  node --version
+ 1657  nodejs --versio
+ 1658  npm install node
+ 1659  npm install nodejs
+ 1660  npm install meteorite
+ 1661  meteorite
+ 1662  meteor
+ 1663  npm install meteorite
+ 1664  cd ..
+ 1665  sudo rm -r waartaa/
+ 1666  https://github.com/mjnovice/waartaa.git
+ 1667  git clone https://github.com/mjnovice/waartaa.git
+ 1668  cd waartaa/
+ 1669  cp server/settings-local.js-dist server/settings-local.js
+ 1670  cd ..
+ 1671  cd .meteor/
+ 1672  ls
+ 1673  cd local/build/server/
+ 1674  npm install irc
+ 1675  cd /home/mj/waartaa/waartaa/
+ 1676  meteor
+ 1677  npm install meteorite
+ 1678  cd ..
+ 1679  cd .meteor/
+ 1680  ls
+ 1681  cd packages/
+ 1682  ls
+ 1683  cd ..
+ 1684  cd waartaa/waartaa/
+ 1685  ls
+ 1686  meteor 
+ 1687  npm install meteorite
+ 1688  cd ..
+ 1689  cd waartaa/
+ 1690  ls
+ 1691  ls -a
+ 1692  cd .meteor/
+ 1693  ls
+ 1694  cd local/
+ 1695  ls
+ 1696  cd build/
+ 1697  ls
+ 1698  nano README 
+ 1699  cd ..
+ 1700  node --version
+ 1701  nodejs --version
+ 1702  sudo apt-get install node
+ 1703  npm install meteorite
+ 1704  sudo apt-get update
+ 1705  sudo apt-get upgrade
+ 1706  sudo rm /var/lib/dpkg/lock
+ 1707  sudo apt-get upgrade
+ 1708  sudo rm /var/cache/apt/archives/lock
+ 1709  sudo apt-get upgrade
+ 1710  cd ..
+ 1711  ./setup.sh 
+ 1712  sudo apt-cache search mrt*
+ 1713  cd ..
+ 1714  cd ktp
+ 1715  ls
+ 1716  cd ktp/
+ 1717  ls
+ 1718  cd ktp-send-file/
+ 1719  git stash
+ 1720  npm install meteorite
+ 1721  cd ..
+ 1722  ls -a
+ 1723  cd ..
+ 1724  cd waartaa/
+ 1725  ack-grep -r "setup.sh"
+ 1726  sudo ack-grep -r "setup.sh"
+ 1727  ls -hal
+ 1728  find setup.sh
+ 1729  cd ..
+ 1730  sudo rm -r waartaa/
+ 1731  git clone https://github.com/waartaa/waartaa.git
+ 1732  sudo add-apt-repository ppa:chris-lea/node.js sudo apt-get update sudo apt-get install nodejs
+ 1733  cd waartaa/
+ 1734  ./setup.sh 
+ 1735  mrt
+ 1736  ./setup.sh 
+ 1737  sudo apt-get update && sudo apt-get upgrade
+ 1738  cd ..
+ 1739  php /var/www/core/extensions/Translate/scripts/ttmserver-export.php --threads 2
+ 1740  cd solr-4.7.0/
+ 1741  cp /var/www/core/extensions/Translate/ttmserver/schema.xml solr/conf
+ 1742  cd ..
+ 1743  ls
+ 1744  cd ktp
+ 1745  ls
+ 1746  cd ktp
+ 1747  cd ktp-send-file/
+ 1748  ls
+ 1749  #include<KLocale>
+ 1750  git add  sendfiledialog.cpp sendfiledialog.h main.cpp CMakeLists.txt
+ 1751  git diff --cached>/home/mj/sol.diff
+ 1752  git add  sendfiledialog.cpp sendfiledialog.h main.cpp CMakeLists.txt
+ 1753  git diff --cached>/home/mj/sol.diff
+ 1754  cd ..
+ 1755  cd ktp-send-file/
+ 1756  cd build/
+ 1757  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=debugfull ..
+ 1758  make -j3
+ 1759  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=debugfull ..
+ 1760  make -j3
+ 1761  ./ktp-send-file
+ 1762  make -j3
+ 1763  ./ktp-send-file
+ 1764  cd ..
+ 1765  git add main.cpp
+ 1766  git diff --cached
+ 1767  git diff --cached>/home/mj/sol.diff
+ 1768  cd /var/www/core/extensions/
+ 1769  php Translate/scripts/ttmserver-export.php --threads 2
+ 1770  cd ..
+ 1771  cd maintenance/
+ 1772  ls
+ 1773  php update.php
+ 1774  cd ..
+ 1775  cd extensions/
+ 1776  php Translate/scripts/ttmserver-export.php --threads 2
+ 1777  cd ..
+ 1778  sudo ack-grep -r "tux-sst-nosolr-body"
+ 1779  nano extensions/Translate/specials/SpecialSearchTranslations.php
+ 1780  php Translate/scripts/ttmserver-export.php --threads 2
+ 1781  php extensions/Translate/scripts/ttmserver-export.php --threads 2
+ 1782  ack-grep -r "SolrTTMServer"
+ 1783  ack-grep -r "wgTranslateTranslationServices"
+ 1784  php extensions/Translate/scripts/ttmserver-export.php --threads 2
+ 1785  SolrException: undefined field: "language"
+ 1786  cd /home/mj/
+ 1787  git clone https://github.com/kushaldas/bugspad.git
+ 1788  cd bugspad/
+ 1789  ls
+ 1790  nano README.rst 
+ 1791  sudo nano ~/.bashrc
+ 1792  source ~/.bashrc
+ 1793  go get github.com/garyburd/redigo/redis
+ 1794  go get github.com/go-sql-driver/mysql
+ 1795  go get github.com/vaughan0/go-ini
+ 1796  mysql -u root
+ 1797  mysql -u root -p
+ 1798  nano scripts/bootstrap.sql 
+ 1799  cd scripts/
+ 1800  ls
+ 1801  mysql -u bugspad -pmypass bugzilla < bootstrap.sql
+ 1802  cd ..
+ 1803  make
+ 1804  ls
+ 1805  service redis start
+ 1806  cp config/bugspad.ini-dist config/bugspad.ini
+ 1807  nano config/bugspad.ini
+ 1808  ./load_all_bugs_redis
+ 1809  ls
+ 1810  ./load_all_bugs_redis
+ 1811  ./load_all_bugs_redis.go
+ 1812  go load_all_bugs_redis.go
+ 1813  sudo ./load_all_bugs_redis.go
+ 1814  sudo ./load_all_bugs_redis
+ 1815  go build load_all_bugs_redis.go redis_op.go backend.go
+ 1816  ls
+ 1817  ./load_all_bugs_redis 
+ 1818  ./bugspad 
+ 1819  cd scripts
+ 1820  wget http://kushal.fedorapeople.org/comps.json.tar.gz
+ 1821  tar -xzvf comps.json.tar.gz
+ 1822  ls
+ 1823  nano addcomponents.py 
+ 1824  python addcomponents.py 
+ 1825  sudo apt-get install python-requests
+ 1826  python addcomponents.py 
+ 1827  nano addcomponents.py 
+ 1828  python addcomponents.py 
+ 1829  cd ..
+ 1830  ls
+ 1831  ./bugspad 
+ 1832  ls
+ 1833  ./bugspad 
+ 1834  sudo apt-get upgrade
+ 1835  cd /usr/local/src
+ 1836  sudo git clone git://github.com/joyent/node.git
+ 1837  cd node/
+ 1838  sudo git checkout v0.10.18
+ 1839  ./configure
+ 1840  sudo ./configure
+ 1841  sudo make
+ 1842  sudo make install
+ 1843  cd /home/mj/
+ 1844  cd bugspad/
+ 1845  cd scripts/
+ 1846  python addc
+ 1847  python addcomponents.py 
+ 1848  service redis start
+ 1849  sudo apt-get install redis
+ 1850  cd scripts/
+ 1851  python addcomponents.py 
+ 1852  sudo apt-cache search redis
+ 1853  service redis-server start
+ 1854  sudo service redis-server start
+ 1855  sudo service redis_6379 start
+ 1856  redis-server
+ 1857  sudo killall -9 redis
+ 1858  sudo killall -9 redis-server
+ 1859  redis-server
+ 1860  cd tools/
+ 1861  cd debugger/
+ 1862  ./ktp-debugger
+ 1863  cd ..
+ 1864  redis-server
+ 1865  cd ..
+ 1866  cd ktp/
+ 1867  ls
+ 1868  cd ktp-contact-list/
+ 1869  git add contact-list-widget.cpp
+ 1870  git status
+ 1871  git diff --cached
+ 1872  git diff --cached>sol2.diff
+ 1873  rm sol2.diff 
+ 1874  git diff --cached>/home/mj/sol2.diff
+ 1875  cd ktp/ktp/
+ 1876  ls
+ 1877  cd ktp-common-internals/
+ 1878  cd build/
+ 1879  make -j3
+ 1880  cd ..
+ 1881  git diff --cached
+ 1882  git add tools/
+ 1883  git status 
+ 1884  git diff --cached
+ 1885  git diff --cached>/home/mj/sol3.diff
+ 1886  cd ..
+ 1887  mkdir aniket
+ 1888  cd aniket/
+ 1889  ls
+ 1890  cd ki
+ 1891  cd kig
+ 1892  ls
+ 1893  ./initrepo.sh 
+ 1894  ls
+ 1895  mkdir build && cd build
+ 1896  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=debugfull ..
+ 1897  make -j3
+ 1898  ls
+ 1899  kig
+ 1900  ./kig
+ 1901  ls
+ 1902  cd kig/
+ 1903  ls
+ 1904  kig
+ 1905  ./kig
+ 1906  kbuildsycoca4
+ 1907  ./kig
+ 1908  sudo apt-get install build-dep kig
+ 1909  sudo apt-get  build-dep kig
+ 1910  sudo apt-cache search kig
+ 1911  sudo apt-get  build-dep kig
+ 1912  sudo apt-cache search boost-python-vc100
+ 1913  sudo apt-cache search boost-python
+ 1914  sudo apt-get install boost-python*
+ 1915  kde-edu
+ 1916  kdeedu
+ 1917  sud
+ 1918  cd ..
+ 1919  sudo make install
+ 1920  buildsycoca4
+ 1921  kbuildsycoca4
+ 1922  kig
+ 1923  sudo make uninstall
+ 1924  kig
+ 1925  cd kig
+ 1926  ls
+ 1927  kig
+ 1928  ./kig
+ 1929  cd ..
+ 1930  cd ktp
+ 1931  kdesrc-build
+ 1932  ack-grep -r "org.kde.ktp"
+ 1933  ack-grep -r "org.kde"
+ 1934  youtube-dl YRgaUmaS_zU
+ 1935  cd ktp
+ 1936  ls
+ 1937  cd kto
+ 1938  cd install/
+ 1939  ls
+ 1940  cd bin/
+ 1941  ./ktp-contactlist 
+ 1942  ./ktp-contactlist -reverse
+ 1943  ./ktp-contactlist -help
+ 1944  ./ktp-contactlist -reverse
+ 1945  cd ..
+ 1946  cd ktp/
+ 1947  cd ktp-call-ui/
+ 1948  ls
+ 1949  mkdir build && cd build
+ 1950  cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=debugfull ..
+ 1951  make -j3
+ 1952  sudo make install
+ 1953  cd ..
+ 1954  cd ktp
+ 1955  cd ktp-contact-list/
+ 1956  ls
+ 1957  ack-grep -r "reverse"
+ 1958  ktp-contactlist 
+ 1959  cd ktp/ktp
+ 1960  cd ktp-contact-list/
+ 1961  ls
+ 1962  cd build/
+ 1963  cd ...
+ 1964  cd ..
+ 1965  nano main-widget.ui
+ 1966  cd build/
+ 1967  make -j3
+ 1968  sudo make install
+ 1969  cd ..
+ 1970  cd install/
+ 1971  ls
+ 1972  cd bin
+ 1973  ls
+ 1974  ./ktp-contact-list
+ 1975  ./ktp-contactlist
+ 1976  cd ..
+ 1977  ack-grep -r "Click to change your presence message."
+ 1978  ack-grep "m_presenceChooser"
+ 1979  ./ktp-contactlist 
+ 1980  cd ..
+ 1981  cd ktp/
+ 1982  cd ktp-contact-list/
+ 1983  ls
+ 1984  cd build/;
+ 1985  cd build
+ 1986  make -j3
+ 1987  ./ktp-contactlist -reverse
+ 1988  ./ktp-contactlist
+ 1989  ./ktp-contactlist -reverse
+ 1990  cd ..
+ 1991  git add global-presence-chooser.cpp
+ 1992  git status
+ 1993  git -p
+ 1994  git diff -p
+ 1995  git stash
+ 1996  git add global-presence-chooser.cpp
+ 1997  git diff --cached
+ 1998  git diff --cached>/home/mjsol4.diff
+ 1999  git diff --cached>/home/mj/sol4.diff
+ 2000  ./ktp-contactlist
+ 2001  ./ktp-contactlist -reverse
+ 2002  ./ktp-contactlist
+ 2003  ./ktp-contactlist -reverse
+ 2004* 
+ 2005  ./ktp-contactlist -reverse
+ 2006  ./ktp-contactlist
+ 2007  ./ktp-contactlist -reverse
+ 2008  ./ktp-contactlist
+ 2009  ./ktp-contactlist -reverse
+ 2010  cd ..
+ 2011  git diff --cached -p
+ 2012  git diff patch -p
+ 2013  history >/home/mj/lol.txt

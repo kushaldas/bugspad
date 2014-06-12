@@ -1,0 +1,25 @@
+{{define "head"}}<title>Bug {{ .id}} - Add attachment</title>{{end}}
+{{define "body"}}
+<div class="maincontent">
+        <div id="bug_details">
+	    <h2 id="bug_heading">Bug - {{ .id}} {{ .summary}}</h2>
+	    <p>Select the attachments you wish to delete
+	    <form name="bugdetail" action="/addattachment/" method="POST" enctype="multipart/form-data">
+		<input type="hidden" name="bug_id" value="{{ .id}}"></input>
+		<p class="field_title">All attachments:</p>
+		{{range $key, $val := .attachments}}
+		<div id={{ $key }} class="attachment_box">
+		    <input type="checkbox" name="attachments_obsolete" value="{{ $key }}">{{ index $val 2}}</input>
+		    <p><a href="{{index $val 0}}">{{index $val 2}}</a><p>
+		    <p>Description: {{index $val 1}}<p>
+		    <p>Submitter: {{index $val 2}}<p>
+		    <p>Submitted at: {{index $val 3}}<p>
+		</div>
+		{{end}}
+		<p><label class="field_title">Description: <input type="text" name="attachment_desc"></input></label></p>
+		<p><label class="field_title">File: <input type="file" name="uploadfile"></input></label></p>
+		<button>Update Bug attachments</button>
+	    </form>
+	</div>
+</div>
+{{end}}

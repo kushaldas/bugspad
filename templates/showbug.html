@@ -4,7 +4,7 @@
     {{if .islogged}}
         <div id="bug_details">
 	    <h2 id="bug_heading">Bug - {{ .id}} {{ .summary}}</h2>
-	    <form name="bugdetail" action="/editbugpage/" method="POST">
+	    <form  name="bugdetail" action="/editbugpage/" method="POST" enctype="multipart/form-data">
 		<table class="left_table">
 		    <tr>
 			<td class="field_title">Summary:</td>
@@ -151,7 +151,18 @@
 			</div>
 		    {{end}}
 		    <textarea name="com_content" rows="5" cols="100"></textarea>
-		</div>			
+		</div>
+		<div id="bug_attachments">
+		    {{range $key, $val := .attachments}}
+			<div id={{ $key }} class="attachment_box">
+			    <p><a href="{{index $val 0}}">{{index $val 2}}</a><p>
+			    <p>Description: {{index $val 1}}<p>
+			    <p>Submitter: {{index $val 2}}<p>
+			    <p>Submitted at: {{index $val 3}}<p>
+			</div>
+		    {{end}}
+		    <a href="/addattachment/{{ .id}}">Add new attachment</a>
+		  </div>
 		 <button> Save Changes </button>
 	     </form>
 	</div>
@@ -240,6 +251,16 @@
 	    {{end}}
 
 		<p> You need to <a href="/login">log in</a> to comment on this bug.</p>
+    </div>
+    <div id="bug_attachments">
+	{{range $key, $val := .attachments}}
+	<div id={{ $key }} class="attachment_box">
+	    <p><a href="/{{index $val 0}}">{{index $val 2}}</a><p>
+	    <p>Description: {{index $val 1}}<p>
+	    <p>Submitter: {{index $val 2}}<p>
+	    <p>Submitted at: {{index $val 3}}<p>
+	</div>
+	{{end}}
     </div>
     {{end}}
 </div>

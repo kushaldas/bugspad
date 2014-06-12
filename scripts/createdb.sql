@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `attachments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `attachments` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `bug_id` int(11) DEFAULT NULL,
   `datec` datetime NOT NULL,
   `description` varchar(255) NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE `attachments` (
   KEY `fk_attachments_submitter_idx` (`submitter`),
   CONSTRAINT `fk_attachments_bug` FOREIGN KEY (`bug_id`) REFERENCES `bugs` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_attachments_submitter` FOREIGN KEY (`submitter`) REFERENCES `users` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

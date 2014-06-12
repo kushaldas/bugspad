@@ -9,7 +9,9 @@ import (
 	"strings"
 	"strconv"
 	"crypto/rand"
-    "encoding/base64" 
+    "encoding/base64"
+	"io"
+	//"io/ioutil"
 )
 
 type User struct {
@@ -191,6 +193,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		    allcomponents := get_components_by_id(bug_product_id)
 		    allsubcomponents := get_subcomponents_by_component(interface_data["component_id"].(int))
 		    interface_data["allcomponents"] = allcomponents
+		    interface_data["attachments"] = get_bug_attachments(bug_id)
 		    interface_data["versions"] = get_product_versions(bug_product_id)
 		    interface_data["allsubcomponents"] = allsubcomponents
 		}
@@ -377,6 +380,7 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 			    
 
 			}*/if r.Method == "POST"{
+				r.ParseForm()
 			    	interface_data["id"]=r.FormValue("bug_id")
 				interface_data["status"]=r.FormValue("bug_status")
 				interface_data["hardware"]=r.FormValue("bug_hardware")
@@ -408,8 +412,12 @@ func editbugpage(w http.ResponseWriter, r *http.Request) {
 				}
 				fixversion_id,_:=strconv.Atoi(r.FormValue("bug_fixedinver"))
 				version_id,_:=strconv.Atoi(r.FormValue("bug_version"))
-				interface_data["qa"]=qaid
-				interface_data["docs"]=docsid
+				if qaid!= -1 {
+				    interface_data["qa"]=qaid
+				}
+				if docsid!= -1 {
+				    interface_data["docs"]=docsid
+				}
 				interface_data["assigned_to"]=assignid
 				interface_data["version"]=version_id
 				interface_data["fixedinver"]=fixversion_id
@@ -830,7 +838,97 @@ func editbugcc (w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w,r,"/login",http.StatusFound)
 
 	}
-}    	
+}
+
+func addattachment (w http.ResponseWriter, r *http.Request) {
+
+    	bug_id := r.URL.Path[len("/addattachment/"):]
+    	il, useremail := is_logged(r)
+	interface_data := make(map[string]interface{})    	
+	if il{
+		if (r.Method == "GET" && bug_id!="") {
+			    tml, err := template.ParseFiles("./templates/addattachment.html","./templates/base.html")
+			    if err != nil {
+				checkError(err)
+			    }
+			    tmp:=get_bug(bug_id)
+			    if tmp["id"] ==nil {
+				fmt.Fprintln(w,"Bug does not exist!")
+				return
+			    }
+			    interface_data["islogged"]=il
+			    interface_data["useremail"]=useremail
+			    interface_data["pagetitle"]="Edit Bug Attachments"+bug_id+" CC"
+			    interface_data["attachments"]=get_bug_attachments(bug_id)
+			    interface_data["id"]=bug_id
+			    //productcomponents := 
+			    tml.ExecuteTemplate(w,"base",interface_data)
+			    
+
+		}
+		if r.Method == "POST"{
+				r.ParseMultipartForm(32 << 20)
+				file, handler, err := r.FormFile("uploadfile")
+				//reading the file and saving it
+				    if err != nil {
+					if err != http.ErrMissingFile {
+					    fmt.Println(err)
+					    fmt.Fprintln(w,err)
+					    //file.Close()
+					    return
+					}
+				    } else {
+					//file.Close()
+					defer file.Close()
+					//fmt.Fprintf(w, "%v", handler.Header)
+					cnt := count_entries("attachments")
+					if cnt == -1{
+					    fmt.Fprintln(w,"Error occured while counting entries of attachment table.")
+					    return
+					}
+					count_str:=strconv.Itoa(cnt+1)
+					filename := "attach_"+count_str+"_"+handler.Filename
+					systempath := "resources/attachments/"+filename
+					f, err := os.OpenFile(systempath, os.O_WRONLY|os.O_CREATE, 0666)
+					if err != nil {
+					    fmt.Fprintln(w,err)
+					    return
+					}
+					defer f.Close()
+					io.Copy(f, file)
+					//now make an entry in the attachments table 
+					interface_data["description"] = r.Form["attachment_desc"][0]
+					interface_data["systempath"] = "/"+systempath
+					interface_data["filename"] = filename 
+					interface_data["submitter"] = get_user_id(useremail)
+					interface_data["bug_id"] = r.Form["bug_id"][0]
+					err = add_attachment(interface_data)
+					
+					if err!=nil {
+					    fmt.Fprintln(w,err)
+					    return
+					}
+					
+				    }
+				attach_obs :=make([]string,0)
+				for index,_ := range(r.Form["attachments_obsolete"]) {
+				    attach_obs = append(attach_obs, r.Form["attachments_obsolete"][index])
+				}
+				err=make_attachments_obsolete(attach_obs)
+				if err!=nil {
+				    fmt.Fprintln(w,err)
+				    return
+				}
+				http.Redirect(w,r,"/addattachment/"+r.Form["bug_id"][0], http.StatusFound)
+				//fmt.Fprintln(w,"Bug successfully updated!")
+				//http.Redirect(w,r,"/editbugcc/"+bug_id, http.StatusFound)
+			
+		}
+	} else {
+		http.Redirect(w,r,"/login",http.StatusFound)
+
+	}
+} 
 
 func main() {
         load_config("config/bugspad.ini")
@@ -843,6 +941,7 @@ func main() {
 	http.HandleFunc("/bugs/", showbug)
 //	http.HandleFunc("/commentonbug/", commentonbug)
 	http.HandleFunc("/filebug/", createbug)
+	http.HandleFunc("/addattachment/", addattachment)
 	http.HandleFunc("/filebug_product/", before_createbug)
 	http.HandleFunc("/admin/", admin)
 	http.HandleFunc("/editusers/", editusers)

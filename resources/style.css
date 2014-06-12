@@ -131,6 +131,15 @@ td.field_title{
     padding:1%;
 }
 
+.attachment_box {
+    border-radius:0.2em;
+    border:0.01em solid rgb(210,210,210);
+    background-color:rgb(250,250,250);
+    margin:2%;
+    padding:1%;
+    
+}
+
 .new_comment{
     width:63%;
     margin:2%;
