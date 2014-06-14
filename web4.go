@@ -152,6 +152,7 @@ func registeruser(w http.ResponseWriter, r *http.Request) {
 		ans := add_user(r.FormValue("username"), r.FormValue("useremail"), "0", r.FormValue("password") )
 		if ans != "User added." {
 		    fmt.Fprintln(w,"User could not be registered.")
+		    return
 		}		
 		http.Redirect(w,r,"/",http.StatusFound)
 	}
@@ -209,16 +210,107 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 	    
 	} else if r.Method == "POST"{
 	    //fmt.Println(r.FormValue("com_content"))
+	    if r.Method == "POST"{
+			    	interface_data["id"]=r.FormValue("bug_id")
+				interface_data["status"]=r.FormValue("bug_status")
+				interface_data["hardware"]=r.FormValue("bug_hardware")
+				interface_data["priority"]=r.FormValue("bug_priority")
+				interface_data["fixedinver"]=r.FormValue("bug_fixedinver")
+				interface_data["severity"]=r.FormValue("bug_severity")
+				interface_data["summary"]=r.FormValue("bug_title")
+				interface_data["whiteboard"]=r.FormValue("bug_whiteboard")
+				//fmt.Println(interface_data["status"])				
+				//fmt.Println("dd")				
+				interface_data["post_user"]=get_user_id(useremail)
+				interface_data["com_content"]=r.FormValue("com_content")
+				comp_idint,_:=strconv.Atoi(r.FormValue("bug_component"))
+				subcomp_idint:=-1
+				if r.FormValue("bug_subcomponent")!=""{
+				    subcomp_idint,_=strconv.Atoi(r.FormValue("bug_subcomponent"))
+				}
+				fmt.Println(subcomp_idint)
+				interface_data["subcomponent_id"]=subcomp_idint
+				interface_data["component_id"]=comp_idint
+				interface_data["component"]=get_component_name_by_id(comp_idint)
+				interface_data["subcomponent"]=get_subcomponent_name_by_id(subcomp_idint)
+				qaid := get_user_id(r.FormValue("bug_qa"))
+				docsid := get_user_id(r.FormValue("bug_docs"))
+				assignid := get_user_id(r.FormValue("bug_assigned_to"))
+				if (qaid ==-1 || docsid==-1 || assignid==-1) && (r.FormValue("bug_qa")!="") && (r.FormValue("bug_docs")!=""  && (r.FormValue("bug_assigned_to")!="")){
+				    fmt.Fprintln(w,"Bug could not be updated!")
+				    return
+				}
+				fixversion_id,_:=strconv.Atoi(r.FormValue("bug_fixedinver"))
+				version_id,_:=strconv.Atoi(r.FormValue("bug_version"))
+				if qaid!= -1 {
+				    interface_data["qa"]=qaid
+				}
+				if docsid!= -1 {
+				    interface_data["docs"]=docsid
+				}
+				interface_data["assigned_to"]=assignid
+				interface_data["version"]=version_id
+				interface_data["fixedinver"]=fixversion_id
+				err := update_bug(interface_data)
+				if err!=nil{
+				    fmt.Fprintln(w,"Bug could not be updated!")
+				    return
+				}
+				//update dependencies
+				currentbug_idint, _ := strconv.Atoi(r.FormValue("bug_id"))
+
+				clear_dependencies(currentbug_idint,"blocked")
+				dependbugs:=strings.SplitAfter(r.FormValue("dependencylist"),",")
+				//fmt.Println(dependbugs)
+				for index,_ := range(dependbugs) {
+					//fmt.Println(dependbug)
+					if dependbugs[index]!=""{
+					    dependbug_idint, _ := strconv.Atoi(strings.Trim(dependbugs[index],","))
+					   // fmt.Println(dependbug_idint)
+					    valid,val:=is_valid_bugdependency(currentbug_idint, dependbug_idint)
+					    fmt.Println(val)
+					    if valid {
+						err:=add_bug_dependency(currentbug_idint, dependbug_idint)
+						if err!=nil{
+						    fmt.Fprintln(w,err)
+						    return
+						}
+					    } else {
+						fmt.Fprintln(w,val)
+						return
+					    }
+					}
+					
+				}
+
+				clear_dependencies(currentbug_idint,"dependson")
+				blockedbugs:=strings.SplitAfter(r.FormValue("blockedlist")," ")
+				//fmt.Println(blockedbugs)
+				for index,_ := range(blockedbugs) {
+					if blockedbugs[index]!="" {
+					    blockedbug_idint, _ := strconv.Atoi(strings.Trim(blockedbugs[index],","))
+					    valid,val:=is_valid_bugdependency(blockedbug_idint, currentbug_idint)
+					    if valid {
+						err:=add_bug_dependency(blockedbug_idint, currentbug_idint)
+						if err!=nil{
+						    fmt.Fprintln(w,err)
+						    return
+						}
+					    } else {
+						fmt.Fprintln(w,val)
+						return
+					    }
+					}
+					
+				}
+				interface_data["blockedlist"]=r.FormValue
+				//fmt.Fprintln(w,"Bug successfully updated!")
+				http.Redirect(w,r,"/bugs/"+r.FormValue("bug_id"),http.StatusFound)
+			
+			}
 	    
 	}
-  /*
-	fmt.Fprintln(w,"resp.Body: ?",resp.Body)   
-	fmt.Fprintln(w,"body: "+string(body))
-	json.Marshal(string(body),&res)
-	fmt.Fprintln(w,"err: ?",err)
-	//convert this to json and apply to the specific template
-	//to_be_rendered by the template
-*/}
+ }
 
 /*
 Frontend function for handling the commenting on 
@@ -552,6 +644,121 @@ func editproducts(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
+Admin:: Listing product versions
+*/
+func listproductversions(w http.ResponseWriter, r *http.Request) {
+    	product_id := r.URL.Path[len("/listproductversions/"):]
+    	il, useremail := is_logged(r)
+	interface_data := make(map[string]interface{})    	
+	if il{
+		if (r.Method == "GET" && product_id!="") {
+			    tml, err := template.ParseFiles("./templates/listproductversions.html","./templates/base.html")
+			    if err != nil {
+				checkError(err)
+			    }
+			    prod_idint,_:=strconv.Atoi(product_id)
+			    interface_data=get_product_by_id(product_id)
+			    if interface_data["id"] ==nil {
+				fmt.Fprintln(w,"Product does not exist!")
+				return
+			    }
+			    interface_data["islogged"]=il
+			    interface_data["useremail"]=useremail
+			    interface_data["pagetitle"]="Edit Bug "+product_id+" CC"
+			    //fmt.Println(get_product_versions(prod_idint))
+			    interface_data["versions"]=get_product_versions(prod_idint)
+			    interface_data["id"]=product_id
+			    //productcomponents := 
+			    err=tml.ExecuteTemplate(w,"base",interface_data)
+			    fmt.Println(err)
+			    
+
+		}
+	} else {
+		    http.Redirect(w,r,"/login",http.StatusFound)
+	}
+}
+
+/*
+Admin:: Editing version of a product
+*/
+func editproductversion(w http.ResponseWriter, r *http.Request) {
+    	version_id := r.URL.Path[len("/editproductversion/"):]
+    	il, useremail := is_logged(r)
+	interface_data := make(map[string]interface{})    	
+	if il{
+		if (r.Method == "GET" && version_id!="") {
+			    tml, err := template.ParseFiles("./templates/editproductversion.html","./templates/base.html")
+			    if err != nil {
+				checkError(err)
+			    }
+			    ver_idint,_:=strconv.Atoi(version_id)
+			    vertxt:=get_version_text(ver_idint)
+			    if vertxt=="" {
+				fmt.Fprintln(w,"Version does not exist!")
+				return
+			    }
+			    interface_data["islogged"]=il
+			    interface_data["useremail"]=useremail
+			    interface_data["pagetitle"]="Edit Version "+vertxt
+			    interface_data["id"]=version_id
+			    interface_data["value"]=vertxt
+			    isact,_:=is_version_active(version_id)
+			    if isact {
+				interface_data["isactive"]=1
+			    } else {
+				interface_data["isactive"]=0
+			    }
+			    //productcomponents := 
+			    err=tml.ExecuteTemplate(w,"base",interface_data)
+			    fmt.Println(err)
+
+		}
+		if r.Method == "POST"{
+				veractive:=0
+				if r.FormValue("version_isactive")=="on" {
+				    veractive=1
+				}
+				fmt.Println(veractive)
+				err:=update_product_version(r.FormValue("version_value"), veractive, r.FormValue("version_id"))
+				if err!=nil{
+				    fmt.Fprintln(w,"Version could not be updated!")
+				    return
+				}
+				    http.Redirect(w,r,"/editproductversion/"+r.FormValue("version_id"), http.StatusFound)
+				//fmt.Fprintln(w,"Bug successfully updated!")
+				//http.Redirect(w,r,"/editbugcc/"+bug_id, http.StatusFound)
+			
+		}
+	} else {
+		http.Redirect(w,r,"/login",http.StatusFound)
+
+	}
+}
+
+/*
+Admin:: Add product version
+*/
+func addproductversion (w http.ResponseWriter, r *http.Request) {
+        //product_id := r.URL.Path[len("/addproductversion/"):]
+    	il, _ := is_logged(r)
+	//interface_data := make(map[string]interface{})    	
+	if il{
+		if r.Method == "POST"{
+			err:=add_product_version(r.FormValue("product_id"),r.FormValue("newversionentry"))
+			if err!=nil{
+			    fmt.Fprintln(w,err)
+			    return
+			}
+			http.Redirect(w,r,"/listproductversions/"+r.FormValue("product_id"), http.StatusFound)			
+		}
+	    
+	} else {
+		http.Redirect(w,r,"/login",http.StatusFound)
+
+	}
+}
+/*
 Admin:: A product description/editing page.
 */
 func editproductpage(w http.ResponseWriter, r *http.Request) {
@@ -849,7 +1056,7 @@ func editbugcc (w http.ResponseWriter, r *http.Request) {
 			    }
 			    bug_idint,_:=strconv.Atoi(bug_id)
 			    tmp:=get_bug(bug_id)
-			    if tmp["id"] !=nil {
+			    if tmp["id"] ==nil {
 				fmt.Fprintln(w,"Bug does not exist!")
 				return
 			    }
@@ -868,6 +1075,8 @@ func editbugcc (w http.ResponseWriter, r *http.Request) {
 				emails_rem :=make([]interface{},0)
 				emails_add :=make([]interface{},0)
 				bug_idint64,_ := strconv.ParseInt(r.Form["bug_id"][0],10,64)
+				    //fmt.Println(len(r.Form["ccem"]))
+				    //fmt.Println(len(r.Form["ccentry"]))
 				for index,_ := range(r.Form["ccentry"]) {
 				    emails_rem = append(emails_rem, r.Form["ccentry"][index])
 				}
@@ -1000,6 +1209,9 @@ func main() {
 	http.HandleFunc("/editbugcc/", editbugcc)
 	http.HandleFunc("/editcomponentpage/", editcomponentpage)
 	http.HandleFunc("/addcomponent/", addcomponentpage)
+	http.HandleFunc("/addproductversion/", addproductversion)
+	http.HandleFunc("/editproductversion/", editproductversion)
+	http.HandleFunc("/listproductversions/", listproductversions)
 	http.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.Dir("resources"))))
 	//http.Handle("/css/", http.FileServer(http.Dir("css/style.css")))
 	//http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("css")))) 

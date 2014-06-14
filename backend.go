@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"fmt"
-	"github.com/garyburd/redigo/redis"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/vaughan0/go-ini"
 	"strconv"
@@ -36,34 +35,21 @@ func get_hex(password string) string {
 	return mdstr
 }
 
-/* To find out if an user already exists or not. */
-func find_user(email string) (bool, string) {
-	conn, err := redis.Dial("tcp", ":6379")
-	if err != nil {
-		// handle error
-		fmt.Print(err)
-		return true, "Redis error."
-	}
-	defer conn.Close()
-	ret, err := conn.Do("HGET", "users", email)
-	if ret != nil {
-		return true, "User exists."
-	}
-	return false, "No such user."
-}
 
 /*
 Adds a new user to the system. user_type can be 0,1,2. First it updates the
 redis server and then saves the details to the MySQL db.
 */
 func add_user(name string, email string, user_type string, password string) string {
-	answer, res := find_user(email)
+	answer, res := find_redis_user(email)
+	fmt.Println(res)
 	if answer == true {
 		return res
 	}
 	mdstr := get_hex(password)
 	c := make(chan int)
-	id, _ := add_user_mysql(name, email, user_type, mdstr)
+	id, err := add_user_mysql(name, email, user_type, mdstr)
+	fmt.Println(err)
 	go update_redis(id, email, mdstr, user_type, c)
 	//fmt.Println(mdstr)
 	 _ = <-c
@@ -1095,9 +1081,9 @@ func get_component_owner(id int) int {
 /*
 Get product versions.
 */
-func get_product_versions(product_id int) map[string]int {
+func get_product_versions(product_id int) map[string][2]int {
 	
-	m := make(map[string]int)
+	m := make(map[string][2]int)
 	//fmt.Print("dgffg")
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
@@ -1106,18 +1092,18 @@ func get_product_versions(product_id int) map[string]int {
 	    return m
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT id, value from versions where product_id=? order by value", product_id)
+	rows, err := db.Query("SELECT id, value, isactive from versions where product_id=? order by value", product_id)
 	if err != nil {
 		fmt.Println(err)
 		return m
 	}
 	defer rows.Close()
 	var description string
-	var v_id int
+	var v_id,isactive int
 	for rows.Next() {
-		err = rows.Scan(&v_id, &description)
+		err = rows.Scan(&v_id, &description,&isactive)
 		//fmt.Println(c_id, name, description)
-		m[description] = v_id
+		m[description] = [2]int{v_id,isactive}
 	}
 	return m
     
@@ -1139,6 +1125,77 @@ func add_release(name string) {
 		return
 	}
 
+}
+
+/*Add Product Version.*/
+func add_product_version(product_id string, value string) error{
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return err
+	}
+	defer db.Close()
+
+	_, err = db.Exec("INSERT INTO versions (value,product_id) VALUES (?,?)", value, product_id)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return err
+	}
+    return err
+}
+
+
+/*
+Update the versions
+*/
+func update_product_version(version_value string, version_active int, version_id string) error{
+
+    db, err := sql.Open("mysql", conn_str)
+    if err != nil {
+	    // handle error
+	fmt.Print(err)
+	return err
+    }
+    defer db.Close()
+	_,err = db.Exec("UPDATE versions set value=?, isactive=? where id=?", version_value, version_active, version_id )
+	if err!=nil{
+	    fmt.Println(err)
+	    return err
+	}
+    
+    return err
+    
+}
+
+/*
+Get version activity.
+*/
+func is_version_active(version_id string)  (bool,error){
+    db, err := sql.Open("mysql", conn_str)
+    if err != nil {
+	    // handle error
+	fmt.Print(err)
+	return false,err
+    }
+    defer db.Close()
+    row:=db.QueryRow("SELECT isactive from versions where id=?",version_id)
+    var act int
+    err = row.Scan(&act)
+	if err==nil{
+	    if act!=0{
+		return true,nil
+	    } else {
+		return false,nil
+	    }
+	    //fmt.Println(m["name"])
+	} else  {
+	
+	    return false,err
+	}
+    
+    
 }
 
 func get_releases() []string {
@@ -1268,6 +1325,7 @@ func get_product_by_id(product_id string) map[string]interface{} {
 	return m
 
 }
+
 
 /* Finds all components for a given product id*/
 func get_components_by_id(product_id int) map[string][3]string {

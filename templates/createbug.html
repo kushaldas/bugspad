@@ -29,7 +29,9 @@
 			<td class="field_title">Version: </td>
 			<td><select name="bug_version">
 				{{range $key, $val := .versions}}
-				    <option value={{$val}}>{{$key}}</option>
+				    {{if eq (index $val 1) (1)}}
+				    <option value={{index $val 0}}>{{$key}}</option>
+				    {{end}}
 				{{end}}
 			    </select>
 			</td>

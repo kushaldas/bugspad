@@ -1,0 +1,15 @@
+{{define "head"}}<title>Product {{ .id}} - {{ .name}}</title>{{end}}
+{{define "body"}}
+<div class="maincontent">
+        <div id="bug_details">
+	    <h2 id="bug_heading">Bug - {{ .id}} {{ .summary}}</h2>
+	    <p>Select the CC entries you wish to delete
+	    <form name="productversion" action="/editproductversion/" method="POST">
+		<input type="hidden" name="version_id" value="{{ .id}}"></input>
+		<input type="text" name="version_value" value="{{ .value}}"></input>
+		<input type="checkbox" name="version_isactive" {{if  eq (1) .isactive }} checked {{end}}>Is Active</input>
+		<button>Update Product Versions</button>
+	    </form>
+	</div>
+</div>
+{{end}}

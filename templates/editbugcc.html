@@ -9,6 +9,7 @@
 		<p class="field_title">CC List:</p>
 		    {{range $val := .cclist}}
 			    <p><input type="checkbox" name="ccentry" value="{{ index $val }}">{{ index $val }}</input></p>
+			    <p><input type="text" name="ccem" value="{{ index $val }}">{{ index $val }}</input></p>
 		    {{end}}
 		<p><label class="field_title">Add New CC<input type="text" name="newccentry"></input></label></p>
 		<button>Update CC List</button>

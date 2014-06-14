@@ -29,7 +29,7 @@
 		<table>
 		{{range $key,$val := .bugs}}
 		    <tr>
-			<td><a href="/editbugpage/{{$key}}">{{$key}}</a></td>
+			<td><a href="/bugs/{{$key}}">{{$key}}</a></td>
 			<td>{{index $val 0}}</td>
 			<td>{{index $val 1}}</td>
 			<td>{{index $val 2}}</td>

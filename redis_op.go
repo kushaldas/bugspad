@@ -254,3 +254,20 @@ func clear_redis_releases() {
 	conn.Do("DEL", "releases")
 
 }
+
+
+/* To find out if an user already exists or not. */
+func find_redis_user(email string) (bool, string) {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return true, "Redis error."
+	}
+	defer conn.Close()
+	ret, err := conn.Do("HGET", "users", email)
+	if ret != nil {
+		return true, "User exists."
+	}
+	return false, "No such user."
+}

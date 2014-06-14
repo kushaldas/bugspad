@@ -4,7 +4,7 @@
     {{if .islogged}}
         <div id="bug_details">
 	    <h2 id="bug_heading">Bug - {{ .id}} {{ .summary}}</h2>
-	    <form  name="bugdetail" action="/editbugpage/" method="POST" enctype="multipart/form-data">
+	    <form  name="bugdetail" action="/bugs/" method="POST" enctype="multipart/form-data">
 		<table class="left_table">
 		    <tr>
 			<td class="field_title">Summary:</td>
@@ -44,8 +44,9 @@
 
 			<td><select name="bug_version">
 				{{$ver := .version_id}}
+				<option value=0 {{if eq ($ver) (0)}} selected {{end}}>None</option>
 			        {{range $key, $val := .versions}}
-				    <option value={{$val}} {{if eq $ver $val }} selected {{end}}>{{$key}}</option>
+				    <option value={{index $val 0}} {{if eq ($ver) (index $val 0) }} selected {{end}}>{{$key}}</option>
 				{{end}}
 			   </select>
 			</td>
