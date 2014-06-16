@@ -377,6 +377,13 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 	} else {
 		return "Missing input: description", nil
 	}
+	//since docs is an optional field.
+	val, ok = data["docs"]
+	if ok {
+		buffer.WriteString(", docs")
+		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	} 
 
 	val, ok = data["component_id"]
 	if ok {

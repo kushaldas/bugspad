@@ -462,6 +462,13 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 		newbug["priority"]=r.FormValue("bug_priority")
 		newbug["component_id"]=r.FormValue("bug_component")
 		newbug["reporter"]=get_user_id(useremail)
+		docsint:=get_user_id(r.FormValue("bug_docs"))
+		if docsint!=-1{
+			newbug["docs"]=docsint
+		} else {
+			    fmt.Fprintln(w,"Please enter a valid user as Docs Maintainer.")
+			    return
+		}
 		comp_idint,_ := strconv.Atoi(r.FormValue("bug_component"))
 		version_int,_ := strconv.Atoi(r.FormValue("bug_version"))
 		fmt.Println(version_int)
