@@ -59,6 +59,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 	    interface_data["useremail"]=useremail
 	    interface_data["islogged"]=il
 	    interface_data["pagetitle"]="Home"
+	    interface_data["is_user_admin"]=false
+	    if useremail!=""{
+		interface_data["is_user_admin"]=is_user_admin(useremail)
+	    }
 		//fmt.Println(r.FormValue("username"))
 		    
 	    tml, err := template.ParseFiles("./templates/home.html","./templates/base.html")
@@ -183,6 +187,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		interface_data["comment_data"]=comment_data
 		interface_data["islogged"]=il
 		interface_data["useremail"]=useremail
+		interface_data["is_user_admin"]=is_user_admin(useremail)
 		interface_data["pagetitle"]="Bug - "+bug_id+" details"
 		interface_data["dependencylist"] = bugs_dependent_on(bug_id)
 		interface_data["blockedlist"] = bugs_blocked_by(bug_id)
@@ -402,8 +407,9 @@ func before_createbug(w http.ResponseWriter, r *http.Request) {
 	    	//fmt.Println(useremail)
 		//fmt.Println(r.FormValue("username"))
 		allproducts := get_all_products()
-				interface_data["useremail"]=useremail
+		interface_data["useremail"]=useremail
 		interface_data["islogged"]=il
+		interface_data["is_user_admin"]=is_user_admin(useremail)
 		interface_data["products"]=allproducts
 		interface_data["pagetitle"]="Choose Product"
 		//fmt.Println(allcomponents)
@@ -442,6 +448,7 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 		allcomponents := get_components_by_id(prod_idint)
 		interface_data["useremail"]=useremail
 		interface_data["islogged"]=il
+		interface_data["is_user_admin"]=is_user_admin(useremail)
 		interface_data["components"]=allcomponents
 		interface_data["pagetitle"]="File Bug"
 		interface_data["versions"]=get_product_versions(prod_idint)
@@ -713,6 +720,7 @@ func admin(w http.ResponseWriter, r *http.Request) {
 			    interface_data := make(map[string]interface{})
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
+			    interface_data["is_user_admin"]=is_user_admin(useremail)
 			    interface_data["pagetitle"]="Admin"
 			    tml.ExecuteTemplate(w,"base",interface_data)
 			    
@@ -747,6 +755,7 @@ func editproducts(w http.ResponseWriter, r *http.Request) {
 			    
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
+			    interface_data["is_user_admin"]=is_user_admin(useremail)
 			    interface_data["pagetitle"]="Edit Products"
 			    interface_data["productlist"]=allproducts
 			    tml.ExecuteTemplate(w,"base",interface_data)
@@ -783,6 +792,7 @@ func listproductversions(w http.ResponseWriter, r *http.Request) {
 			    }
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
+			    interface_data["is_user_admin"]=is_user_admin(useremail)
 			    interface_data["pagetitle"]="Edit Bug "+product_id+" CC"
 			    //fmt.Println(get_product_versions(prod_idint))
 			    interface_data["versions"]=get_product_versions(prod_idint)
@@ -819,6 +829,7 @@ func editproductversion(w http.ResponseWriter, r *http.Request) {
 			    }
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
+			    interface_data["is_user_admin"]=is_user_admin(useremail)
 			    interface_data["pagetitle"]="Edit Version "+vertxt
 			    interface_data["id"]=version_id
 			    interface_data["value"]=vertxt
@@ -895,6 +906,7 @@ func editproductpage(w http.ResponseWriter, r *http.Request) {
 			    }
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
+			    interface_data["is_user_admin"]=is_user_admin(useremail)
 			    interface_data["pagetitle"]="Edit Product Page"
 			    productdata := get_product_by_id(product_id)
 			    if productdata["id"] == nil {
@@ -964,6 +976,7 @@ func editusers(w http.ResponseWriter, r *http.Request) {
 				interface_data := make(map[string]interface{})
 				interface_data["islogged"]=il
 				interface_data["useremail"]=useremail
+				interface_data["is_user_admin"]=is_user_admin(useremail)
 				interface_data["pagetitle"]="Edit Users"
 				interface_data["userlist"]=allusers
 				tml.ExecuteTemplate(w,"base",interface_data)
@@ -998,6 +1011,7 @@ func edituserpage(w http.ResponseWriter, r *http.Request) {
 				}
 				interface_data["islogged"]=il
 				interface_data["useremail"]=useremail
+				interface_data["is_user_admin"]=is_user_admin(useremail)
 				interface_data["pagetitle"]="Edit User Page"
 				userdata := get_user_by_id(user_id)
 				if userdata["id"] == nil {
@@ -1054,6 +1068,7 @@ func addcomponentpage(w http.ResponseWriter, r *http.Request) {
 					interface_data := make(map[string]interface{})
 					interface_data["islogged"]=il
 					interface_data["useremail"]=useremail
+					interface_data["is_user_admin"]=is_user_admin(useremail)
 					interface_data["pagetitle"]="Add Component Page"
 					interface_data["product_id"]=product_id
 					err=tml.ExecuteTemplate(w,"base",interface_data)
@@ -1104,6 +1119,7 @@ func editcomponentpage(w http.ResponseWriter, r *http.Request) {
 			    }
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
+			    interface_data["is_user_admin"]=is_user_admin(useremail)
 			    interface_data["pagetitle"]="Edit Component Page"
 			    interface_data["component_id"]=component_id
 			    cdata := get_component_by_id(component_id)
@@ -1181,6 +1197,7 @@ func editbugcc (w http.ResponseWriter, r *http.Request) {
 			    }
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
+			    interface_data["is_user_admin"]=is_user_admin(useremail)
 			    interface_data["pagetitle"]="Edit Bug "+bug_id+" CC"
 			    interface_data["cclist"]=get_bugcc_list(bug_idint)
 			    interface_data["id"]=bug_id
@@ -1234,6 +1251,7 @@ func addattachment (w http.ResponseWriter, r *http.Request) {
 			    }
 			    interface_data["islogged"]=il
 			    interface_data["useremail"]=useremail
+			    interface_data["is_user_admin"]=is_user_admin(useremail)
 			    interface_data["pagetitle"]="Edit Bug Attachments"+bug_id+" CC"
 			    interface_data["attachments"]=get_bug_attachments(bug_id)
 			    interface_data["id"]=bug_id

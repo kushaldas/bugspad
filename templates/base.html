@@ -19,7 +19,11 @@
 			<li> <a href="/login">Login</a></li>
 			<li> <a href="/register">New User ?</a></li>
 		    {{end}}
-		<li><a href="/admin"> Admin panel</a></li>
+		 {{if .islogged}}
+		    {{if .is_user_admin}}
+		    <li><a href="/admin"> Admin panel</a></li>
+		    {{end}}
+		{{end}}
 	    </ul>
 	 {{template "body" .}}
     </body>
