@@ -264,9 +264,22 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 				    fmt.Fprintln(w,"Bug could not be updated!")
 				    return
 				}
+				
 				//update dependencies
 				currentbug_idint, _ := strconv.Atoi(r.FormValue("bug_id"))
-
+				
+				olddependencies:=""
+				dep:=bugs_dependent_on(r.FormValue("bug_id"))
+				for i,_ := range(dep) {
+				    tmp:=strconv.Itoa(dep[i])
+				    olddependencies=olddependencies+tmp+","
+				}
+				oldblocked:=""
+				bloc:=bugs_blocked_by(r.FormValue("bug_id"))
+				for i,_ := range(bloc) {
+				    tmp:=strconv.Itoa(bloc[i])
+				    oldblocked=oldblocked+tmp+","
+				}
 				clear_dependencies(currentbug_idint,"blocked")
 				dependbugs:=strings.SplitAfter(r.FormValue("dependencylist"),",")
 				//fmt.Println(dependbugs)
@@ -292,7 +305,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 				}
 
 				clear_dependencies(currentbug_idint,"dependson")
-				blockedbugs:=strings.SplitAfter(r.FormValue("blockedlist")," ")
+				blockedbugs:=strings.SplitAfter(r.FormValue("blockedlist"),",")
 				//fmt.Println(blockedbugs)
 				for index,_ := range(blockedbugs) {
 					if blockedbugs[index]!="" {
@@ -304,6 +317,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 						    fmt.Fprintln(w,err)
 						    return
 						}
+
 					    } else {
 						fmt.Fprintln(w,val)
 						return
@@ -311,7 +325,31 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 					}
 					
 				}
-				//fmt.Fprintln(w,"Bug successfully updated!")
+				
+				newdependencies:=""
+				dep=bugs_dependent_on(r.FormValue("bug_id"))
+				for i,_ := range(dep) {
+				    tmp:=strconv.Itoa(dep[i])
+				    newdependencies=newdependencies+tmp+","
+				}
+				newblocked:=""
+				bloc=bugs_blocked_by(r.FormValue("bug_id"))
+				for i,_ := range(bloc) {
+				    tmp:=strconv.Itoa(bloc[i])
+				    newblocked=newblocked+tmp+","
+				}
+				net_comment:=""
+				if olddependencies!=newdependencies {
+				    net_comment=net_comment+htmlify(olddependencies,newdependencies,"depends on")
+				}
+				fmt.Println(oldblocked)
+				fmt.Println(newblocked)
+				if oldblocked!=newblocked {
+				    net_comment=net_comment+htmlify(oldblocked,newblocked,"blocks")
+				}//fmt.Fprintln(w,"Bug successfully updated!")
+				if net_comment!=""{    
+				    new_comment(interface_data["post_user"].(int),currentbug_idint,net_comment)
+				}
 				http.Redirect(w,r,"/bugs/"+r.FormValue("bug_id"),http.StatusFound)
 			
 			}

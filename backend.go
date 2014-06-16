@@ -444,6 +444,10 @@ func add_bug_comments(olddata map[string]interface{},newdata map[string]interfac
 	if olddata["subcomponent_id"].(int) !=newdata["subcomponent_id"].(int) {
 	    changes_comments = changes_comments+htmlify(olddata["subcomponent"].(string),newdata["subcomponent"].(string),"subcomponent")
 	}
+	fmt.Println("fiv")
+	fmt.Println(olddata["fixedinver_id"].(int))
+	fmt.Println(newdata["fixedinver"].(int))
+	fmt.Println("fiv")
 	if olddata["fixedinver_id"].(int) !=newdata["fixedinver"].(int) {
 	    changes_comments = changes_comments+htmlify(get_version_text(olddata["fixedinver_id"].(int)),get_version_text(newdata["fixedinver"].(int)),"fixedinver")
 	}
@@ -873,7 +877,7 @@ func get_bug(bug_id string) Bug {
 	    	    qaint := -1
 		    docsint := -1
 		    subcint := -1
-		    fixedinverint := -1
+		    fixedinverint := 0
 		    if qa.Valid{
 			qaint = int(qa.Int64)
 		    }

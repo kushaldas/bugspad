@@ -144,7 +144,7 @@
 				{{if ne .fixedinver_id (-1)}}
 				    {{$ver := .fixedinver_id}}
 				    {{range $key, $val := .versions}}
-					<option value={{$val}}  {{if eq $ver $val  }} selected {{end}}>{{$key}}</option>
+					<option value={{$val}}  {{if eq $ver (index $val 0)  }} selected {{end}}>{{$key}}</option>
 				    {{end}}
 				{{else}}
 				    <option value="-1" selected>--</option>
