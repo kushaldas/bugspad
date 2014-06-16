@@ -982,7 +982,17 @@ func editusers(w http.ResponseWriter, r *http.Request) {
 				tml.ExecuteTemplate(w,"base",interface_data)
 		    
 			    } else if r.Method == "POST"{
-				    
+				r.ParseForm()
+				for index,_ := range(r.Form["inactiveusers"]) {
+				    //fmt.Println("ll")
+				    user_idint,_:=strconv.Atoi(r.Form["inactiveusers"][index])
+				    if !update_user_type(user_idint,"-1") {
+					fmt.Fprintln(w,"User could not be made inactive!")
+					return
+				    }
+				}
+				load_users()
+				
 			    }
 		    } else {
 			fmt.Fprintln(w,"You do not have sufficient rights!")

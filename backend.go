@@ -131,10 +131,12 @@ func authenticate_redis(email string, password string) bool {
 	ret := redis_hget("users", email)
 
 	if string(ret) == mdstr {
-		return true
-	} else {
+		ret:=string(redis_hget("userstype",email))
+		if ret!="-1" {
+		    return true
+		}
+	} 
 		return false
-	}
 }
 
 /* Finds all components for a given product id*/
@@ -507,6 +509,25 @@ func add_attachment(data map[string]interface{}) error {
 	    fmt.Println(err)
 	}
 	return err
+    
+}
+
+/*
+Updates user type.
+*/
+func update_user_type(userid int, newtype string) bool {
+    db, err := sql.Open("mysql", conn_str)
+    if err != nil {
+	    // handle error
+	fmt.Print(err)
+	return false
+    }
+    _,err = db.Exec("UPDATE users set type=? where id=?",newtype, userid)
+	if err!=nil{
+	    fmt.Println(err)
+	    return false
+	}
+    return true
     
 }
 

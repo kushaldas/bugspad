@@ -3,19 +3,25 @@
 
     <div class="maincontent">
 	<table id="userlist">
+	    <form method="POST" name="userslist" action="/editusers/">
+	    <p>WARNING:: Please keep atleast 1 admin user active.</p>
 	    <tr>
 		<td>Email</td>
 		<td>Name</td>
 		<td>Type</td>
+		<td>Inactive</td>
 	    </tr>
 	    {{range $key, $val := .userlist}}
 		<tr id="u{{$key}}">
 		    <td><a href="/edituserpage/{{$key}}">{{index $val 2}}</a></td>
 		    <td>{{index $val 1}}</td>
 		    <td>{{index $val 3}}</td>
+		    <td><input type="checkbox" {{if eq (index $val 3) ("-1")}} checked {{end}} name="inactiveusers" value="{{$key}}"></input><td>
 		</tr>
 	    {{end}}
 	</table>
+	<button>Update User Active/Inactive Status</button>
+	</form>
     </div>
 
 {{end}}
