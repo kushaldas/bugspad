@@ -25,6 +25,15 @@ func checkError(err error) {
 	}
 }
 
+func isvalueinlist(value string, list []string) bool {
+    for _, v := range list {
+        if v == value {
+            return true
+        }
+    }
+    return false
+}
+
 func generate_hash() []byte {
 	b := make([]byte, 16)
 	rand.Read(b)
@@ -213,6 +222,19 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "POST" {
 		//fmt.Println(r.FormValue("com_content"))
 		if r.Method == "POST" {
+			stats,severs,priors:=get_redis_bugtags()
+			if !isvalueinlist(r.FormValue("bug_status"),stats) {
+			    fmt.Fprintln(w,"Bug Status Invalid.")
+			    return
+			}
+			if !isvalueinlist(r.FormValue("bug_priority"),priors) {
+			    fmt.Fprintln(w,"Bug Priority Invalid.")
+			    return
+			}
+			if !isvalueinlist(r.FormValue("bug_severity"),severs) {
+			    fmt.Fprintln(w,"Bug Severity Invalid.")
+			    return
+			}
 			interface_data["id"] = r.FormValue("bug_id")
 			interface_data["status"] = r.FormValue("bug_status")
 			interface_data["hardware"] = r.FormValue("bug_hardware")
@@ -456,6 +478,15 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 		}
 	} else if r.Method == "POST" {
 		if il {
+			_,severs,priors:=get_redis_bugtags()
+			if !isvalueinlist(r.FormValue("bug_priority"),priors) {
+			    fmt.Fprintln(w,"Bug Priority Invalid.")
+			    return
+			}
+			if !isvalueinlist(r.FormValue("bug_severity"),severs) {
+			    fmt.Fprintln(w,"Bug Severity Invalid.")
+			    return
+			}
 			newbug := make(Bug)
 			newbug["summary"] = r.FormValue("bug_title")
 			newbug["whiteboard"] = r.FormValue("bug_whiteboard")
@@ -1329,6 +1360,8 @@ func main() {
 	load_config("config/bugspad.ini")
 	// Load the user details into redis.
 	load_users()
+	//loading static bug tags
+	load_bugtags()
 	http.HandleFunc("/", home)
 	http.HandleFunc("/register/", registeruser)
 	http.HandleFunc("/login", login)

@@ -794,14 +794,22 @@ func update_bug(data map[string]interface{}) error {
 
 	val, ok = data["qa"]
 	if ok {
-		buffer.WriteString(", qa=?")
-		vals = append(vals, val)
+		if val==-1{
+		    buffer.WriteString(", qa=NULL")
+		} else {
+		    buffer.WriteString(", qa=?")
+		    vals = append(vals, val)
+		}
 	}
 
 	val, ok = data["docs"]
 	if ok {
-		buffer.WriteString(", docs=?")
-		vals = append(vals, val)
+		if val==-1{
+		    buffer.WriteString(", docs=NULL")
+		} else {
+		    buffer.WriteString(", docs=?")
+		    vals = append(vals, val)
+		}
 	}
 
 	val, ok = data["whiteboard"]

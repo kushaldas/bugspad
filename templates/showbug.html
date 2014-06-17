@@ -30,11 +30,14 @@
 			<td>
 			    <select name="bug_status">
 				<option value="new" {{if eq .status "new"}} selected {{end}}>New</option>
+				<option value="open" {{if eq .status "open"}} selected {{end}}>Open</option>
 				<option value="unconfirmed" {{if eq .status "unconfirmed"}} selected {{end}}>Unconfirmed</option>
 				<option value="worksforme" {{if eq .status "worksforme"}} selected {{end}}>Works For Me</option>
 				<option value="invalid" {{if eq .status "invalid"}} selected {{end}}>Invalid</option>
 				<option value="duplicate" {{if eq .status "duplicate"}} selected {{end}}>Duplicate</option>
-				<option value="fixed" {{if eq .status "fixed"}} selected {{end}}>Fixed</option>
+				<option value="fixed (closed)" {{if eq .status "fixed (closed)"}} selected {{end}}>Fixed (Closed)</option>
+				<option value="notabug (closed)" {{if eq .status "notabug (closed)"}} selected {{end}}>Notabug (Closed)</option>
+				<option value="wontfix (closed)" {{if eq .status "wontfix (closed)"}} selected {{end}}>Wont Fix (Closed)</option>
 			    </select>
 			</td>
 		    </tr>
