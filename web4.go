@@ -227,6 +227,26 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 			    fmt.Fprintln(w,"Bug Status Invalid.")
 			    return
 			}
+			//The bug cannot be closed until all dependent bugs are closed.
+			//we cannot compare simply with r.FormValue("blockedlist"), as 
+			/*if strings.Contains(r.FormValue("status"),"closed") {
+			    depbugs:=bugs_dependent_on(r.FormValue("bug_id"))
+			    for i,_:=range(depbugs) {
+				d:=strconv.Itoa(depbugs[i])
+				b:=get_bug(d)
+				if !strings.Contains(b["status"].(string),"closed") {
+				    fmt.Fprintln(w,"A bug depends on bug "+r.FormValue("bug_id"+"which is not closed."))
+				    return
+				}
+			    }
+			}*/
+			if strings.Contains(r.FormValue("bug_status"),"closed") {
+			    if r.FormValue("blockedlist")!=""{
+				    fmt.Fprintln(w,"This bug blocks other bugs and hence cannot be closed.")
+				    return
+				}
+			}
+			
 			if !isvalueinlist(r.FormValue("bug_priority"),priors) {
 			    fmt.Fprintln(w,"Bug Priority Invalid.")
 			    return
@@ -282,13 +302,8 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 			interface_data["assigned_to"] = assignid
 			interface_data["version"] = version_id
 			interface_data["fixedinver"] = fixversion_id
-			err := update_bug(interface_data)
-			if err != nil {
-				fmt.Fprintln(w, "Bug could not be updated!")
-				return
-			}
 
-			//update dependencies
+			/******update dependencies**********/
 			currentbug_idint, _ := strconv.Atoi(r.FormValue("bug_id"))
 
 			olddependencies := ""
@@ -372,6 +387,12 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 			} //fmt.Fprintln(w,"Bug successfully updated!")
 			if net_comment != "" {
 				new_comment(interface_data["post_user"].(int), currentbug_idint, net_comment)
+			}
+			/********dependencies updated**********/
+			err := update_bug(interface_data)
+			if err != nil {
+				fmt.Fprintln(w, "Bug could not be updated!")
+				return
 			}
 			http.Redirect(w, r, "/bugs/"+r.FormValue("bug_id"), http.StatusFound)
 
