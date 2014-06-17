@@ -94,8 +94,8 @@
 		    <tr>
 			<td class="field_title">CC List:</td>
 			<td>
-			    {{range $val := .cclist}}
-				    {{ index $val }},
+			    {{range $key,$val := .cclist}}
+				    {{ index $val 1}},
 			    {{end}}
 			    <a href="/editbugcc/{{ .id}}"> Edit</a>
 			</td>
@@ -183,8 +183,8 @@
 			<div id={{ $key }} class="attachment_box">
 			    <p><a href="{{index $val 0}}">{{index $val 2}}</a><p>
 			    <p>Description: {{index $val 1}}<p>
-			    <p>Submitter: {{index $val 2}}<p>
-			    <p>Submitted at: {{index $val 3}}<p>
+			    <p>Submitter: {{index $val 3}}<p>
+			    <p>Submitted at: {{index $val 5}}<p>
 			</div>
 		    {{end}}
 		    <a href="/addattachment/{{ .id}}">Add new attachment</a>
@@ -212,15 +212,15 @@
 		</tr-->
 		<tr>
 		    <td class="field_title">Quality Assurance:</td>
-		    <td>{{ .qa}}</td>
+		    <td>{{ .qaname}}</td>
 		</tr>
 		<tr>
 		    <td class="field_title">Assigned to:</td>
-		    <td>{{ .assigned_to}}</td>
+		    <td>{{ .assigned_toname}}</td>
 		</tr>
 		<tr>
 		    <td class="field_title">Docs Maintainter:</td>
-		    <td>{{ .docs}}</td>
+		    <td>{{ .docsname}}</td>
 		</tr>
 		<tr>
 		    <td class="field_title">Version:</td>
@@ -255,14 +255,14 @@
 	    <tr>
 		<td class="field_title">CC List:</td>
 		<td>
-		    {{range $val := .cclist}}
-			    {{ index $val }}
+		    {{range $key,$val := .cclist}}
+			    {{ index $val 0}}
 		    {{end}}
 		</td>
 	    </tr>
 	    <tr>
 		<td class="field_title">Reporter:</td>
-		<td>{{ .reporter}}</td>
+		<td>{{ .reportername}}</td>
 	    </tr>
 	    <tr>
 		<td class="field_title">WhiteBoard:</td>
@@ -286,7 +286,7 @@
 	<h2>Comments</h2>
 	    {{range $key, $val := .comment_data}}
 		<div id={{ $key }} class="comment_box">
-		    <i>{{ index $val 0 }}  {{index $val 1}} {{index $val 3}}</i>
+		    <i>{{index $val 1}} {{index $val 3}}</i>
 		    <p>{{index $val 2}}</p>
 		    <br>
 		</div>
@@ -295,12 +295,13 @@
 		<p> You need to <a href="/login">log in</a> to comment on this bug.</p>
     </div>
     <div id="bug_attachments">
+	<h2>Attachments</h2>
 	{{range $key, $val := .attachments}}
 	<div id={{ $key }} class="attachment_box">
 	    <p><a href="/{{index $val 0}}">{{index $val 2}}</a><p>
 	    <p>Description: {{index $val 1}}<p>
-	    <p>Submitter: {{index $val 2}}<p>
-	    <p>Submitted at: {{index $val 3}}<p>
+	    <p>Submitter: {{index $val 4}}<p>
+	    <p>Submitted at: {{index $val 5}}<p>
 	</div>
 	{{end}}
     </div>

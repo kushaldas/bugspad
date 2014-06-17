@@ -225,8 +225,8 @@ func get_subcomponents_by_component(component_id int) map[string][3]string {
 }
 
 /* Get bug cc list*/
-func get_bugcc_list(bug_id int) []string {
-	ans := make([]string, 0)
+func get_bugcc_list(bug_id int) map[int][2]string {
+	ans := make(map[int][2]string)
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
@@ -241,8 +241,9 @@ func get_bugcc_list(bug_id int) []string {
 		for rows.Next() {
 			err = rows.Scan(&user_id)
 			email := get_user_email(user_id)
+			name := get_user_name(user_id)
 			if email != "" {
-				ans = append(ans, email)
+				ans[user_id] = [2]string{name, email}
 			}
 		}
 	}
@@ -253,11 +254,13 @@ func get_bugcc_list(bug_id int) []string {
 		for rows.Next() {
 			err = rows.Scan(&user_id)
 			email := get_user_email(user_id)
+			name := get_user_name(user_id)
 			if email != "" {
-				ans = append(ans, email)
+				ans[user_id] = [2]string{name, email}
 			}
 		}
 	}
+	/*Leaving subcomponents for the time
 	//from subcomponent_owners table
 	rows, err = db.Query("select subcomponent_owners.subcomponent_owner as user from bugs join subcomponent_owners where bugs.id=? and subcomponent_owners.subcomponent_id=bugs.subcomponent_id", bug_id)
 	if err == nil {
@@ -269,7 +272,7 @@ func get_bugcc_list(bug_id int) []string {
 				ans = append(ans, email)
 			}
 		}
-	}
+	}*/
 	return ans
 
 }
@@ -552,8 +555,8 @@ func count_entries(table_name string) int {
 /*
 Fetches all the attachments of a bug.
 */
-func get_bug_attachments(bug_id string) map[int][5]string {
-	m := make(map[int][5]string)
+func get_bug_attachments(bug_id string) map[int][6]string {
+	m := make(map[int][6]string)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
 	if err != nil {
@@ -571,10 +574,10 @@ func get_bug_attachments(bug_id string) map[int][5]string {
 	for rows.Next() {
 		err = rows.Scan(&id, &datec, &description, &filename, &systempath, &submitter)
 		if err == nil {
-			m[id] = [5]string{systempath, description, filename, get_user_email(submitter), time.Time.String(datec)}
+			m[id] = [6]string{systempath, description, filename, get_user_email(submitter), get_user_name(submitter), time.Time.String(datec)}
 		} else {
 			fmt.Println(err)
-			return make(map[int][5]string)
+			return make(map[int][6]string)
 		}
 	}
 	//fmt.Println("ad")
@@ -925,13 +928,17 @@ func get_bug(bug_id string) Bug {
 		if subcomponent_id.Valid {
 			subcint = int(subcomponent_id.Int64)
 		}
+		qa_email := ""
 		qa_name := ""
+		docs_email := ""
 		docs_name := ""
 		if qaint != -1 {
-			qa_name = get_user_email(qaint)
+			qa_email = get_user_email(qaint)
+			qa_name = get_user_name(qaint)
 		}
 		if docsint != -1 {
-			docs_name = get_user_email(docsint)
+			docs_email = get_user_email(docsint)
+			docs_name = get_user_name(docsint)
 		}
 		bugs_idint, _ := strconv.Atoi(bug_id)
 		m["id"] = bug_id
@@ -945,6 +952,7 @@ func get_bug(bug_id string) Bug {
 		m["whiteboard"] = string(whiteboard)
 		m["reported"] = reported.String()
 		m["reporter"] = get_user_email(reporter)
+		m["reportername"] = get_user_name(reporter)
 		m["component"] = get_component_name_by_id(component_id)
 		m["component_id"] = component_id
 		m["subcomponent"] = get_subcomponent_name_by_id(subcint)
@@ -953,12 +961,15 @@ func get_bug(bug_id string) Bug {
 		m["fixedinver_id"] = fixedinverint
 		m["version_id"] = version
 		m["version"] = get_version_text(version)
-		m["qa"] = qa_name
-		m["docs"] = docs_name
+		m["qa"] = qa_email
+		m["qaname"] = qa_name
+		m["docs"] = docs_email
+		m["docsname"] = docs_name
 		m["qaint"] = qaint
 		m["docsint"] = docsint
 		m["assigned_toid"] = assigned_to
 		m["assigned_to"] = get_user_email(assigned_to)
+		m["assigned_toname"] = get_user_name(assigned_to)
 		m["cclist"] = get_bugcc_list(bugs_idint)
 
 	} else {
@@ -992,6 +1003,29 @@ func get_user_email(id int) string {
 	return ""
 }
 
+/*
+Returns the user name given the user id.
+*/
+func get_user_name(id int) string {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return ""
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT name from users where id = ?", id)
+	if err == nil {
+		var name string
+		for rows.Next() {
+			err = rows.Scan(&name)
+			if name != "" {
+				return name
+			}
+		}
+	}
+	return ""
+}
 /*
 Adds new CC users to a bug
 */

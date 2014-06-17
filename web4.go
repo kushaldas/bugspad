@@ -208,10 +208,10 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 			allcomponents := get_components_by_id(bug_product_id)
 			allsubcomponents := get_subcomponents_by_component(interface_data["component_id"].(int))
 			interface_data["allcomponents"] = allcomponents
-			interface_data["attachments"] = get_bug_attachments(bug_id)
 			interface_data["versions"] = get_product_versions(bug_product_id)
 			interface_data["allsubcomponents"] = allsubcomponents
 		}
+		interface_data["attachments"] = get_bug_attachments(bug_id)
 		err = tml.ExecuteTemplate(w, "base", interface_data)
 
 		fmt.Println(err)
