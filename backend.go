@@ -8,13 +8,13 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/vaughan0/go-ini"
+	"html/template"
 	"strconv"
 	"time"
-	"html/template"
-
 )
 
 var conn_str string
+
 /* To read config file values.  */
 func load_config(filepath string) {
 	file, _ := ini.LoadFile(filepath)
@@ -35,7 +35,6 @@ func get_hex(password string) string {
 	return mdstr
 }
 
-
 /*
 Adds a new user to the system. user_type can be 0,1,2. First it updates the
 redis server and then saves the details to the MySQL db.
@@ -52,7 +51,7 @@ func add_user(name string, email string, user_type string, password string) stri
 	fmt.Println(err)
 	go update_redis(id, email, mdstr, user_type, c)
 	//fmt.Println(mdstr)
-	 _ = <-c
+	_ = <-c
 	return "User added."
 
 }
@@ -65,7 +64,7 @@ func add_user_mysql(name string, email string, user_type string, password string
 	if err != nil {
 		// handle error
 		fmt.Print(err)
-		return	-1, err
+		return -1, err
 	}
 	defer db.Close()
 
@@ -107,12 +106,12 @@ func insert_component(name string, desc string, product_id int, owner int, qa in
 		fmt.Print(err)
 		return "", err
 	}
-	var ret sql.Result;
+	var ret sql.Result
 	defer db.Close()
-	if qa!=-1{
-	    ret, err = db.Exec("INSERT INTO components (name, description, product_id, owner, qa) VALUES (?, ?, ?, ?, ?)", name, desc, product_id, owner, qa)
+	if qa != -1 {
+		ret, err = db.Exec("INSERT INTO components (name, description, product_id, owner, qa) VALUES (?, ?, ?, ?, ?)", name, desc, product_id, owner, qa)
 	} else {
-	    ret, err = db.Exec("INSERT INTO components (name, description, product_id, owner) VALUES (?, ?, ?, ?)", name, desc, product_id, owner)
+		ret, err = db.Exec("INSERT INTO components (name, description, product_id, owner) VALUES (?, ?, ?, ?)", name, desc, product_id, owner)
 	}
 	if err != nil {
 		fmt.Println(err.Error())
@@ -131,12 +130,12 @@ func authenticate_redis(email string, password string) bool {
 	ret := redis_hget("users", email)
 
 	if string(ret) == mdstr {
-		ret:=string(redis_hget("userstype",email))
-		if ret!="-1" {
-		    return true
+		ret := string(redis_hget("userstype", email))
+		if ret != "-1" {
+			return true
 		}
-	} 
-		return false
+	}
+	return false
 }
 
 /* Finds all components for a given product id*/
@@ -205,7 +204,6 @@ func get_subcomponent_name_by_id(subcomponent_id int) string {
 
 }
 
-
 /* Finds all subcomponents for a given component*/
 func get_subcomponents_by_component(component_id int) map[string][3]string {
 	m := make(map[string][3]string)
@@ -228,7 +226,7 @@ func get_subcomponents_by_component(component_id int) map[string][3]string {
 
 /* Get bug cc list*/
 func get_bugcc_list(bug_id int) []string {
-	ans:=make([]string,0)
+	ans := make([]string, 0)
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
@@ -244,7 +242,7 @@ func get_bugcc_list(bug_id int) []string {
 			err = rows.Scan(&user_id)
 			email := get_user_email(user_id)
 			if email != "" {
-				ans = append(ans,email)
+				ans = append(ans, email)
 			}
 		}
 	}
@@ -256,7 +254,7 @@ func get_bugcc_list(bug_id int) []string {
 			err = rows.Scan(&user_id)
 			email := get_user_email(user_id)
 			if email != "" {
-				ans = append(ans,email)
+				ans = append(ans, email)
 			}
 		}
 	}
@@ -268,7 +266,7 @@ func get_bugcc_list(bug_id int) []string {
 			err = rows.Scan(&user_id)
 			email := get_user_email(user_id)
 			if email != "" {
-				ans = append(ans,email)
+				ans = append(ans, email)
 			}
 		}
 	}
@@ -337,7 +335,7 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 		buffer2.WriteString(",?")
 		vals = append(vals, val)
 	}
-	
+
 	val, ok = data["assigned_to"]
 	if ok {
 		buffer.WriteString(", assigned_to")
@@ -385,7 +383,7 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 		buffer.WriteString(", docs")
 		buffer2.WriteString(",?")
 		vals = append(vals, val)
-	} 
+	}
 
 	val, ok = data["component_id"]
 	if ok {
@@ -420,76 +418,76 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 /*
 HTMLify the string
 */
-func htmlify(olddata string, newdata string, datatype string) string{
-	return "<p class=\"bugstatchange\"><label class=\"updatetype\">"+datatype+"</label>"+"<label class=\"oldstat\">"+olddata+"</label>"+"<label class=\"newstat\">"+newdata+"</label></p>"
+func htmlify(olddata string, newdata string, datatype string) string {
+	return "<p class=\"bugstatchange\"><label class=\"updatetype\">" + datatype + "</label>" + "<label class=\"oldstat\">" + olddata + "</label>" + "<label class=\"newstat\">" + newdata + "</label></p>"
 }
+
 /*
 Adds comments for each change made to the bug.
 */
-func add_bug_comments(olddata map[string]interface{},newdata map[string]interface{}) {
-	changes_comments:=""
+func add_bug_comments(olddata map[string]interface{}, newdata map[string]interface{}) {
+	changes_comments := ""
 	if olddata["summary"] != newdata["summary"] {
-	    changes_comments = changes_comments+htmlify(olddata["summary"].(string),newdata["summary"].(string),"summary")
+		changes_comments = changes_comments + htmlify(olddata["summary"].(string), newdata["summary"].(string), "summary")
 	}
 	if olddata["status"] != newdata["status"] {
-	    changes_comments = changes_comments+htmlify(olddata["status"].(string),newdata["status"].(string),"status")
+		changes_comments = changes_comments + htmlify(olddata["status"].(string), newdata["status"].(string), "status")
 	}
 	if olddata["severity"] != newdata["severity"] {
-	    changes_comments = changes_comments+htmlify(olddata["severity"].(string),newdata["severity"].(string),"severity")
+		changes_comments = changes_comments + htmlify(olddata["severity"].(string), newdata["severity"].(string), "severity")
 	}
-	if olddata["whiteboard"] !=newdata["whiteboard"] {
-	   changes_comments = changes_comments+htmlify(olddata["whiteboard"].(string),newdata["whiteboard"].(string),"whiteboard")
+	if olddata["whiteboard"] != newdata["whiteboard"] {
+		changes_comments = changes_comments + htmlify(olddata["whiteboard"].(string), newdata["whiteboard"].(string), "whiteboard")
 	}
-	if olddata["hardware"] !=newdata["hardware"] {
-	   changes_comments = changes_comments+htmlify(olddata["hardware"].(string),newdata["hardware"].(string),"hardware")
+	if olddata["hardware"] != newdata["hardware"] {
+		changes_comments = changes_comments + htmlify(olddata["hardware"].(string), newdata["hardware"].(string), "hardware")
 	}
 	if olddata["priority"] != newdata["priority"] {
-	   changes_comments = changes_comments+htmlify(olddata["priority"].(string),newdata["priority"].(string),"priority")
+		changes_comments = changes_comments + htmlify(olddata["priority"].(string), newdata["priority"].(string), "priority")
 	}
-	if olddata["component_id"].(int) !=newdata["component_id"].(int) {
-	   changes_comments = changes_comments+htmlify(olddata["component"].(string),newdata["component"].(string),"component")
-	    
+	if olddata["component_id"].(int) != newdata["component_id"].(int) {
+		changes_comments = changes_comments + htmlify(olddata["component"].(string), newdata["component"].(string), "component")
+
 	}
-	if olddata["subcomponent_id"].(int) !=newdata["subcomponent_id"].(int) {
-	    changes_comments = changes_comments+htmlify(olddata["subcomponent"].(string),newdata["subcomponent"].(string),"subcomponent")
+	if olddata["subcomponent_id"].(int) != newdata["subcomponent_id"].(int) {
+		changes_comments = changes_comments + htmlify(olddata["subcomponent"].(string), newdata["subcomponent"].(string), "subcomponent")
 	}
 	fmt.Println("fiv")
 	fmt.Println(olddata["fixedinver_id"].(int))
 	fmt.Println(newdata["fixedinver"].(int))
 	fmt.Println("fiv")
-	if olddata["fixedinver_id"].(int) !=newdata["fixedinver"].(int) {
-	    changes_comments = changes_comments+htmlify(get_version_text(olddata["fixedinver_id"].(int)),get_version_text(newdata["fixedinver"].(int)),"fixedinver")
+	if olddata["fixedinver_id"].(int) != newdata["fixedinver"].(int) {
+		changes_comments = changes_comments + htmlify(get_version_text(olddata["fixedinver_id"].(int)), get_version_text(newdata["fixedinver"].(int)), "fixedinver")
 	}
-	if olddata["version_id"].(int) !=newdata["version"].(int) {
-	    changes_comments = changes_comments+htmlify(get_version_text(olddata["version_id"].(int)),get_version_text(newdata["version"].(int)),"version")
+	if olddata["version_id"].(int) != newdata["version"].(int) {
+		changes_comments = changes_comments + htmlify(get_version_text(olddata["version_id"].(int)), get_version_text(newdata["version"].(int)), "version")
 	}
 	//fmt.Println(olddata["qaint"].(int))
 	//fmt.Println(newdata["qa"].(int))
 	if newdata["qaint"] != nil {
-	    if olddata["qaint"].(int) !=newdata["qa"].(int) && newdata["qa"].(int)!=-1 {
-		changes_comments = changes_comments+htmlify(get_user_email(olddata["qaint"].(int)),get_user_email(newdata["qa"].(int)),"qa")
-	    }
+		if olddata["qaint"].(int) != newdata["qa"].(int) && newdata["qa"].(int) != -1 {
+			changes_comments = changes_comments + htmlify(get_user_email(olddata["qaint"].(int)), get_user_email(newdata["qa"].(int)), "qa")
+		}
 	}
 
-	if olddata["assigned_toid"].(int) !=newdata["assigned_to"].(int) && newdata["assigned_to"].(int)!=-1 {
-	    changes_comments = changes_comments+htmlify(get_user_email(olddata["assigned_toid"].(int)),get_user_email(newdata["assigned_to"].(int)),"assigned_to")
+	if olddata["assigned_toid"].(int) != newdata["assigned_to"].(int) && newdata["assigned_to"].(int) != -1 {
+		changes_comments = changes_comments + htmlify(get_user_email(olddata["assigned_toid"].(int)), get_user_email(newdata["assigned_to"].(int)), "assigned_to")
 	}
 
 	if newdata["docsint"] != nil {
-	    if olddata["docsint"].(int) !=newdata["docs"].(int) && newdata["docs"].(int)!=-1 {
-		changes_comments = changes_comments+htmlify(get_user_email(olddata["docsint"].(int)),get_user_email(newdata["docs"].(int)),"docs")
-	    }
+		if olddata["docsint"].(int) != newdata["docs"].(int) && newdata["docs"].(int) != -1 {
+			changes_comments = changes_comments + htmlify(get_user_email(olddata["docsint"].(int)), get_user_email(newdata["docs"].(int)), "docs")
+		}
 	}
-	bug_idint,_ := strconv.Atoi(newdata["id"].(string))
-	if changes_comments!=""{
-	    //user_idint,_ := strconv.Atoi(newdata["post_user"].(int))
-	    new_comment(newdata["post_user"].(int), bug_idint, changes_comments)
+	bug_idint, _ := strconv.Atoi(newdata["id"].(string))
+	if changes_comments != "" {
+		//user_idint,_ := strconv.Atoi(newdata["post_user"].(int))
+		new_comment(newdata["post_user"].(int), bug_idint, changes_comments)
 	}
-	if newdata["com_content"].(string)!=""{
-	    new_comment(newdata["post_user"].(int), bug_idint, newdata["com_content"].(string))
+	if newdata["com_content"].(string) != "" {
+		new_comment(newdata["post_user"].(int), bug_idint, newdata["com_content"].(string))
 	}
-	
-	
+
 }
 
 /*
@@ -503,120 +501,121 @@ func add_attachment(data map[string]interface{}) error {
 		return err
 	}
 	defer db.Close()
-	
-	_,err = db.Exec("INSERT INTO attachments (bug_id, datec, description, filename, systempath, submitter) VALUES (?,NOW(),?,?,?,?)", data["bug_id"].(string), data["description"].(string), data["filename"].(string), data["systempath"].(string), data["submitter"].(int))
-	if err!=nil{
-	    fmt.Println(err)
+
+	_, err = db.Exec("INSERT INTO attachments (bug_id, datec, description, filename, systempath, submitter) VALUES (?,NOW(),?,?,?,?)", data["bug_id"].(string), data["description"].(string), data["filename"].(string), data["systempath"].(string), data["submitter"].(int))
+	if err != nil {
+		fmt.Println(err)
 	}
 	return err
-    
+
 }
 
 /*
 Updates user type.
 */
 func update_user_type(userid int, newtype string) bool {
-    db, err := sql.Open("mysql", conn_str)
-    if err != nil {
-	    // handle error
-	fmt.Print(err)
-	return false
-    }
-    _,err = db.Exec("UPDATE users set type=? where id=?",newtype, userid)
-	if err!=nil{
-	    fmt.Println(err)
-	    return false
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return false
 	}
-    return true
-    
+	_, err = db.Exec("UPDATE users set type=? where id=?", newtype, userid)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	return true
+
 }
 
 /*
 Gets the total number of attachments.
 */
 func count_entries(table_name string) int {
-    	db, err := sql.Open("mysql", conn_str)
+	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
 	if err != nil {
-	    return -1
+		return -1
 	}
-	row := db.QueryRow("SELECT count(*) from "+table_name)
+	row := db.QueryRow("SELECT count(*) from " + table_name)
 	var entries int
 	err = row.Scan(&entries)
 	fmt.Println(err)
 	if err == nil {
-	    return entries
+		return entries
 	}
 	return -1
-    
+
 }
+
 /*
 Fetches all the attachments of a bug.
 */
-func get_bug_attachments(bug_id string) map[int][5]string{
+func get_bug_attachments(bug_id string) map[int][5]string {
 	m := make(map[int][5]string)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
 	if err != nil {
-	    fmt.Println(err)
-	    return m
+		fmt.Println(err)
+		return m
 	}
 	rows, err := db.Query("SELECT id, datec, description, filename, systempath, submitter from attachments where isobsolete=0 and bug_id=?", bug_id)
 	if err != nil {
 		fmt.Println(err)
 		return m
 	}
-	var description,  systempath, filename string
+	var description, systempath, filename string
 	var id, submitter int
 	var datec time.Time
 	for rows.Next() {
 		err = rows.Scan(&id, &datec, &description, &filename, &systempath, &submitter)
 		if err == nil {
-		    m[id]=[5]string{systempath, description, filename, get_user_email(submitter), time.Time.String(datec)}
+			m[id] = [5]string{systempath, description, filename, get_user_email(submitter), time.Time.String(datec)}
 		} else {
-		    fmt.Println(err)
-		    return make(map[int][5]string)
+			fmt.Println(err)
+			return make(map[int][5]string)
 		}
 	}
 	//fmt.Println("ad")
 	return m
-    
+
 }
 
 /*
 Makes attachments obsolete
 */
-func make_attachments_obsolete(attachment_ids []string) error{
+func make_attachments_obsolete(attachment_ids []string) error {
 
-    db, err := sql.Open("mysql", conn_str)
-    if err != nil {
-	    // handle error
-	fmt.Print(err)
-	return err
-    }
-    defer db.Close()
-    for _,x := range(attachment_ids) {
-	_,err = db.Exec("UPDATE attachments set isobsolete=1 where id=?",x)
-	if err!=nil{
-	    fmt.Println(err)
-	    return err
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return err
 	}
-    }
-    return err
-    
+	defer db.Close()
+	for _, x := range attachment_ids {
+		_, err = db.Exec("UPDATE attachments set isobsolete=1 where id=?", x)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+	}
+	return err
+
 }
 
 /*
 Getting all bug ids blocked by the given bug.
 */
 func bugs_blocked_by(bug_id string) []int {
-    	m := make([]int,0)
+	m := make([]int, 0)
 	//fmt.Print("dgffg")
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
-	    fmt.Print(err)
-	    return m
+		fmt.Print(err)
+		return m
 	}
 	defer db.Close()
 	rows, err := db.Query("SELECT blocked from dependencies where dependson=?", bug_id)
@@ -628,24 +627,24 @@ func bugs_blocked_by(bug_id string) []int {
 	var b_id int
 	for rows.Next() {
 		err = rows.Scan(&b_id)
-		m=append(m,b_id)
+		m = append(m, b_id)
 		//fmt.Println(c_id, name, description)
 	}
 	return m
-    
+
 }
 
 /*
 Getting all bugs which the given bug is dependent on.
 */
 func bugs_dependent_on(bug_id string) []int {
-    	m := make([]int,0)
+	m := make([]int, 0)
 	//fmt.Print("dgffg")
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
-	    fmt.Print(err)
-	    return m
+		fmt.Print(err)
+		return m
 	}
 	defer db.Close()
 	rows, err := db.Query("SELECT dependson from dependencies where blocked=?", bug_id)
@@ -657,52 +656,52 @@ func bugs_dependent_on(bug_id string) []int {
 	var b_id int
 	for rows.Next() {
 		err = rows.Scan(&b_id)
-		m=append(m,b_id)
+		m = append(m, b_id)
 		//fmt.Println(c_id, name, description)
 	}
 	return m
-    
+
 }
 
 /*
 Check is the bug dependency is valid
 */
-func is_valid_bugdependency(blocked int, dependson int) (bool,string){
+func is_valid_bugdependency(blocked int, dependson int) (bool, string) {
 	//bug cannot depend on itself.
 	if blocked == dependson {
-	    return false,"Both blocked and depends can't be the same"
+		return false, "Both blocked and depends can't be the same"
 	}
 	//checking for circular dependency
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
-	    fmt.Print(err)
-	    return false,err.Error()
+		fmt.Print(err)
+		return false, err.Error()
 	}
 	defer db.Close()
-	rows,err := db.Query("SELECT * from dependencies where dependson=? and blocked=?",blocked,dependson)
+	rows, err := db.Query("SELECT * from dependencies where dependson=? and blocked=?", blocked, dependson)
 	for rows.Next() {
-	    return false,"Circular Dependency cannot exist."
+		return false, "Circular Dependency cannot exist."
 	}
-	return true,"Valid"
+	return true, "Valid"
 }
 
 func clear_dependencies(bug int, bugtype string) error {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
-	    fmt.Print(err)
-	    return err
+		fmt.Print(err)
+		return err
 	}
 	defer db.Close()
-	_,err = db.Exec("DELETE from dependencies where "+bugtype+"=?",bug)
-	 return err
-    
+	_, err = db.Exec("DELETE from dependencies where "+bugtype+"=?", bug)
+	return err
+
 }
 
 /*
 Add a bug dependency
 */
-func add_bug_dependency(blocked int, dependson int) error{
+func add_bug_dependency(blocked int, dependson int) error {
 	//fmt.Println("blocked")
 	fmt.Println(blocked)
 	//fmt.Println("dependson")
@@ -710,8 +709,8 @@ func add_bug_dependency(blocked int, dependson int) error{
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
-	    fmt.Print(err)
-	    return err
+		fmt.Print(err)
+		return err
 	}
 	defer db.Close()
 	_, err = db.Exec("INSERT into dependencies (blocked,dependson) VALUES (?,?)", blocked, dependson)
@@ -726,18 +725,18 @@ func entry_exists(tablename string, fieldname string, fieldvalue string) bool {
 
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
-	    fmt.Print(err)
-	    return false
+		fmt.Print(err)
+		return false
 	}
 	defer db.Close()
-	rows,err := db.Query("SELECT * from "+tablename+" where "+fieldname+"="+fieldvalue)
+	rows, err := db.Query("SELECT * from " + tablename + " where " + fieldname + "=" + fieldvalue)
 	fmt.Println(err)
 	for rows.Next() {
-	    
-	    return false
+
+		return false
 	}
 	return true
-    
+
 }
 
 /*
@@ -747,7 +746,7 @@ func update_bug(data map[string]interface{}) error {
 	var buffer bytes.Buffer
 	vals := make([]interface{}, 0)
 	buffer.WriteString("UPDATE bugs SET ")
-	bug_id,_ := strconv.ParseInt(data["id"].(string),10,64)
+	bug_id, _ := strconv.ParseInt(data["id"].(string), 10, 64)
 	old_bug := get_bug(data["id"].(string))
 	val1, ok1 := data["status"]
 	if ok1 {
@@ -774,7 +773,7 @@ func update_bug(data map[string]interface{}) error {
 		buffer.WriteString(", severity=?")
 		vals = append(vals, val)
 	}
-	
+
 	val, ok = data["summary"]
 	if ok {
 		buffer.WriteString(", summary=?")
@@ -810,31 +809,31 @@ func update_bug(data map[string]interface{}) error {
 		buffer.WriteString(", whiteboard=?")
 		vals = append(vals, val)
 	}
-	
+
 	val, ok = data["assigned_to"]
 	if ok {
 		buffer.WriteString(", assigned_to=?")
 		vals = append(vals, val)
 	}
-// * Since this canot be changes.
+	// * Since this canot be changes.
 	val, ok = data["subcomponent_id"]
-	if ok && val!=-1{
+	if ok && val != -1 {
 		buffer.WriteString(", subcomponent_id=?")
 		vals = append(vals, val)
 	}
-//*/
+	//*/
 	val, ok = data["fixedinver"]
 	if ok {
 		buffer.WriteString(", fixedinver=?")
 		vals = append(vals, val)
 	}
-///*Since this cannot be changed
+	///*Since this cannot be changed
 	val, ok = data["component_id"]
 	if ok {
 		buffer.WriteString(", component_id=?")
 		vals = append(vals, val)
 	}
-//*/
+	//*/
 	buffer.WriteString(" WHERE id=?")
 	//fmt.Println(buffer.String())
 
@@ -896,37 +895,37 @@ func get_bug(bug_id string) Bug {
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
 	row := db.QueryRow("SELECT status, description, version, severity, hardware, priority, whiteboard, reported, component_id, subcomponent_id, reporter, summary, fixedinver, qa, docs, assigned_to from bugs where id=?", bug_id)
-	var status, description, severity, hardware, priority, whiteboard,  summary []byte
+	var status, description, severity, hardware, priority, whiteboard, summary []byte
 	var reporter, component_id, assigned_to, version int
 	var qa, docs, subcomponent_id, fixedinver sql.NullInt64
 	var reported time.Time
 	err = row.Scan(&status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &subcomponent_id, &reporter, &summary, &fixedinver, &qa, &docs, &assigned_to)
 	if err == nil {
-	    	    qaint := -1
-		    docsint := -1
-		    subcint := -1
-		    fixedinverint := 0
-		    if qa.Valid{
+		qaint := -1
+		docsint := -1
+		subcint := -1
+		fixedinverint := 0
+		if qa.Valid {
 			qaint = int(qa.Int64)
-		    }
-		    if fixedinver.Valid{
+		}
+		if fixedinver.Valid {
 			fixedinverint = int(fixedinver.Int64)
-		    }
-		    if docs.Valid{
+		}
+		if docs.Valid {
 			docsint = int(docs.Int64)
-		    }
-		    if subcomponent_id.Valid{
+		}
+		if subcomponent_id.Valid {
 			subcint = int(subcomponent_id.Int64)
-		    }
+		}
 		qa_name := ""
 		docs_name := ""
-		if qaint!=-1 {
-		    qa_name = get_user_email(qaint) 
+		if qaint != -1 {
+			qa_name = get_user_email(qaint)
 		}
-		if docsint!=-1 {
-		    docs_name = get_user_email(docsint)
+		if docsint != -1 {
+			docs_name = get_user_email(docsint)
 		}
-		bugs_idint,_ := strconv.Atoi(bug_id)
+		bugs_idint, _ := strconv.Atoi(bug_id)
 		m["id"] = bug_id
 		m["status"] = string(status)
 		m["summary"] = string(summary)
@@ -961,10 +960,9 @@ func get_bug(bug_id string) Bug {
 	return m
 }
 
-
 /*
 Returns the user email given the user id.
-*/ 
+*/
 func get_user_email(id int) string {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
@@ -986,8 +984,6 @@ func get_user_email(id int) string {
 	return ""
 }
 
-
-
 /*
 Adds new CC users to a bug
 */
@@ -1007,7 +1003,7 @@ func add_bug_cc(bug_id int64, emails interface{}) bool {
 		user_id := get_user_id(email)
 		// If user_id is -1 means no such user
 		if user_id != -1 {
-			_,err := db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, user_id)
+			_, err := db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, user_id)
 			fmt.Println(err)
 		}
 	}
@@ -1114,14 +1110,14 @@ func get_component_owner(id int) int {
 Get product versions.
 */
 func get_product_versions(product_id int) map[string][2]int {
-	
+
 	m := make(map[string][2]int)
 	//fmt.Print("dgffg")
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
-	    fmt.Print(err)
-	    return m
+		fmt.Print(err)
+		return m
 	}
 	defer db.Close()
 	rows, err := db.Query("SELECT id, value, isactive from versions where product_id=? order by value", product_id)
@@ -1131,15 +1127,16 @@ func get_product_versions(product_id int) map[string][2]int {
 	}
 	defer rows.Close()
 	var description string
-	var v_id,isactive int
+	var v_id, isactive int
 	for rows.Next() {
-		err = rows.Scan(&v_id, &description,&isactive)
+		err = rows.Scan(&v_id, &description, &isactive)
 		//fmt.Println(c_id, name, description)
-		m[description] = [2]int{v_id,isactive}
+		m[description] = [2]int{v_id, isactive}
 	}
 	return m
-    
+
 }
+
 /*Adds release information.*/
 func add_release(name string) {
 	db, err := sql.Open("mysql", conn_str)
@@ -1160,7 +1157,7 @@ func add_release(name string) {
 }
 
 /*Add Product Version.*/
-func add_product_version(product_id string, value string) error{
+func add_product_version(product_id string, value string) error {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
@@ -1175,59 +1172,57 @@ func add_product_version(product_id string, value string) error{
 		fmt.Print(err)
 		return err
 	}
-    return err
+	return err
 }
-
 
 /*
 Update the versions
 */
-func update_product_version(version_value string, version_active int, version_id string) error{
+func update_product_version(version_value string, version_active int, version_id string) error {
 
-    db, err := sql.Open("mysql", conn_str)
-    if err != nil {
-	    // handle error
-	fmt.Print(err)
-	return err
-    }
-    defer db.Close()
-	_,err = db.Exec("UPDATE versions set value=?, isactive=? where id=?", version_value, version_active, version_id )
-	if err!=nil{
-	    fmt.Println(err)
-	    return err
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return err
 	}
-    
-    return err
-    
+	defer db.Close()
+	_, err = db.Exec("UPDATE versions set value=?, isactive=? where id=?", version_value, version_active, version_id)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return err
+
 }
 
 /*
 Get version activity.
 */
-func is_version_active(version_id string)  (bool,error){
-    db, err := sql.Open("mysql", conn_str)
-    if err != nil {
-	    // handle error
-	fmt.Print(err)
-	return false,err
-    }
-    defer db.Close()
-    row:=db.QueryRow("SELECT isactive from versions where id=?",version_id)
-    var act int
-    err = row.Scan(&act)
-	if err==nil{
-	    if act!=0{
-		return true,nil
-	    } else {
-		return false,nil
-	    }
-	    //fmt.Println(m["name"])
-	} else  {
-	
-	    return false,err
+func is_version_active(version_id string) (bool, error) {
+	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return false, err
 	}
-    
-    
+	defer db.Close()
+	row := db.QueryRow("SELECT isactive from versions where id=?", version_id)
+	var act int
+	err = row.Scan(&act)
+	if err == nil {
+		if act != 0 {
+			return true, nil
+		} else {
+			return false, nil
+		}
+		//fmt.Println(m["name"])
+	} else {
+
+		return false, err
+	}
+
 }
 
 func get_releases() []string {
@@ -1282,12 +1277,11 @@ func fetch_comments_by_bug(bug_id string) map[int64][4]template.HTML {
 	return m
 }
 
-
 /*
 Retrieving all components of all products.
 */
 func get_all_components() map[string][2]string {
-    	m := make(map[string][2]string)
+	m := make(map[string][2]string)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
 	rows, err := db.Query("SELECT id, name, description from components order by name")
@@ -1331,33 +1325,32 @@ func is_user_admin(email string) bool {
 	return false
 }
 
-/*Returns the details of the product with the given product id*/ 
+/*Returns the details of the product with the given product id*/
 func get_product_by_id(product_id string) map[string]interface{} {
 	m := make(map[string]interface{})
 	db, err := sql.Open("mysql", conn_str)
-	if err!=nil{
-	    m["error_msg"]=err
-	    return m
+	if err != nil {
+		m["error_msg"] = err
+		return m
 	}
 	defer db.Close()
 	row := db.QueryRow("SELECT name, description from products where id=?", product_id)
-	if err!=nil{
-	    m["error_msg"]=err
-	    return m
+	if err != nil {
+		m["error_msg"] = err
+		return m
 	}
 	var name, description string
 	err = row.Scan(&name, &description)
-	if err==nil{
-	    m["id"]=product_id
-	    m["name"]=name
-	    m["description"]=description
-	    //fmt.Println(m["name"])
+	if err == nil {
+		m["id"] = product_id
+		m["name"] = name
+		m["description"] = description
+		//fmt.Println(m["name"])
 	}
-	
+
 	return m
 
 }
-
 
 /* Finds all components for a given product id*/
 func get_components_by_id(product_id int) map[string][3]string {
@@ -1380,8 +1373,9 @@ func get_components_by_id(product_id int) map[string][3]string {
 	return m
 
 }
+
 /*Returns the product id of the entered component*/
-func get_product_of_component(component_id int) int{
+func get_product_of_component(component_id int) int {
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
 	row := db.QueryRow("SELECT product_id from components where id=?", component_id)
@@ -1389,11 +1383,11 @@ func get_product_of_component(component_id int) int{
 	err = row.Scan(&product_id)
 	//fmt.Println(c_id, name, description)
 	if err != nil {
-	    
-	    return -1
+
+		return -1
 	}
 	return product_id
-    
+
 }
 
 /*Returns all bugs related to a single product*/
@@ -1402,62 +1396,62 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
 	if err != nil {
-		return m,err
+		return m, err
 	}
-	r1:="distinct bugs.id as id, bugs.status as status, bugs.version as version, bugs.severity as severity, bugs.hardware as hardware, bugs.priority as priority,"
-	r2:=" bugs.reporter as reporter, bugs.qa as qa, bugs.docs as docs, bugs.whiteboard as whiteboard, bugs.summary as summary, bugs.description as description, "
-	r3:="bugs.reported as reported, bugs.fixedinver as fixedinver, bugs.component_id as component_id, bugs.subcomponent_id as subcomponent_id "
+	r1 := "distinct bugs.id as id, bugs.status as status, bugs.version as version, bugs.severity as severity, bugs.hardware as hardware, bugs.priority as priority,"
+	r2 := " bugs.reporter as reporter, bugs.qa as qa, bugs.docs as docs, bugs.whiteboard as whiteboard, bugs.summary as summary, bugs.description as description, "
+	r3 := "bugs.reported as reported, bugs.fixedinver as fixedinver, bugs.component_id as component_id, bugs.subcomponent_id as subcomponent_id "
 	rows, err := db.Query("SELECT "+r1+r2+r3+" from bugs join components join products where products.id=components.product_id and products.id=?", product_id)
 	if err != nil {
-		return m,err
+		return m, err
 	}
-	var status, description,  severity, hardware, priority, whiteboard,  summary []byte
+	var status, description, severity, hardware, priority, whiteboard, summary []byte
 	var id, reporter, component_id, version int
 	var qa, docs, subcomponent_id, fixedinver sql.NullInt64
 	var reported time.Time
 	for rows.Next() {
 		err = rows.Scan(&id, &status, &version, &severity, &hardware, &priority, &reporter, &qa, &docs, &whiteboard, &summary, &description, &reported, &fixedinver, &component_id, &subcomponent_id)
 		if err == nil {
-		    qaint := -1
-		    docsint := -1
-		    subcint := -1
-		    fixedinverint := -1
-		    if qa.Valid{
-			qaint = int(qa.Int64)
-		    }
-		    if fixedinver.Valid{
-			fixedinverint = int(qa.Int64)
-		    }
-		    if docs.Valid{
-			docsint = int(docs.Int64)
-		    }
-		    if subcomponent_id.Valid{
-			subcint = int(subcomponent_id.Int64)
-		    }
-		    subc := get_subcomponent_by_id(strconv.Itoa(subcint))
-		    subcomponent_name := ""
-		    if subc["name"]!=nil{
-			subcomponent_name = subc["name"].(string)
-		    }
-		    c := get_component_by_id(strconv.Itoa(component_id))
-		    component_name := ""
-		    if c["name"]!=nil{
-			component_name = c["name"].(string)
-		    }
-			
+			qaint := -1
+			docsint := -1
+			subcint := -1
+			fixedinverint := -1
+			if qa.Valid {
+				qaint = int(qa.Int64)
+			}
+			if fixedinver.Valid {
+				fixedinverint = int(qa.Int64)
+			}
+			if docs.Valid {
+				docsint = int(docs.Int64)
+			}
+			if subcomponent_id.Valid {
+				subcint = int(subcomponent_id.Int64)
+			}
+			subc := get_subcomponent_by_id(strconv.Itoa(subcint))
+			subcomponent_name := ""
+			if subc["name"] != nil {
+				subcomponent_name = subc["name"].(string)
+			}
+			c := get_component_by_id(strconv.Itoa(component_id))
+			component_name := ""
+			if c["name"] != nil {
+				component_name = c["name"].(string)
+			}
+
 			//fmt.Println(string(f))
-			m[strconv.Itoa(id)] = [15]string{string(status), string(get_version_text(version)), string(severity), string(hardware), string(priority), get_user_email(reporter), get_user_email(qaint), get_user_email(docsint), string(whiteboard), string(summary), string(description), reported.String(), string(get_version_text(fixedinverint)), component_name , subcomponent_name }
+			m[strconv.Itoa(id)] = [15]string{string(status), string(get_version_text(version)), string(severity), string(hardware), string(priority), get_user_email(reporter), get_user_email(qaint), get_user_email(docsint), string(whiteboard), string(summary), string(description), reported.String(), string(get_version_text(fixedinverint)), component_name, subcomponent_name}
 		} else {
-		    //fmt.Println("yaha hai")
-		    return m,err
-		    
+			//fmt.Println("yaha hai")
+			return m, err
+
 		}
 	}
-	return m,err
+	return m, err
 }
 
-/*Returns the details of the user with the given user id*/ 
-func get_user_by_id(user_id string) map[string]interface{}{
+/*Returns the details of the user with the given user id*/
+func get_user_by_id(user_id string) map[string]interface{} {
 	m := make(map[string]interface{})
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
@@ -1466,8 +1460,8 @@ func get_user_by_id(user_id string) map[string]interface{}{
 	err = row.Scan(&name, &email, &u_type)
 	//fmt.Println(c_id, name, description)
 	if err != nil {
-	    m["error_msg"]=err
-	    return m
+		m["error_msg"] = err
+		return m
 	}
 	m["id"] = user_id
 	m["name"] = name
@@ -1480,7 +1474,7 @@ func get_user_by_id(user_id string) map[string]interface{}{
 
 /*
 Updates an existing user.
-*/ 
+*/
 func update_user(data map[string]interface{}) (msg string, err error) {
 
 	var buffer bytes.Buffer
@@ -1492,7 +1486,7 @@ func update_user(data map[string]interface{}) (msg string, err error) {
 		buffer.WriteString("name=?")
 		vals = append(vals, val)
 	}
-	
+
 	val, ok = data["email"]
 	if ok {
 		buffer.WriteString(", email=?")
@@ -1505,7 +1499,6 @@ func update_user(data map[string]interface{}) (msg string, err error) {
 		vals = append(vals, val)
 	}
 
-	
 	buffer.WriteString(" WHERE id=?")
 	fmt.Println(buffer.String())
 
@@ -1521,14 +1514,14 @@ func update_user(data map[string]interface{}) (msg string, err error) {
 	_, err = db.Exec(buffer.String(), vals...)
 	if err != nil {
 		fmt.Println(err)
-		return "Error occured updating",err
+		return "Error occured updating", err
 	}
-	return "Update Successful.",err
+	return "Update Successful.", err
 }
 
 /*Get the details of all users */
 func get_all_users() map[string][4]string {
-    	m := make(map[string][4]string)
+	m := make(map[string][4]string)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
 	rows, err := db.Query("SELECT id, name, email, type from users")
@@ -1545,10 +1538,9 @@ func get_all_users() map[string][4]string {
 	return m
 }
 
-
 /*
 Updates an existing product.
-*/ 
+*/
 func update_product(data map[string]interface{}) (msg string, err error) {
 
 	var buffer bytes.Buffer
@@ -1560,7 +1552,7 @@ func update_product(data map[string]interface{}) (msg string, err error) {
 		buffer.WriteString("name=?")
 		vals = append(vals, val)
 	}
-	
+
 	val, ok = data["description"]
 	if ok {
 		buffer.WriteString(", description=?")
@@ -1582,9 +1574,9 @@ func update_product(data map[string]interface{}) (msg string, err error) {
 	_, err = db.Exec(buffer.String(), vals...)
 	if err != nil {
 		fmt.Println(err)
-		return "Error occured updating",err
+		return "Error occured updating", err
 	}
-	return "Update Successful.",err
+	return "Update Successful.", err
 }
 
 func get_subcomponent_by_id(subcomponent_id string) map[string]interface{} {
@@ -1593,21 +1585,21 @@ func get_subcomponent_by_id(subcomponent_id string) map[string]interface{} {
 	defer db.Close()
 	row := db.QueryRow("SELECT name, description, component_id from subcomponent where id=?", subcomponent_id)
 	if err != nil {
-		m["error_msg"]=err
+		m["error_msg"] = err
 		return m
 	}
 	var name, description string
 	var component_id int
 	err = row.Scan(&name, &description, &component_id)
-		//fmt.Println(c_id, name, description)
+	//fmt.Println(c_id, name, description)
 	if err != nil {
-		m["error_msg"]=err
+		m["error_msg"] = err
 		return m
 	}
-	m["id"]=subcomponent_id
-	m["component_id"]=component_id
-	m["description"]=description
-	m["name"]=name
+	m["id"] = subcomponent_id
+	m["component_id"] = component_id
+	m["description"] = description
+	m["name"] = name
 	return m
 
 }
@@ -1619,35 +1611,35 @@ func get_component_by_id(component_id string) map[string]interface{} {
 	defer db.Close()
 	row := db.QueryRow("SELECT name, description, product_id, owner, qa from components where id=?", component_id)
 	if err != nil {
-		m["error_msg"]=err
+		m["error_msg"] = err
 		return m
 	}
 	var name, description string
 	var owner, product_id int
 	var qa sql.NullInt64
 	err = row.Scan(&name, &description, &product_id, &owner, &qa)
-		//fmt.Println(c_id, name, description)
+	//fmt.Println(c_id, name, description)
 	qaint := -1
 	if qa.Valid {
-	    qaint = int(qa.Int64)
+		qaint = int(qa.Int64)
 	}
 	if err != nil {
-		m["error_msg"]=err
+		m["error_msg"] = err
 		return m
 	}
-	m["id"]=component_id
-	m["name"]=name
-	m["description"]=description
-	m["product_id"]=product_id
-	m["owner"]=get_user_email(owner)
-	m["qa"]=get_user_email(qaint)
+	m["id"] = component_id
+	m["name"] = name
+	m["description"] = description
+	m["product_id"] = product_id
+	m["owner"] = get_user_email(owner)
+	m["qa"] = get_user_email(qaint)
 	return m
 
 }
 
 /*Get the details of all products */
 func get_all_products() map[string][2]string {
-    	m := make(map[string][2]string)
+	m := make(map[string][2]string)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
 	rows, err := db.Query("SELECT id, name, description from products order by name")
@@ -1664,10 +1656,9 @@ func get_all_products() map[string][2]string {
 	return m
 }
 
-
 /*
 Updates an existing component.
-*/ 
+*/
 func update_component(data map[string]interface{}) (msg string, err error) {
 
 	var buffer bytes.Buffer
@@ -1679,7 +1670,7 @@ func update_component(data map[string]interface{}) (msg string, err error) {
 		buffer.WriteString("name=?")
 		vals = append(vals, val)
 	}
-	
+
 	val, ok = data["description"]
 	if ok {
 		buffer.WriteString(", description=?")
@@ -1704,7 +1695,6 @@ func update_component(data map[string]interface{}) (msg string, err error) {
 		vals = append(vals, val)
 	}
 
-	
 	buffer.WriteString(" WHERE id=?")
 	//fmt.Println(buffer.String())
 
@@ -1720,7 +1710,7 @@ func update_component(data map[string]interface{}) (msg string, err error) {
 	_, err = db.Exec(buffer.String(), vals...)
 	if err != nil {
 		fmt.Println(err)
-		return "Error occured updating",err
+		return "Error occured updating", err
 	}
-	return "Update Successful.",err
+	return "Update Successful.", err
 }
