@@ -254,6 +254,9 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 			version_id, _ := strconv.Atoi(r.FormValue("bug_version"))
 			interface_data["qa"] = qaid
 			interface_data["docs"] = docsid
+			if assignid==-1{
+			    assignid=get_component_owner(comp_idint)
+			}
 			interface_data["assigned_to"] = assignid
 			interface_data["version"] = version_id
 			interface_data["fixedinver"] = fixversion_id
