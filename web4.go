@@ -255,12 +255,8 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 				}
 				fixversion_id,_:=strconv.Atoi(r.FormValue("bug_fixedinver"))
 				version_id,_:=strconv.Atoi(r.FormValue("bug_version"))
-				if qaid!= -1 {
-				    interface_data["qa"]=qaid
-				}
-				if docsid!= -1 {
-				    interface_data["docs"]=docsid
-				}
+				interface_data["qa"]=qaid
+				interface_data["docs"]=docsid
 				interface_data["assigned_to"]=assignid
 				interface_data["version"]=version_id
 				interface_data["fixedinver"]=fixversion_id
