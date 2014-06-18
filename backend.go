@@ -611,8 +611,8 @@ func make_attachments_obsolete(attachment_ids []string) error {
 /*
 Getting all bug ids blocked by the given bug.
 */
-func bugs_blocked_by(bug_id string) []int {
-	m := make([]int, 0)
+func bugs_blocked_by(bug_id string) map[int]string {
+	m := make(map[int]string)
 	//fmt.Print("dgffg")
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
@@ -621,16 +621,17 @@ func bugs_blocked_by(bug_id string) []int {
 		return m
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT blocked from dependencies where dependson=?", bug_id)
+	rows, err := db.Query("SELECT distinct dependencies.blocked as blocked, bugs.status as status from dependencies join bugs where bugs.id=dependencies.dependson and dependson=?", bug_id)
 	if err != nil {
 		fmt.Println(err)
 		return m
 	}
 	defer rows.Close()
 	var b_id int
+	var status string
 	for rows.Next() {
-		err = rows.Scan(&b_id)
-		m = append(m, b_id)
+		err = rows.Scan(&b_id,&status)
+		m[b_id] = status 
 		//fmt.Println(c_id, name, description)
 	}
 	return m
@@ -640,8 +641,8 @@ func bugs_blocked_by(bug_id string) []int {
 /*
 Getting all bugs which the given bug is dependent on.
 */
-func bugs_dependent_on(bug_id string) []int {
-	m := make([]int, 0)
+func bugs_dependent_on(bug_id string) map[int]string {
+	m := make(map[int]string)
 	//fmt.Print("dgffg")
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
@@ -650,16 +651,17 @@ func bugs_dependent_on(bug_id string) []int {
 		return m
 	}
 	defer db.Close()
-	rows, err := db.Query("SELECT dependson from dependencies where blocked=?", bug_id)
+	rows, err := db.Query("SELECT distinct dependencies.dependson as dependson,bugs.status as status from dependencies join bugs where bugs.id=dependencies.blocked and blocked=?", bug_id)
 	if err != nil {
 		fmt.Println(err)
 		return m
 	}
 	defer rows.Close()
 	var b_id int
+	var status string
 	for rows.Next() {
-		err = rows.Scan(&b_id)
-		m = append(m, b_id)
+		err = rows.Scan(&b_id, &status)
+		m[b_id]=status
 		//fmt.Println(c_id, name, description)
 	}
 	return m

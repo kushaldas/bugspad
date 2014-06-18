@@ -1,9 +1,10 @@
-{{define "head"}}<title>Bug {{ .id}} - {{ .summary}}</title>{{end}}
+{{define "head"}}<title class="{{if eq .status "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}">Bug {{ .id}} - {{ .summary}}</title>{{end}}
 {{define "body"}}
 <div class="maincontent">
     {{if .islogged}}
         <div id="bug_details">
-	    <h2 id="bug_heading">Bug - {{ .id}} {{ .summary}}</h2>
+	    <h2 id="bug_heading"><label class={{if eq .status "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}>Bug - {{ .id}}</label> {{ .summary}}</h2>
+	    <label>{{if eq .status "duplicate"}}DUPLICATE{{end}}</label>
 	    <form  name="bugdetail" action="/bugs/" method="POST" enctype="multipart/form-data">
 		<table class="left_table">
 		    <tr>
@@ -70,23 +71,23 @@
 		    <tr>
 			<td class="field_title">Depends on: </td>
 			<td>
-			    {{range $val := .dependencylist}}
-				    <a href="/bugs/{{ index $val }}">{{ index $val }} </a>
+			    {{range $key,$val := .dependencylist}}
+				    <a class="{{if eq (index $val) "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}" href="/bugs/{{$key}}">{{$key}} </a>
 			    {{end}}
 			</td>
 			<td>
-			    <input name="dependencylist" value="{{range $val := .dependencylist}}{{ index $val }},{{end}}" type="text"></input>
+			    <input name="dependencylist" value="{{range $key,$val := .dependencylist}}{{ index $key }},{{end}}" type="text"></input>
 			</td>
 		    </tr>
 		    <tr>
 			<td class="field_title">Blocks: </td>
 			<td>
-			    {{range $val := .blockedlist}}
-				    <a href="/bugs/{{ index $val }}">{{ index $val }} </a>
+			    {{range $key,$val := .blockedlist}}
+				    <a class="{{if eq (index $val) "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}" href="/bugs/{{$key}}">{{$key}} </a>
 			    {{end}}
 			</td>
 			<td>
-			    <input name="blockedlist" value="{{range $val := .blockedlist}}{{ index $val }},{{end}}" type="text"></input>
+			    <input name="blockedlist" value="{{range $key,$val := .blockedlist}}{{ index $key }},{{end}}" type="text"></input>
 			</td>
 		    </tr>
 		  </table>
@@ -244,8 +245,8 @@
 		<tr>
 		    <td class="field_title">Depends on: </td>
 		    <td>
-			{{range $val := .dependencylist}}
-			    <a href="/bugs/{{ index $val }}">{{ index $val }} </a>
+			{{range $key,$val := .dependencylist}}
+			    <a class="{{if eq (index $val) "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}" href="/bugs/{{$key}}">{{$key}} </a>
 			{{end}}
 		    </td>
 		 </tr>
@@ -253,7 +254,7 @@
 		    <td class="field_title">Blocks: </td>
 		    <td>
 			{{range $val := .blockedlist}}
-			    <a href="/bugs/{{ index $val }}">{{ index $val }} </a>
+			    <a class="{{if eq (index $val) "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}" href="/bugs/{{ index $val }}">{{ index $val }} </a>
 			{{end}}
 		    </td>
 		 </tr>

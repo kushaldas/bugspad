@@ -58,6 +58,10 @@ color: rgb(65, 131, 196);
     
 }
 
+.closedbug {
+	text-decoration:line-through;
+}
+
 .maincontent {
 
     padding-bottom:10em;
@@ -68,6 +72,7 @@ color: rgb(65, 131, 196);
     background-color:rgb(240,240,240)
 
 }
+
 
 .title_bar {
     margin:2%;

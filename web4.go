@@ -313,13 +313,14 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 			olddependencies := ""
 			dep := bugs_dependent_on(r.FormValue("bug_id"))
 			for i, _ := range dep {
-				tmp := strconv.Itoa(dep[i])
+				fmt.Println(i)
+				tmp := strconv.Itoa(i)
 				olddependencies = olddependencies + tmp + ","
 			}
 			oldblocked := ""
 			bloc := bugs_blocked_by(r.FormValue("bug_id"))
 			for i, _ := range bloc {
-				tmp := strconv.Itoa(bloc[i])
+				tmp := strconv.Itoa(i)
 				oldblocked = oldblocked + tmp + ","
 			}
 			clear_dependencies(currentbug_idint, "blocked")
@@ -371,13 +372,13 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 			newdependencies := ""
 			dep = bugs_dependent_on(r.FormValue("bug_id"))
 			for i, _ := range dep {
-				tmp := strconv.Itoa(dep[i])
+				tmp := strconv.Itoa(i)
 				newdependencies = newdependencies + tmp + ","
 			}
 			newblocked := ""
 			bloc = bugs_blocked_by(r.FormValue("bug_id"))
 			for i, _ := range bloc {
-				tmp := strconv.Itoa(bloc[i])
+				tmp := strconv.Itoa(i)
 				newblocked = newblocked + tmp + ","
 			}
 			net_comment := ""
