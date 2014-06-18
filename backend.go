@@ -1099,6 +1099,15 @@ func new_comment(reporter int, bug_id int, desc string) (id string, err error) {
 		return "Error in entering a new comment", err
 	}
 	rid, err := ret.LastInsertId()
+	//checking if reporter is in bugcc list if not add it.
+	_,err=db.Query("SELECT * from cc where bug_id=?,who=?",reporter,bug_id)
+	if err!=nil{
+	    _, err = db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, reporter)
+	    if err!=nil{
+		fmt.Println(err)
+		return strconv.FormatInt(rid, 10), err
+	    }
+	}
 	return strconv.FormatInt(rid, 10), err
 }
 
