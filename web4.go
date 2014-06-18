@@ -277,11 +277,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 			interface_data["com_content"] = r.FormValue("com_content")
 			//making first user comment should change status from new to open
 			if r.FormValue("com_content")!="" {
-			    fmt.Println()
-			    if r.FormValue("bug_status")=="new" {
-				    interface_data["status"]="open"
-			    }
-			    if r.FormValue("bug_status")=="fixed (closed)" || r.FormValue("bug_status")=="notabug (closed)" || r.FormValue("bug_status")=="wontfix (closed)"{
+			    if r.FormValue("bug_status")=="new"|| r.FormValue("bug_status")=="fixed (closed)" || r.FormValue("bug_status")=="notabug (closed)" || r.FormValue("bug_status")=="wontfix (closed)"{
 				    interface_data["status"]="open"
 			    }
 			}
