@@ -159,6 +159,10 @@ func registeruser(w http.ResponseWriter, r *http.Request) {
 
 	} else if r.Method == "POST" {
 		//type "0" refers to the normal user, while "1" refers to the admin
+		if r.FormValue("password").(string)!=r.FormValue("repassword").(string) {
+			fmt.Fprintln(w, "Passwords do not match.")
+			return
+		}
 		ans := add_user(r.FormValue("username"), r.FormValue("useremail"), "0", r.FormValue("password"))
 		if ans != "User added." {
 			fmt.Fprintln(w, "User could not be registered.")
