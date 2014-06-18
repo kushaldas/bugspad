@@ -198,6 +198,10 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		interface_data["pagetitle"] = "Bug - " + bug_id + " details"
 		interface_data["dependencylist"] = bugs_dependent_on(bug_id)
 		interface_data["blockedlist"] = bugs_blocked_by(bug_id)
+		dup:=find_orig_ifdup(bug_id)
+		if dup!=-1{
+		    interface_data["duplicateof"] = dup
+		}
 		//fmt.Println(bug_data["reporter"])
 		if il {
 			bug_product_id := get_product_of_component(interface_data["component_id"].(int))
@@ -221,7 +225,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 
 	} else if r.Method == "POST" {
 		//fmt.Println(r.FormValue("com_content"))
-		if r.Method == "POST" {
+			fmt.Println(r.FormValue("bug_status"))
 			stats,severs,priors:=get_redis_bugtags()
 			if !isvalueinlist(r.FormValue("bug_status"),stats) {
 			    fmt.Fprintln(w,"Bug Status Invalid.")
@@ -385,20 +389,54 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 			if oldblocked != newblocked {
 				net_comment = net_comment + htmlify(oldblocked, newblocked, "blocks")
 			} //fmt.Fprintln(w,"Bug successfully updated!")
-			if net_comment != "" {
-				new_comment(interface_data["post_user"].(int), currentbug_idint, net_comment)
-			}
+
 			/********dependencies updated**********/
+			
+			/*******duplicate changes if any***********/
+			dupof:=r.FormValue("bug_duplicate")
+			orig:=find_orig_ifdup(dupof)
+			if interface_data["status"].(string)=="duplicate" {
+				if dupof!="" {
+					fmt.Println("hoo")
+					if orig!=-1{
+					    fmt.Println("Cant be duplicated as a duplicate of a duplicate.")
+					    return
+					}
+					//remove previous entry
+					if remove_dup_bug(r.FormValue("bug_id")) {
+					    //add new entry
+					    if !add_dup_bug(r.FormValue("bug_id"),dupof) {
+						fmt.Fprintln(w,"Some error occured while updating duplicates.")
+						return
+					    }
+					} else {
+					    fmt.Fprintln(w,"Some error occured while updating duplicates.")
+					    return
+					}
+					sorg:=strconv.Itoa(orig)
+					net_comment = net_comment + htmlify(sorg,dupof,"duplicateof")
+				}
+			} else {
+				if !remove_dup_bug(r.FormValue("bug_id")) {
+					    fmt.Fprintln(w,"Some error occured while updating duplicates.")
+					    return
+				}
+			}
+			
+			/*******duplicates done********/
+			
 			err := update_bug(interface_data)
 			if err != nil {
 				fmt.Fprintln(w, "Bug could not be updated!")
 				return
 			}
+			if net_comment != "" {
+				new_comment(interface_data["post_user"].(int), currentbug_idint, net_comment)
+			}
 			http.Redirect(w, r, "/bugs/"+r.FormValue("bug_id"), http.StatusFound)
 
 		}
 
-	}
 }
 
 /*

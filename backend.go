@@ -1198,6 +1198,67 @@ func add_release(name string) {
 
 }
 
+/*
+Get original of a duplicate bug if it is a duplicate.
+*/
+func find_orig_ifdup(bug_id string) int{
+    	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return -1
+	}
+	defer db.Close()
+	row := db.QueryRow("SELECT dup_of from duplicates where dup=?",bug_id)
+	var dup_of int
+	err = row.Scan(&dup_of)
+	if err == nil {
+		return dup_of
+		//fmt.Println(m["name"])
+	} else {
+		return -1
+	}
+
+}
+
+/*
+Set original of a duplicate bug if it is a duplicate.
+*/
+func add_dup_bug(dup string, dup_of string) bool{
+    	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return false
+	}
+	defer db.Close()
+	_,err = db.Exec("INSERT into duplicates (dup,dup_of) VALUES (?,?)",dup,dup_of)
+	if err == nil {
+		return true
+	}
+	fmt.Println(err)
+	return false
+}
+
+/*
+Remove original of a duplicate bug if it is a duplicate.
+*/
+func remove_dup_bug(dup string) bool{
+    	db, err := sql.Open("mysql", conn_str)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+		return false
+	}
+	defer db.Close()
+	_,err = db.Exec("DELETE from duplicates where dup=?",dup)
+	if err == nil {
+		return true
+	}
+	fmt.Println(err)
+	return false
+}
+
 /*Add Product Version.*/
 func add_product_version(product_id string, value string) error {
 	db, err := sql.Open("mysql", conn_str)

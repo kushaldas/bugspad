@@ -160,6 +160,13 @@
 		    
 		    </tr>
 		    {{end}}
+		    {{if eq .status "duplicate"}}
+		    <tr>
+			<td class="field_title">Duplicate of: </td>
+			<td><input name="bug_duplicate" type="text" value="{{ .duplicateof}}"></input></td>
+		    
+		    </tr>
+		    {{end}}
 		    <input name="bug_id" value="{{ .id}}" type="hidden"></input>
 		</table>
 	   
@@ -272,10 +279,18 @@
 		<td class="field_title">Reported at:</td>
 		<td>{{ .reported}}</td>
 	    </tr>
+	    {{if eq .status "fixed"}}
 	    <tr>
 		<td class="field_title">Fixed in Version:</td>
 		<td>{{ .fixedinver}}</td>
 	    </tr>
+	    {{end}}
+	    {{if eq .status "duplicate"}}
+	    <tr>
+		<td class="field_title">Duplicate of:</td>
+		<td>{{ .duplicateof}}</td>
+	    </tr>
+	    {{end}}
 	</table>
     </div>
     <div id="bug_description">
