@@ -6,12 +6,8 @@
     
     </head>
     <body>
-	<div class="title_bar">Bugspad - {{.pagetitle}}</div>
-	    <ul class="head_container">
-		<li><a href="/">Home</a></li>
-		<li><a href="/filebug_product">File a Bug</a></li>
-		<li><a href="#"> Search a Bug</a></li>
-		<li><a href="#"> Frequent Bugs</a></li>
+	<div id="userlogreg">
+	    <ul class="loguser head_container" >
 		{{if .islogged}}
 			<li><a href="#">{{ .useremail}}</a></li>
 			<li> <a href="/logout">Logout</a></li>
@@ -19,6 +15,14 @@
 			<li> <a href="/login">Login</a></li>
 			<li> <a href="/register">New User ?</a></li>
 		    {{end}}
+	    </ul>
+	</div>
+	<div class="title_bar">Bugspad - {{.pagetitle}}</div>
+	    <ul class="head_container">
+		<li><a href="/">Home</a></li>
+		<li><a href="/filebug_product">File a Bug</a></li>
+		<li><a href="#"> Search a Bug</a></li>
+		<li><a href="#"> Frequent Bugs</a></li>
 		 {{if .islogged}}
 		    {{if .is_user_admin}}
 		    <li><a href="/admin"> Admin panel</a></li>

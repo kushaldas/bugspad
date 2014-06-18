@@ -15,12 +15,23 @@ ul.head_container > li {
     display: inline;
 }
 */
+a{
+    color: rgb(65, 131, 196);
+}
+
 ul.head_container
 {
     list-style-type:none;
     margin-left:2%;
     padding:0;
     overflow:hidden;
+}
+
+#userlogreg
+{
+float:right;
+margin-right:2%;
+padding-bottom:2%;
 }
 
 ul.head_container > li
@@ -30,9 +41,7 @@ float:left;
 
 li+li { border-left: 1px solid rgb(200,200,200) }
 
-a{
-    color: rgb(65, 131, 196);
-}
+
 
 ul.head_container > li > a:link, ul.head_container > li > a:visited
 {
@@ -51,7 +60,7 @@ ul.head_container > li > a:link, ul.head_container > li > a:visited
     text-decoration:none;
 }
 
-ul.head_container > li > a:hover,ul.head_container > li > a:active
+ul.head_container > li > a:hover,ul.head_container> li > a:active
 {
     //background-color:#7A991A;
 color: rgb(65, 131, 196);
