@@ -1088,6 +1088,7 @@ func editusers(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 				load_users()
+				http.Redirect(w, r, "/editusers", http.StatusFound)
 
 			}
 		} else {
