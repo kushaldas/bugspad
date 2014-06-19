@@ -254,7 +254,7 @@
 		    <td class="field_title">Blocks: </td>
 		    <td>
 			{{range $val := .blockedlist}}
-			    <a class="{{if eq (index $val) "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}" href="/bugs/{{ index $val }}">{{ index $val }} </a>
+			    <a class="{{if eq (index $val) "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}" href="/bugs/{{ index $val }}">{{$key}} </a>
 			{{end}}
 		    </td>
 		 </tr>
