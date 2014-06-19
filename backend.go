@@ -415,6 +415,13 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 	update_redis_bug_status(bug_id, status)
 	set_redis_bug(rid, status, summary)
 	add_latest_created(bug_id)
+
+	//adding the reporter to the cclist
+	val, _ = data["reporter"]
+	_, err = db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, val)
+	redis_sadd("userbug"+val.(string), bug_id)
+
+	fmt.Println(err)
 	return bug_id, err
 }
 
@@ -1050,6 +1057,7 @@ func add_bug_cc(bug_id int64, emails interface{}) bool {
 		if user_id != -1 {
 			_, err := db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, user_id)
 			fmt.Println(err)
+			redis_sadd("userbug"+strconv.Itoa(user_id), strconv.Itoa(int(bug_id)))
 		}
 	}
 	//fmt.Print("addcc")
@@ -1077,6 +1085,7 @@ func remove_bug_cc(bug_id int64, emails interface{}) bool {
 			if err != nil {
 				fmt.Println(err)
 			}
+			redis_srem("userbug"+strconv.Itoa(user_id), strconv.Itoa(int(bug_id)))
 		}
 	}
 	return true
@@ -1108,6 +1117,7 @@ func new_comment(reporter int, bug_id int, desc string) (id string, err error) {
 			fmt.Println(err)
 			return strconv.FormatInt(rid, 10), err
 		}
+		redis_sadd("userbug"+strconv.Itoa(reporter), strconv.Itoa(bug_id))
 	}
 	return strconv.FormatInt(rid, 10), err
 }
@@ -1563,6 +1573,21 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 		}
 	}
 	return m, err
+}
+
+func get_user_bugs(user_id string) map[string][2]string {
+
+	m := make(map[string][2]string)
+	bug_ids := redis_smembers("userbug" + user_id)
+	b := bug_ids.([]interface{})
+	for i, _ := range b {
+		//fmt.Println(string(b[i].([]uint8)))
+		bug := get_redis_bug(string(b[i].([]uint8)))
+		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
+	}
+	//fmt.Println(m)
+	return m
+
 }
 
 /*Returns the details of the user with the given user id*/

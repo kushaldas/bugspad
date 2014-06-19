@@ -2,6 +2,12 @@
 {{define "body"}}
     
     <div class="maincontent">
-	<center style="font-size:50px;margin-top:2%;"><b>Bugspad</b> - lightning fast bugtracker!</center>	
+	<center style="font-size:50px;margin-top:2%;"><b>Bugspad</b> - lightning fast bugtracker!</center>
+	{{if .islogged}}
+	<p>Bugs Related to you:</p>
+	    {{range $key,$val:= .userbugs}}
+		<p><a href="/bugs/{{$key}}" class="{{if eq (index $val 0) "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}">{{$key}} {{index $val 1}}</a></p>
+	    {{end}}
+	{{end}}
     </div>
 {{end}}

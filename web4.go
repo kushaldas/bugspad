@@ -66,8 +66,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		interface_data["islogged"] = il
 		interface_data["pagetitle"] = "Home"
 		interface_data["is_user_admin"] = false
-		if useremail != "" {
+		if useremail != "" && il {
 			interface_data["is_user_admin"] = is_user_admin(useremail)
+			interface_data["userbugs"] = get_user_bugs(strconv.Itoa(get_user_id(useremail)))
 		}
 		//fmt.Println(r.FormValue("username"))
 

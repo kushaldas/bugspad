@@ -40,6 +40,21 @@ func main() {
 		fmt.Println("err in loading data")
 		fmt.Println(err.Error())
 	}
+	//loading the user-related bug ids
+	rows, err = db.Query("SELECT bug_id, who FROM cc")
+	if err == nil {
+		var bug_id, user_id int
+		for rows.Next() {
+			err = rows.Scan(&bug_id, &user_id)
+			user_idstr := strconv.Itoa(user_id)
+			//fmt.Println("userbug"+user_idstr)
+			redis_sadd("userbug"+user_idstr, strconv.Itoa(bug_id))
+		}
+		fmt.Println("All user related bugs loaded in Redis.")
+	} else {
+		fmt.Println("err in loading data")
+		fmt.Println(err.Error())
+	}
 	defer rows.Close()
 
 }

@@ -70,6 +70,69 @@ func redis_hget(name, key string) []byte {
 	return val.([]uint8)
 }
 
+//Generic function to add into a redis set
+func redis_sadd(name, value string) error {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return nil
+	}
+
+	defer conn.Close()
+	val, err := conn.Do("SADD", name, value)
+	if err != nil || val == nil {
+		// handle error
+		fmt.Print(err)
+		return nil
+	}
+	return err
+}
+
+//Generic function to remove from a redis set
+func redis_srem(name, value string) error {
+	conn, err := redis.Dial("tcp", ":6379")
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return nil
+	}
+
+	defer conn.Close()
+	_, err = conn.Do("SREM", name, value)
+	if err != nil {
+		// handle error
+		fmt.Print(err)
+	}
+	return err
+}
+
+//Generic function to get all entries from a redis set
+func redis_smembers(name string) interface{} {
+	conn, err := redis.Dial("tcp", ":6379")
+	m := make([]interface{}, 0)
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return m
+	}
+
+	defer conn.Close()
+	val, err := conn.Do("SMEMBERS", name)
+	if err != nil || val == nil {
+		// handle error
+		fmt.Print(err)
+		return m
+	}
+	return val
+	//m=append(val,m)
+	/*	for i,_ := range(val) {
+		    m = append(m,val[i].([]uint8))
+		}
+	*/
+	//return m
+}
+
 func update_redis_bug_status(bug_id string, status string) {
 	redis_hset("b_status:"+status, bug_id, "1")
 }
