@@ -26,12 +26,12 @@ func checkError(err error) {
 }
 
 func isvalueinlist(value string, list []string) bool {
-    for _, v := range list {
-        if v == value {
-            return true
-        }
-    }
-    return false
+	for _, v := range list {
+		if v == value {
+			return true
+		}
+	}
+	return false
 }
 
 func generate_hash() []byte {
@@ -159,7 +159,7 @@ func registeruser(w http.ResponseWriter, r *http.Request) {
 
 	} else if r.Method == "POST" {
 		//type "0" refers to the normal user, while "1" refers to the admin
-		if r.FormValue("password")!=r.FormValue("repassword"){
+		if r.FormValue("password") != r.FormValue("repassword") {
 			fmt.Fprintln(w, "Passwords do not match.")
 			return
 		}
@@ -202,9 +202,9 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		interface_data["pagetitle"] = "Bug - " + bug_id + " details"
 		interface_data["dependencylist"] = bugs_dependent_on(bug_id)
 		interface_data["blockedlist"] = bugs_blocked_by(bug_id)
-		dup:=find_orig_ifdup(bug_id)
-		if dup!=-1{
-		    interface_data["duplicateof"] = dup
+		dup := find_orig_ifdup(bug_id)
+		if dup != -1 {
+			interface_data["duplicateof"] = dup
 		}
 		//fmt.Println(bug_data["reporter"])
 		if il {
@@ -229,225 +229,225 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 
 	} else if r.Method == "POST" {
 		//fmt.Println(r.FormValue("com_content"))
-			fmt.Println(r.FormValue("bug_status"))
-			stats,severs,priors:=get_redis_bugtags()
-			if !isvalueinlist(r.FormValue("bug_status"),stats) {
-			    fmt.Fprintln(w,"Bug Status Invalid.")
+		fmt.Println(r.FormValue("bug_status"))
+		stats, severs, priors := get_redis_bugtags()
+		if !isvalueinlist(r.FormValue("bug_status"), stats) {
+			fmt.Fprintln(w, "Bug Status Invalid.")
+			return
+		}
+		//The bug cannot be closed until all dependent bugs are closed.
+		//we cannot compare simply with r.FormValue("blockedlist"), as
+		/*if strings.Contains(r.FormValue("status"),"closed") {
+		    depbugs:=bugs_dependent_on(r.FormValue("bug_id"))
+		    for i,_:=range(depbugs) {
+			d:=strconv.Itoa(depbugs[i])
+			b:=get_bug(d)
+			if !strings.Contains(b["status"].(string),"closed") {
+			    fmt.Fprintln(w,"A bug depends on bug "+r.FormValue("bug_id"+"which is not closed."))
 			    return
 			}
-			//The bug cannot be closed until all dependent bugs are closed.
-			//we cannot compare simply with r.FormValue("blockedlist"), as 
-			/*if strings.Contains(r.FormValue("status"),"closed") {
-			    depbugs:=bugs_dependent_on(r.FormValue("bug_id"))
-			    for i,_:=range(depbugs) {
-				d:=strconv.Itoa(depbugs[i])
-				b:=get_bug(d)
-				if !strings.Contains(b["status"].(string),"closed") {
-				    fmt.Fprintln(w,"A bug depends on bug "+r.FormValue("bug_id"+"which is not closed."))
-				    return
-				}
-			    }
-			}*/
-			if strings.Contains(r.FormValue("bug_status"),"closed") {
-			    if r.FormValue("blockedlist")!=""{
-				    fmt.Fprintln(w,"This bug blocks other bugs and hence cannot be closed.")
-				    return
-				}
-			}
-			
-			if !isvalueinlist(r.FormValue("bug_priority"),priors) {
-			    fmt.Fprintln(w,"Bug Priority Invalid.")
-			    return
-			}
-			if !isvalueinlist(r.FormValue("bug_severity"),severs) {
-			    fmt.Fprintln(w,"Bug Severity Invalid.")
-			    return
-			}
-			interface_data["id"] = r.FormValue("bug_id")
-			interface_data["status"] = r.FormValue("bug_status")
-			interface_data["hardware"] = r.FormValue("bug_hardware")
-			interface_data["priority"] = r.FormValue("bug_priority")
-			interface_data["fixedinver"] = r.FormValue("bug_fixedinver")
-			interface_data["severity"] = r.FormValue("bug_severity")
-			interface_data["summary"] = r.FormValue("bug_title")
-			interface_data["whiteboard"] = r.FormValue("bug_whiteboard")
-			//fmt.Println(interface_data["status"])
-			//fmt.Println("dd")
-			interface_data["post_user"] = get_user_id(useremail)
-			interface_data["com_content"] = r.FormValue("com_content")
-			//making first user comment should change status from new to open
-			if r.FormValue("com_content")!="" {
-			    if r.FormValue("bug_status")=="new"|| r.FormValue("bug_status")=="fixed (closed)" || r.FormValue("bug_status")=="notabug (closed)" || r.FormValue("bug_status")=="wontfix (closed)"{
-				    interface_data["status"]="open"
-			    }
-			}
-			
-			comp_idint, _ := strconv.Atoi(r.FormValue("bug_component"))
-			subcomp_idint := -1
-			if r.FormValue("bug_subcomponent") != "" {
-				subcomp_idint, _ = strconv.Atoi(r.FormValue("bug_subcomponent"))
-			}
-			fmt.Println(subcomp_idint)
-			interface_data["subcomponent_id"] = subcomp_idint
-			interface_data["component_id"] = comp_idint
-			interface_data["component"] = get_component_name_by_id(comp_idint)
-			interface_data["subcomponent"] = get_subcomponent_name_by_id(subcomp_idint)
-			qaid := get_user_id(r.FormValue("bug_qa"))
-			docsid := get_user_id(r.FormValue("bug_docs"))
-			assignid := get_user_id(r.FormValue("bug_assigned_to"))
-			if qaid == -1 && (r.FormValue("bug_qa") != "") {
-				fmt.Fprintln(w, "Please enter correct QA entry.")
+		    }
+		}*/
+		if strings.Contains(r.FormValue("bug_status"), "closed") {
+			if r.FormValue("blockedlist") != "" {
+				fmt.Fprintln(w, "This bug blocks other bugs and hence cannot be closed.")
 				return
 			}
-			if docsid == -1 && (r.FormValue("bug_docs") != "") {
-				fmt.Fprintln(w, "Please enter correct Docs entry.")
-				return
-			}
-			if assignid == -1 && (r.FormValue("bug_assigned_to") != "") {
-				fmt.Fprintln(w, "Please enter correct Assigned to entry.")
-				return
-			}
-			fixversion_id, _ := strconv.Atoi(r.FormValue("bug_fixedinver"))
-			version_id, _ := strconv.Atoi(r.FormValue("bug_version"))
-			interface_data["qa"] = qaid
-			interface_data["docs"] = docsid
-			if assignid==-1{
-			    assignid=get_component_owner(comp_idint)
-			}
-			interface_data["assigned_to"] = assignid
-			interface_data["version"] = version_id
-			interface_data["fixedinver"] = fixversion_id
+		}
 
-			/******update dependencies**********/
-			currentbug_idint, _ := strconv.Atoi(r.FormValue("bug_id"))
+		if !isvalueinlist(r.FormValue("bug_priority"), priors) {
+			fmt.Fprintln(w, "Bug Priority Invalid.")
+			return
+		}
+		if !isvalueinlist(r.FormValue("bug_severity"), severs) {
+			fmt.Fprintln(w, "Bug Severity Invalid.")
+			return
+		}
+		interface_data["id"] = r.FormValue("bug_id")
+		interface_data["status"] = r.FormValue("bug_status")
+		interface_data["hardware"] = r.FormValue("bug_hardware")
+		interface_data["priority"] = r.FormValue("bug_priority")
+		interface_data["fixedinver"] = r.FormValue("bug_fixedinver")
+		interface_data["severity"] = r.FormValue("bug_severity")
+		interface_data["summary"] = r.FormValue("bug_title")
+		interface_data["whiteboard"] = r.FormValue("bug_whiteboard")
+		//fmt.Println(interface_data["status"])
+		//fmt.Println("dd")
+		interface_data["post_user"] = get_user_id(useremail)
+		interface_data["com_content"] = r.FormValue("com_content")
+		//making first user comment should change status from new to open
+		if r.FormValue("com_content") != "" {
+			if r.FormValue("bug_status") == "new" || r.FormValue("bug_status") == "fixed (closed)" || r.FormValue("bug_status") == "notabug (closed)" || r.FormValue("bug_status") == "wontfix (closed)" {
+				interface_data["status"] = "open"
+			}
+		}
 
-			olddependencies := ""
-			dep := bugs_dependent_on(r.FormValue("bug_id"))
-			for i, _ := range dep {
-				fmt.Println(i)
-				tmp := strconv.Itoa(i)
-				olddependencies = olddependencies + tmp + ","
-			}
-			oldblocked := ""
-			bloc := bugs_blocked_by(r.FormValue("bug_id"))
-			for i, _ := range bloc {
-				tmp := strconv.Itoa(i)
-				oldblocked = oldblocked + tmp + ","
-			}
-			clear_dependencies(currentbug_idint, "blocked")
-			dependbugs := strings.SplitAfter(r.FormValue("dependencylist"), ",")
-			//fmt.Println(dependbugs)
-			for index, _ := range dependbugs {
-				//fmt.Println(dependbug)
-				if dependbugs[index] != "" {
-					dependbug_idint, _ := strconv.Atoi(strings.Trim(dependbugs[index], ","))
-					// fmt.Println(dependbug_idint)
-					valid, val := is_valid_bugdependency(currentbug_idint, dependbug_idint)
-					fmt.Println(val)
-					if valid {
-						err := add_bug_dependency(currentbug_idint, dependbug_idint)
-						if err != nil {
-							fmt.Fprintln(w, err)
-							return
-						}
-					} else {
-						fmt.Fprintln(w, val)
+		comp_idint, _ := strconv.Atoi(r.FormValue("bug_component"))
+		subcomp_idint := -1
+		if r.FormValue("bug_subcomponent") != "" {
+			subcomp_idint, _ = strconv.Atoi(r.FormValue("bug_subcomponent"))
+		}
+		fmt.Println(subcomp_idint)
+		interface_data["subcomponent_id"] = subcomp_idint
+		interface_data["component_id"] = comp_idint
+		interface_data["component"] = get_component_name_by_id(comp_idint)
+		interface_data["subcomponent"] = get_subcomponent_name_by_id(subcomp_idint)
+		qaid := get_user_id(r.FormValue("bug_qa"))
+		docsid := get_user_id(r.FormValue("bug_docs"))
+		assignid := get_user_id(r.FormValue("bug_assigned_to"))
+		if qaid == -1 && (r.FormValue("bug_qa") != "") {
+			fmt.Fprintln(w, "Please enter correct QA entry.")
+			return
+		}
+		if docsid == -1 && (r.FormValue("bug_docs") != "") {
+			fmt.Fprintln(w, "Please enter correct Docs entry.")
+			return
+		}
+		if assignid == -1 && (r.FormValue("bug_assigned_to") != "") {
+			fmt.Fprintln(w, "Please enter correct Assigned to entry.")
+			return
+		}
+		fixversion_id, _ := strconv.Atoi(r.FormValue("bug_fixedinver"))
+		version_id, _ := strconv.Atoi(r.FormValue("bug_version"))
+		interface_data["qa"] = qaid
+		interface_data["docs"] = docsid
+		if assignid == -1 {
+			assignid = get_component_owner(comp_idint)
+		}
+		interface_data["assigned_to"] = assignid
+		interface_data["version"] = version_id
+		interface_data["fixedinver"] = fixversion_id
+
+		/******update dependencies**********/
+		currentbug_idint, _ := strconv.Atoi(r.FormValue("bug_id"))
+
+		olddependencies := ""
+		dep := bugs_dependent_on(r.FormValue("bug_id"))
+		for i, _ := range dep {
+			fmt.Println(i)
+			tmp := strconv.Itoa(i)
+			olddependencies = olddependencies + tmp + ","
+		}
+		oldblocked := ""
+		bloc := bugs_blocked_by(r.FormValue("bug_id"))
+		for i, _ := range bloc {
+			tmp := strconv.Itoa(i)
+			oldblocked = oldblocked + tmp + ","
+		}
+		clear_dependencies(currentbug_idint, "blocked")
+		dependbugs := strings.SplitAfter(r.FormValue("dependencylist"), ",")
+		//fmt.Println(dependbugs)
+		for index, _ := range dependbugs {
+			//fmt.Println(dependbug)
+			if dependbugs[index] != "" {
+				dependbug_idint, _ := strconv.Atoi(strings.Trim(dependbugs[index], ","))
+				// fmt.Println(dependbug_idint)
+				valid, val := is_valid_bugdependency(currentbug_idint, dependbug_idint)
+				fmt.Println(val)
+				if valid {
+					err := add_bug_dependency(currentbug_idint, dependbug_idint)
+					if err != nil {
+						fmt.Fprintln(w, err)
 						return
 					}
-				}
-
-			}
-
-			clear_dependencies(currentbug_idint, "dependson")
-			blockedbugs := strings.SplitAfter(r.FormValue("blockedlist"), ",")
-			//fmt.Println(blockedbugs)
-			for index, _ := range blockedbugs {
-				if blockedbugs[index] != "" {
-					blockedbug_idint, _ := strconv.Atoi(strings.Trim(blockedbugs[index], ","))
-					valid, val := is_valid_bugdependency(blockedbug_idint, currentbug_idint)
-					if valid {
-						err := add_bug_dependency(blockedbug_idint, currentbug_idint)
-						if err != nil {
-							fmt.Fprintln(w, err)
-							return
-						}
-
-					} else {
-						fmt.Fprintln(w, val)
-						return
-					}
-				}
-
-			}
-
-			newdependencies := ""
-			dep = bugs_dependent_on(r.FormValue("bug_id"))
-			for i, _ := range dep {
-				tmp := strconv.Itoa(i)
-				newdependencies = newdependencies + tmp + ","
-			}
-			newblocked := ""
-			bloc = bugs_blocked_by(r.FormValue("bug_id"))
-			for i, _ := range bloc {
-				tmp := strconv.Itoa(i)
-				newblocked = newblocked + tmp + ","
-			}
-			net_comment := ""
-			if olddependencies != newdependencies {
-				net_comment = net_comment + htmlify(olddependencies, newdependencies, "depends on")
-			}
-			fmt.Println(oldblocked)
-			fmt.Println(newblocked)
-			if oldblocked != newblocked {
-				net_comment = net_comment + htmlify(oldblocked, newblocked, "blocks")
-			} //fmt.Fprintln(w,"Bug successfully updated!")
-
-			/********dependencies updated**********/
-			
-			/*******duplicate changes if any***********/
-			dupof:=r.FormValue("bug_duplicate")
-			orig:=find_orig_ifdup(dupof)
-			if interface_data["status"].(string)=="duplicate" {
-				if dupof!="" {
-					fmt.Println("hoo")
-					if orig!=-1{
-					    fmt.Println("Cant be duplicated as a duplicate of a duplicate.")
-					    return
-					}
-					//remove previous entry
-					if remove_dup_bug(r.FormValue("bug_id")) {
-					    //add new entry
-					    if !add_dup_bug(r.FormValue("bug_id"),dupof) {
-						fmt.Fprintln(w,"Some error occured while updating duplicates.")
-						return
-					    }
-					} else {
-					    fmt.Fprintln(w,"Some error occured while updating duplicates.")
-					    return
-					}
-					sorg:=strconv.Itoa(orig)
-					net_comment = net_comment + htmlify(sorg,dupof,"duplicateof")
-				}
-			} else {
-				if !remove_dup_bug(r.FormValue("bug_id")) {
-					    fmt.Fprintln(w,"Some error occured while updating duplicates.")
-					    return
+				} else {
+					fmt.Fprintln(w, val)
+					return
 				}
 			}
-			
-			/*******duplicates done********/
-			
-			err := update_bug(interface_data)
-			if err != nil {
-				fmt.Fprintln(w, "Bug could not be updated!")
-				return
-			}
-			if net_comment != "" {
-				new_comment(interface_data["post_user"].(int), currentbug_idint, net_comment)
-			}
-			http.Redirect(w, r, "/bugs/"+r.FormValue("bug_id"), http.StatusFound)
 
 		}
+
+		clear_dependencies(currentbug_idint, "dependson")
+		blockedbugs := strings.SplitAfter(r.FormValue("blockedlist"), ",")
+		//fmt.Println(blockedbugs)
+		for index, _ := range blockedbugs {
+			if blockedbugs[index] != "" {
+				blockedbug_idint, _ := strconv.Atoi(strings.Trim(blockedbugs[index], ","))
+				valid, val := is_valid_bugdependency(blockedbug_idint, currentbug_idint)
+				if valid {
+					err := add_bug_dependency(blockedbug_idint, currentbug_idint)
+					if err != nil {
+						fmt.Fprintln(w, err)
+						return
+					}
+
+				} else {
+					fmt.Fprintln(w, val)
+					return
+				}
+			}
+
+		}
+
+		newdependencies := ""
+		dep = bugs_dependent_on(r.FormValue("bug_id"))
+		for i, _ := range dep {
+			tmp := strconv.Itoa(i)
+			newdependencies = newdependencies + tmp + ","
+		}
+		newblocked := ""
+		bloc = bugs_blocked_by(r.FormValue("bug_id"))
+		for i, _ := range bloc {
+			tmp := strconv.Itoa(i)
+			newblocked = newblocked + tmp + ","
+		}
+		net_comment := ""
+		if olddependencies != newdependencies {
+			net_comment = net_comment + htmlify(olddependencies, newdependencies, "depends on")
+		}
+		fmt.Println(oldblocked)
+		fmt.Println(newblocked)
+		if oldblocked != newblocked {
+			net_comment = net_comment + htmlify(oldblocked, newblocked, "blocks")
+		} //fmt.Fprintln(w,"Bug successfully updated!")
+
+		/********dependencies updated**********/
+
+		/*******duplicate changes if any***********/
+		dupof := r.FormValue("bug_duplicate")
+		orig := find_orig_ifdup(dupof)
+		if interface_data["status"].(string) == "duplicate" {
+			if dupof != "" {
+				fmt.Println("hoo")
+				if orig != -1 {
+					fmt.Println("Cant be duplicated as a duplicate of a duplicate.")
+					return
+				}
+				//remove previous entry
+				if remove_dup_bug(r.FormValue("bug_id")) {
+					//add new entry
+					if !add_dup_bug(r.FormValue("bug_id"), dupof) {
+						fmt.Fprintln(w, "Some error occured while updating duplicates.")
+						return
+					}
+				} else {
+					fmt.Fprintln(w, "Some error occured while updating duplicates.")
+					return
+				}
+				sorg := strconv.Itoa(orig)
+				net_comment = net_comment + htmlify(sorg, dupof, "duplicateof")
+			}
+		} else {
+			if !remove_dup_bug(r.FormValue("bug_id")) {
+				fmt.Fprintln(w, "Some error occured while updating duplicates.")
+				return
+			}
+		}
+
+		/*******duplicates done********/
+
+		err := update_bug(interface_data)
+		if err != nil {
+			fmt.Fprintln(w, "Bug could not be updated!")
+			return
+		}
+		if net_comment != "" {
+			new_comment(interface_data["post_user"].(int), currentbug_idint, net_comment)
+		}
+		http.Redirect(w, r, "/bugs/"+r.FormValue("bug_id"), http.StatusFound)
+
+	}
 
 }
 
@@ -549,14 +549,14 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 		}
 	} else if r.Method == "POST" {
 		if il {
-			_,severs,priors:=get_redis_bugtags()
-			if !isvalueinlist(r.FormValue("bug_priority"),priors) {
-			    fmt.Fprintln(w,"Bug Priority Invalid.")
-			    return
+			_, severs, priors := get_redis_bugtags()
+			if !isvalueinlist(r.FormValue("bug_priority"), priors) {
+				fmt.Fprintln(w, "Bug Priority Invalid.")
+				return
 			}
-			if !isvalueinlist(r.FormValue("bug_severity"),severs) {
-			    fmt.Fprintln(w,"Bug Severity Invalid.")
-			    return
+			if !isvalueinlist(r.FormValue("bug_severity"), severs) {
+				fmt.Fprintln(w, "Bug Severity Invalid.")
+				return
 			}
 			newbug := make(Bug)
 			newbug["summary"] = r.FormValue("bug_title")

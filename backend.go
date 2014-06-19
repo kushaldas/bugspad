@@ -630,8 +630,8 @@ func bugs_blocked_by(bug_id string) map[int]string {
 	var b_id int
 	var status string
 	for rows.Next() {
-		err = rows.Scan(&b_id,&status)
-		m[b_id] = status 
+		err = rows.Scan(&b_id, &status)
+		m[b_id] = status
 		//fmt.Println(c_id, name, description)
 	}
 	return m
@@ -661,7 +661,7 @@ func bugs_dependent_on(bug_id string) map[int]string {
 	var status string
 	for rows.Next() {
 		err = rows.Scan(&b_id, &status)
-		m[b_id]=status
+		m[b_id] = status
 		//fmt.Println(c_id, name, description)
 	}
 	return m
@@ -799,21 +799,21 @@ func update_bug(data map[string]interface{}) error {
 
 	val, ok = data["qa"]
 	if ok {
-		if val==-1{
-		    buffer.WriteString(", qa=NULL")
+		if val == -1 {
+			buffer.WriteString(", qa=NULL")
 		} else {
-		    buffer.WriteString(", qa=?")
-		    vals = append(vals, val)
+			buffer.WriteString(", qa=?")
+			vals = append(vals, val)
 		}
 	}
 
 	val, ok = data["docs"]
 	if ok {
-		if val==-1{
-		    buffer.WriteString(", docs=NULL")
+		if val == -1 {
+			buffer.WriteString(", docs=NULL")
 		} else {
-		    buffer.WriteString(", docs=?")
-		    vals = append(vals, val)
+			buffer.WriteString(", docs=?")
+			vals = append(vals, val)
 		}
 	}
 
@@ -1028,6 +1028,7 @@ func get_user_name(id int) string {
 	}
 	return ""
 }
+
 /*
 Adds new CC users to a bug
 */
@@ -1100,13 +1101,13 @@ func new_comment(reporter int, bug_id int, desc string) (id string, err error) {
 	}
 	rid, err := ret.LastInsertId()
 	//checking if reporter is in bugcc list if not add it.
-	_,err=db.Query("SELECT * from cc where bug_id=?,who=?",reporter,bug_id)
-	if err!=nil{
-	    _, err = db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, reporter)
-	    if err!=nil{
-		fmt.Println(err)
-		return strconv.FormatInt(rid, 10), err
-	    }
+	_, err = db.Query("SELECT * from cc where bug_id=?,who=?", reporter, bug_id)
+	if err != nil {
+		_, err = db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, reporter)
+		if err != nil {
+			fmt.Println(err)
+			return strconv.FormatInt(rid, 10), err
+		}
 	}
 	return strconv.FormatInt(rid, 10), err
 }
@@ -1212,15 +1213,15 @@ func add_release(name string) {
 /*
 Get original of a duplicate bug if it is a duplicate.
 */
-func find_orig_ifdup(bug_id string) int{
-    	db, err := sql.Open("mysql", conn_str)
+func find_orig_ifdup(bug_id string) int {
+	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
 		fmt.Print(err)
 		return -1
 	}
 	defer db.Close()
-	row := db.QueryRow("SELECT dup_of from duplicates where dup=?",bug_id)
+	row := db.QueryRow("SELECT dup_of from duplicates where dup=?", bug_id)
 	var dup_of int
 	err = row.Scan(&dup_of)
 	if err == nil {
@@ -1235,15 +1236,15 @@ func find_orig_ifdup(bug_id string) int{
 /*
 Set original of a duplicate bug if it is a duplicate.
 */
-func add_dup_bug(dup string, dup_of string) bool{
-    	db, err := sql.Open("mysql", conn_str)
+func add_dup_bug(dup string, dup_of string) bool {
+	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
 		fmt.Print(err)
 		return false
 	}
 	defer db.Close()
-	_,err = db.Exec("INSERT into duplicates (dup,dup_of) VALUES (?,?)",dup,dup_of)
+	_, err = db.Exec("INSERT into duplicates (dup,dup_of) VALUES (?,?)", dup, dup_of)
 	if err == nil {
 		return true
 	}
@@ -1254,15 +1255,15 @@ func add_dup_bug(dup string, dup_of string) bool{
 /*
 Remove original of a duplicate bug if it is a duplicate.
 */
-func remove_dup_bug(dup string) bool{
-    	db, err := sql.Open("mysql", conn_str)
+func remove_dup_bug(dup string) bool {
+	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
 		fmt.Print(err)
 		return false
 	}
 	defer db.Close()
-	_,err = db.Exec("DELETE from duplicates where dup=?",dup)
+	_, err = db.Exec("DELETE from duplicates where dup=?", dup)
 	if err == nil {
 		return true
 	}

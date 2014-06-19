@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/garyburd/redigo/redis"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/vaughan0/go-ini"
 	"strconv"
 	"strings"
-	"github.com/vaughan0/go-ini"
 )
 
 type Bug map[string]interface{}
@@ -32,7 +32,6 @@ func redis_hdel(name, key string) {
 		return
 	}
 }
-
 
 // Generic function to update a redis HASH
 func redis_hset(name, key, value string) {
@@ -133,32 +132,32 @@ func load_bugtags() {
 		return
 	}
 	file, _ := ini.LoadFile("config/static.ini")
-	statuses,_:=file.Get("bugspad", "statuses")
-	severities,_:=file.Get("bugspad", "severities")
-	priorities,_:=file.Get("bugspad", "priorities")
-	_,err = conn.Do("HSET", "tags", "statuses",  statuses)
-	_,err = conn.Do("HSET", "tags", "severities",  severities)
-	_,err = conn.Do("HSET", "tags", "priorities",  priorities)
+	statuses, _ := file.Get("bugspad", "statuses")
+	severities, _ := file.Get("bugspad", "severities")
+	priorities, _ := file.Get("bugspad", "priorities")
+	_, err = conn.Do("HSET", "tags", "statuses", statuses)
+	_, err = conn.Do("HSET", "tags", "severities", severities)
+	_, err = conn.Do("HSET", "tags", "priorities", priorities)
 	if err != nil {
 		// handle error
 		fmt.Print(err)
 		return
 	}
-	
+
 	return
 }
 
-func get_redis_bugtags() ([]string,[]string,[]string){
-    m1:=make([]string,0)
-    m2:=make([]string,0)
-    m3:=make([]string,0)
-    dec := json.NewDecoder(strings.NewReader(string(redis_hget("tags","statuses"))))
-    dec.Decode(&m1)
-    dec = json.NewDecoder(strings.NewReader(string(redis_hget("tags","severities"))))
-    dec.Decode(&m2)
-    dec = json.NewDecoder(strings.NewReader(string(redis_hget("tags","priorities"))))
-    dec.Decode(&m3)
-    return m1,m2,m3	
+func get_redis_bugtags() ([]string, []string, []string) {
+	m1 := make([]string, 0)
+	m2 := make([]string, 0)
+	m3 := make([]string, 0)
+	dec := json.NewDecoder(strings.NewReader(string(redis_hget("tags", "statuses"))))
+	dec.Decode(&m1)
+	dec = json.NewDecoder(strings.NewReader(string(redis_hget("tags", "severities"))))
+	dec.Decode(&m2)
+	dec = json.NewDecoder(strings.NewReader(string(redis_hget("tags", "priorities"))))
+	dec.Decode(&m3)
+	return m1, m2, m3
 }
 
 func update_redis(id int64, email string, password string, utype string, channel chan int) {
@@ -292,7 +291,6 @@ func clear_redis_releases() {
 	conn.Do("DEL", "releases")
 
 }
-
 
 /* To find out if an user already exists or not. */
 func find_redis_user(email string) (bool, string) {

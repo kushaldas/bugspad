@@ -11,7 +11,6 @@ import (
 
 type Result1 map[string]string
 
-
 func product(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -66,9 +65,9 @@ func component(w http.ResponseWriter, r *http.Request) {
 		desc := pdata["description"].(string)
 		product_id := int(pdata["product_id"].(float64))
 		owner := pdata["owner"].(string)
-		qa:=""
-		if pdata["qa"]!=nil{
-		    qa = pdata["qa"].(string)
+		qa := ""
+		if pdata["qa"] != nil {
+			qa = pdata["qa"].(string)
 		}
 		if authenticate_redis(user, password) {
 			owner_id := get_user_id(owner)
@@ -369,9 +368,9 @@ func releases(w http.ResponseWriter, r *http.Request) {
 // Main function of the application. This handles
 // all entry points for the webapplication.
 func main() {
-        // First load the configuration details.
+	// First load the configuration details.
 	load_config("config/bugspad.ini")
-        // Load the user details into redis.
+	// Load the user details into redis.
 	load_users()
 	http.HandleFunc("/component/", component)
 	http.HandleFunc("/components/", components)
