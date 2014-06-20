@@ -1119,6 +1119,14 @@ func new_comment(reporter int, bug_id int, desc string) (id string, err error) {
 		}
 		redis_sadd("userbug"+strconv.Itoa(reporter), strconv.Itoa(bug_id))
 	}
+	//check if the bug status is still new if yes then change it to open
+	bug := get_redis_bug(strconv.Itoa(bug_id))
+	if bug["status"].(string) == "new" && err == nil {
+		bug["status"] = "open"
+		update_bug(bug)
+	} else {
+		fmt.Println(err)
+	}
 	return strconv.FormatInt(rid, 10), err
 }
 
