@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	//"reflect"
 	//"io/ioutil"
 )
 
@@ -194,7 +195,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			checkError(err)
 		}
-		//fmt.Println(bug_data["cclist"])
+		fmt.Println(interface_data["cclist"])
 		comment_data := fetch_comments_by_bug(bug_id)
 		interface_data["comment_data"] = comment_data
 		interface_data["islogged"] = il
@@ -560,8 +561,11 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 			newbug["hardware"] = r.FormValue("bug_hardware")
 			newbug["description"] = r.FormValue("bug_description")
 			newbug["priority"] = r.FormValue("bug_priority")
-			newbug["component_id"] = r.FormValue("bug_component")
+			compid,_:=strconv.Atoi(r.FormValue("bug_component"))
+			newbug["component_id"] = compid
 			newbug["reporter"] = get_user_id(useremail)
+			//fmt.Println(reflect.TypeOf(newbug["component_id"]))
+			//fmt.Println(reflect.TypeOf(newbug["reporter"]))
 			docsint := get_user_id(r.FormValue("bug_docs"))
 			if r.FormValue("bug_docs") != "" {
 				if docsint != -1 {
@@ -586,9 +590,9 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 			}
 
 			newbug["version"] = version_int
-			id, err := new_bug(newbug)
+			bugid, err := new_bug(newbug)
 
-			if err != nil {
+			if bugid == -1 {
 				fmt.Fprintln(w, err)
 				return
 			}
@@ -601,21 +605,17 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 					bugccemails = append(bugccemails, strings.Trim(ccs[index], ","))
 				}
 			}
-			bugid, ok := strconv.ParseInt(id, 10, 32)
-			if ok == nil {
-				if bugccemails != nil {
-					if !add_bug_cc(bugid, bugccemails) {
-						fmt.Fprintln(w, "Bug CC could not be updated, please check")
-						return
-					}
+			if bugccemails != nil {
+				if !add_bug_cc(int64(bugid), bugccemails) {
+					fmt.Fprintln(w, "Bug CC could not be updated, please check")
+					return
 				}
-				http.Redirect(w, r, "/bugs/"+id, http.StatusFound)
+				http.Redirect(w, r, "/bugs/"+strconv.Itoa(bugid), http.StatusFound)
 
 			} else {
 				fmt.Fprintln(w, "The Bug creation had errors, unable to fetch Bug ID.")
 				return
 			}
-			bug_id := int(bugid)
 			//Adding dependencies and blocked.
 			dependbugs := strings.SplitAfter(r.FormValue("bug_depends_on"), ",")
 			//fmt.Println(dependbugs)
@@ -624,10 +624,10 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 				if dependbugs[index] != "" {
 					dependbug_idint, _ := strconv.Atoi(strings.Trim(dependbugs[index], ","))
 					// fmt.Println(dependbug_idint)
-					valid, val := is_valid_bugdependency(bug_id, dependbug_idint)
+					valid, val := is_valid_bugdependency(bugid, dependbug_idint)
 					fmt.Println(val)
 					if valid {
-						err := add_bug_dependency(bug_id, dependbug_idint)
+						err := add_bug_dependency(bugid, dependbug_idint)
 						if err != nil {
 							fmt.Fprintln(w, err)
 							return
@@ -645,9 +645,9 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 			for index, _ := range blockedbugs {
 				if blockedbugs[index] != "" {
 					blockedbug_idint, _ := strconv.Atoi(strings.Trim(blockedbugs[index], ","))
-					valid, val := is_valid_bugdependency(blockedbug_idint, bug_id)
+					valid, val := is_valid_bugdependency(blockedbug_idint, bugid)
 					if valid {
-						err := add_bug_dependency(blockedbug_idint, bug_id)
+						err := add_bug_dependency(blockedbug_idint, bugid)
 						if err != nil {
 							fmt.Fprintln(w, err)
 							return
@@ -666,137 +666,27 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-An editing page for bug.
-
-func editbugpage(w http.ResponseWriter, r *http.Request) {
-
-    	//bug_id := r.URL.Path[len("/editbugpage/"):]
-	il, useremail := is_logged(r)
-	interface_data := make(map[string]interface{})
-	if il{
-			/*if (r.Method == "GET" && bug_id!="") {
-			    tml, err := template.ParseFiles("./templates/editbugpage.html","./templates/base.html")
-			    if err != nil {
-				checkError(err)
-			    }
-			    interface_data["islogged"]=il
-			    interface_data["useremail"]=useremail
-			    interface_data["pagetitle"]="Edit Bug Page"
-			    tml.ExecuteTemplate(w,"base",interface_data)
-			    bugdata := get_bug(bug_id)
-			    if bugdata["error_msg"]!=nil{
-				fmt.Fprintln(w,bugdata["error_msg"])
-				return
-			    }
-			    fmt.Println(bugdata["summary"])
-			    //productcomponents :=
-			    tml.ExecuteTemplate(w,"bugdescription",bugdata)
-
-
-			}if r.Method == "POST"{
-			    	interface_data["id"]=r.FormValue("bug_id")
-				interface_data["status"]=r.FormValue("bug_status")
-				interface_data["hardware"]=r.FormValue("bug_hardware")
-				interface_data["priority"]=r.FormValue("bug_priority")
-				interface_data["fixedinver"]=r.FormValue("bug_fixedinver")
-				interface_data["severity"]=r.FormValue("bug_severity")
-				interface_data["summary"]=r.FormValue("bug_title")
-				interface_data["whiteboard"]=r.FormValue("bug_whiteboard")
-				//fmt.Println(interface_data["status"])
-				//fmt.Println("dd")
-				interface_data["post_user"]=get_user_id(useremail)
-				interface_data["com_content"]=r.FormValue("com_content")
-				comp_idint,_:=strconv.Atoi(r.FormValue("bug_component"))
-				subcomp_idint:=-1
-				if r.FormValue("bug_subcomponent")!=""{
-				    subcomp_idint,_=strconv.Atoi(r.FormValue("bug_subcomponent"))
-				}
-				fmt.Println(subcomp_idint)
-				interface_data["subcomponent_id"]=subcomp_idint
-				interface_data["component_id"]=comp_idint
-				interface_data["component"]=get_component_name_by_id(comp_idint)
-				interface_data["subcomponent"]=get_subcomponent_name_by_id(subcomp_idint)
-				qaid := get_user_id(r.FormValue("bug_qa"))
-				docsid := get_user_id(r.FormValue("bug_docs"))
-				assignid := get_user_id(r.FormValue("bug_assigned_to"))
-				if (qaid ==-1 || docsid==-1 || assignid==-1) && (r.FormValue("bug_qa")!="") && (r.FormValue("bug_docs")!=""  && (r.FormValue("bug_assigned_to")!="")){
-				    fmt.Fprintln(w,"Bug could not be updated!")
-				    return
-				}
-				fixversion_id,_:=strconv.Atoi(r.FormValue("bug_fixedinver"))
-				version_id,_:=strconv.Atoi(r.FormValue("bug_version"))
-				if qaid!= -1 {
-				    interface_data["qa"]=qaid
-				}
-				if docsid!= -1 {
-				    interface_data["docs"]=docsid
-				}
-				interface_data["assigned_to"]=assignid
-				interface_data["version"]=version_id
-				interface_data["fixedinver"]=fixversion_id
-				err := update_bug(interface_data)
-				if err!=nil{
-				    fmt.Fprintln(w,"Bug could not be updated!")
-				    return
-				}
-				//update dependencies
-				currentbug_idint, _ := strconv.Atoi(r.FormValue("bug_id"))
-
-				clear_dependencies(currentbug_idint,"blocked")
-				dependbugs:=strings.SplitAfter(r.FormValue("dependencylist"),",")
-				//fmt.Println(dependbugs)
-				for index,_ := range(dependbugs) {
-					//fmt.Println(dependbug)
-					if dependbugs[index]!=""{
-					    dependbug_idint, _ := strconv.Atoi(strings.Trim(dependbugs[index],","))
-					   // fmt.Println(dependbug_idint)
-					    valid,val:=is_valid_bugdependency(currentbug_idint, dependbug_idint)
-					    fmt.Println(val)
-					    if valid {
-						err:=add_bug_dependency(currentbug_idint, dependbug_idint)
-						if err!=nil{
-						    fmt.Fprintln(w,err)
-						    return
-						}
-					    } else {
-						fmt.Fprintln(w,val)
-						return
-					    }
-					}
-
-				}
-
-				clear_dependencies(currentbug_idint,"dependson")
-				blockedbugs:=strings.SplitAfter(r.FormValue("blockedlist")," ")
-				//fmt.Println(blockedbugs)
-				for index,_ := range(blockedbugs) {
-					if blockedbugs[index]!="" {
-					    blockedbug_idint, _ := strconv.Atoi(strings.Trim(blockedbugs[index],","))
-					    valid,val:=is_valid_bugdependency(blockedbug_idint, currentbug_idint)
-					    if valid {
-						err:=add_bug_dependency(blockedbug_idint, currentbug_idint)
-						if err!=nil{
-						    fmt.Fprintln(w,err)
-						    return
-						}
-					    } else {
-						fmt.Fprintln(w,val)
-						return
-					    }
-					}
-
-				}
-				interface_data["blockedlist"]=r.FormValue
-				//fmt.Fprintln(w,"Bug successfully updated!")
-				http.Redirect(w,r,"/bugs/"+r.FormValue("bug_id"),http.StatusFound)
-
-			}
-	} else {
-		http.Redirect(w,r,"/login",http.StatusFound)
-
+Search interface function bugspad
+*/
+func searchbugs(w http.ResponseWriter, r *http.Request) {
+	
+	if r.Method == "GET" {
+	    m:=make(map[string]interface{})
+	    tml, _ := template.ParseFiles("./templates/searchbug.html","./templates/base.html") 
+	    m["products"] = get_all_products()
+	    m["components"] = get_all_components()
+	    m["searchresult"]=false
+	    m["pagetitle"]="Search"
+	    tml.ExecuteTemplate(w,"base", m)    
+	
+	} else if r.Method == "POST" {
+	   tml, _ := template.ParseFiles("./templates/searchbug.html","./templates/base.html")
+	   r.ParseForm()
+	   searchbugs := search_redis_bugs(r.Form["bug_component"], r.Form["bug_product"], r.Form["bug_status"], r.Form["bug_version"], r.Form["bug_fixedinver"])
+	   fmt.Println(searchbugs)
+	   tml.ExecuteTemplate(w,"base",map[string]interface{}{"searchbugs":searchbugs,"searchresult":true, "pagetitle":"Search"})
 	}
 }
-*/
 /*
 Admin:: Homepage of the Admin interface.
 */
@@ -1234,8 +1124,8 @@ func editcomponentpage(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				interface_data["component_name"] = cdata["name"]
-				interface_data["component_qa"] = cdata["qa"]
-				interface_data["component_owner"] = cdata["owner"]
+				interface_data["component_qaname"] = cdata["qaname"]
+				interface_data["component_ownername"] = cdata["ownername"]
 				interface_data["component_description"] = cdata["description"]
 				comp_idint, err := strconv.Atoi(component_id)
 				interface_data["component_subs"] = get_subcomponents_by_component(comp_idint)
@@ -1445,6 +1335,7 @@ func main() {
 	http.HandleFunc("/editproducts/", editproducts)
 	//http.HandleFunc("/editbugpage/", editbugpage)
 	http.HandleFunc("/editbugcc/", editbugcc)
+	http.HandleFunc("/searchbugs/", searchbugs)
 	http.HandleFunc("/editcomponentpage/", editcomponentpage)
 	http.HandleFunc("/addcomponent/", addcomponentpage)
 	http.HandleFunc("/addproductversion/", addproductversion)

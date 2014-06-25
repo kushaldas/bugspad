@@ -273,26 +273,34 @@ func get_bugcc_list(bug_id int) map[int][2]string {
 			}
 		}
 	}*/
+	//fmt.Println(ans)
 	return ans
 
 }
 
 /* Files a new bug based on input*/
-func new_bug(data map[string]interface{}) (id string, err error) {
+func new_bug(data map[string]interface{}) ( int, string) {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
 		fmt.Print(err)
-		return "", err
+		return -1, err.Error()
 	}
 	defer db.Close()
 
-	var status, summary string
+	//var status, summary string
+
 	var buffer, buffer2 bytes.Buffer
 	vals := make([]interface{}, 0)
 	buffer.WriteString("INSERT INTO bugs (")
-
-	val, ok := data["status"]
+	/*data["status"]="new"
+	buffer.WriteString(", status")
+	buffer2.WriteString(",?")
+	vals = append(vals, data["status"].(string))
+	
+	/*
+	 * While filing a bug status cannot be anything other than new.
+	 * val, ok := data["status"]
 	if ok {
 		buffer.WriteString("status")
 		buffer2.WriteString("?")
@@ -304,10 +312,17 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 		status = "new"
 	}
 
-	val, ok = data["version"]
+	val, ok = data["status"]
 	if ok {
-		buffer.WriteString(", version")
+		buffer.WriteString(", status")
 		buffer2.WriteString(",?")
+		vals = append(vals, val)
+	}
+	*/
+	val, ok := data["version"]
+	if ok {
+		buffer.WriteString("version")
+		buffer2.WriteString("?")
 		vals = append(vals, val)
 	}
 
@@ -359,7 +374,7 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 		buffer2.WriteString(",?")
 		vals = append(vals, val)
 	} else {
-		return "Missing input: reporter", nil
+		return -1,"Missing input: reporter"
 	}
 
 	val, ok = data["summary"]
@@ -367,9 +382,9 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 		buffer.WriteString(", summary")
 		buffer2.WriteString(",?")
 		vals = append(vals, val)
-		summary = val.(string)
+//		summary = val.(string)
 	} else {
-		return "Missing input: summary", nil
+		return -1,"Missing input: summary"
 	}
 
 	val, ok = data["description"]
@@ -378,7 +393,7 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 		buffer2.WriteString(",?")
 		vals = append(vals, val)
 	} else {
-		return "Missing input: description", nil
+		return -1,"Missing input: description"
 	}
 	//since docs is an optional fields
 	val, ok = data["docs"]
@@ -393,8 +408,12 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 		buffer.WriteString(", component_id")
 		buffer2.WriteString(",?")
 		vals = append(vals, val)
+
+		buffer.WriteString(", qa")
+		buffer2.WriteString(",?")
+		vals = append(vals, strconv.Itoa(get_component_owner(val.(int))))
 	} else {
-		return "Missing input: component_id", nil
+		return -1,"Missing input: component_id"
 	}
 
 	buffer.WriteString(", reported) VALUES (")
@@ -402,27 +421,58 @@ func new_bug(data map[string]interface{}) (id string, err error) {
 
 	buffer.WriteString(buffer2.String())
 	buffer.WriteString(")")
-
+	//fmt.Println(buffer.String())
 	ret, err := db.Exec(buffer.String(), vals...)
 	if err != nil {
 		fmt.Println(err.Error())
-		return "Error in entering a new bug", err
+		fmt.Println("dsadasd")
+		return -1,"Error in entering a new bug"
 	}
 
 	rid, err := ret.LastInsertId()
-	bug_id := strconv.FormatInt(rid, 10)
+	fmt.Println(err)
+	bug_id := rid
 	// Now update redis cache for status
-	update_redis_bug_status(bug_id, status)
-	set_redis_bug(rid, status, summary)
+	//update_redis_bug_status(bug_id, status)
+
+
+	//adding the reporter,assignee,qa,docs to the cclist
+	
+	reporter, _ := data["reporter"]
+	_,present:=db.Query("SELECT * from cc where bug_id=? and who=?",bug_id,reporter)
+	if present==nil{
+	     db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, reporter)
+	}
+	assignee, _ := data["assigned_to"]
+	_,present=db.Query("SELECT * from cc where bug_id=? and who=?",bug_id,assignee)
+	if present==nil{
+	     db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, assignee)
+	}
+	//comp_id,_:= strconv.Atoi(data["component_id"].(string))
+	qa:= get_component_owner(data["component_id"].(int))
+	_,present=db.Query("SELECT * from cc where bug_id=? and who=?",bug_id,qa)
+	if present==nil{
+	     db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, qa)
+	}
+	
+	docs,ok := data["docs"]
+	if ok{
+	    _,present=db.Query("SELECT * from cc where bug_id=? and who=?",bug_id,docs)
+	    if present==nil{
+		 db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, docs)
+	    }
+	}
+
+	//_, err = db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, docs)
+	//redis_sadd("userbug"+val.(string), bug_id)
+	data["id"]=bug_id
+	//comp_id,_=strconv.Atoi(data["component_id"].(string))
+	data["qa"]=get_component_owner(data["component_id"].(int))
+	set_redis_bug(data)
 	add_latest_created(bug_id)
 
-	//adding the reporter to the cclist
-	val, _ = data["reporter"]
-	_, err = db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, val)
-	redis_sadd("userbug"+val.(string), bug_id)
-
 	fmt.Println(err)
-	return bug_id, err
+	return int(bug_id), ""
 }
 
 /*
@@ -455,37 +505,37 @@ func add_bug_comments(olddata map[string]interface{}, newdata map[string]interfa
 	if olddata["priority"] != newdata["priority"] {
 		changes_comments = changes_comments + htmlify(olddata["priority"].(string), newdata["priority"].(string), "priority")
 	}
-	if olddata["component_id"].(int) != newdata["component_id"].(int) {
+	if olddata["component_id"] != newdata["component_id"] {
 		changes_comments = changes_comments + htmlify(olddata["component"].(string), newdata["component"].(string), "component")
 
 	}
-	if olddata["subcomponent_id"].(int) != newdata["subcomponent_id"].(int) {
+	if olddata["subcomponent_id"] != newdata["subcomponent_id"] {
 		changes_comments = changes_comments + htmlify(olddata["subcomponent"].(string), newdata["subcomponent"].(string), "subcomponent")
 	}
 	fmt.Println("fiv")
-	fmt.Println(olddata["fixedinver_id"].(int))
+	fmt.Println(olddata["fixedinver"].(int))
 	fmt.Println(newdata["fixedinver"].(int))
 	fmt.Println("fiv")
-	if olddata["fixedinver_id"].(int) != newdata["fixedinver"].(int) {
-		changes_comments = changes_comments + htmlify(get_version_text(olddata["fixedinver_id"].(int)), get_version_text(newdata["fixedinver"].(int)), "fixedinver")
+	if olddata["fixedinver"] != newdata["fixedinver"] {
+		changes_comments = changes_comments + htmlify(get_version_text(olddata["fixedinver"].(int)), get_version_text(newdata["fixedinvername"].(int)), "fixedinverame")
 	}
-	if olddata["version_id"].(int) != newdata["version"].(int) {
+	if olddata["version_id"] != newdata["version"] {
 		changes_comments = changes_comments + htmlify(get_version_text(olddata["version_id"].(int)), get_version_text(newdata["version"].(int)), "version")
 	}
 	//fmt.Println(olddata["qaint"].(int))
 	//fmt.Println(newdata["qa"].(int))
-	if newdata["qaint"] != nil {
-		if olddata["qaint"].(int) != newdata["qa"].(int) && newdata["qa"].(int) != -1 {
-			changes_comments = changes_comments + htmlify(get_user_email(olddata["qaint"].(int)), get_user_email(newdata["qa"].(int)), "qa")
+	if newdata["qa"] != nil {
+		if olddata["qa"] != newdata["qa"] && newdata["qa"] != -1 {
+			changes_comments = changes_comments + htmlify(get_user_email(olddata["qa"].(int)), get_user_email(newdata["qa"].(int)), "qa")
 		}
 	}
 
-	if olddata["assigned_toid"].(int) != newdata["assigned_to"].(int) && newdata["assigned_to"].(int) != -1 {
+	if olddata["assigned_toid"] != newdata["assigned_to"] && newdata["assigned_to"]!= -1 {
 		changes_comments = changes_comments + htmlify(get_user_email(olddata["assigned_toid"].(int)), get_user_email(newdata["assigned_to"].(int)), "assigned_to")
 	}
 
 	if newdata["docsint"] != nil {
-		if olddata["docsint"].(int) != newdata["docs"].(int) && newdata["docs"].(int) != -1 {
+		if olddata["docsint"] != newdata["docs"] && newdata["docs"].(int) != -1 {
 			changes_comments = changes_comments + htmlify(get_user_email(olddata["docsint"].(int)), get_user_email(newdata["docs"].(int)), "docs")
 		}
 	}
@@ -949,7 +999,7 @@ func get_bug(bug_id string) Bug {
 			docs_email = get_user_email(docsint)
 			docs_name = get_user_name(docsint)
 		}
-		bugs_idint, _ := strconv.Atoi(bug_id)
+		bug_idint, _ := strconv.Atoi(bug_id)
 		m["id"] = bug_id
 		m["status"] = string(status)
 		m["summary"] = string(summary)
@@ -961,26 +1011,29 @@ func get_bug(bug_id string) Bug {
 		m["whiteboard"] = string(whiteboard)
 		m["reported"] = reported.String()
 		m["reporter"] = get_user_email(reporter)
-		m["reportername"] = get_user_name(reporter)
-		m["component"] = get_component_name_by_id(component_id)
+		m["assigned_to"] = assigned_to
+		m["assigned_toemail"] = get_user_email(assigned_to)
+		m["qa"] = qaint
+		m["docs"] = docsint
 		m["component_id"] = component_id
-		m["subcomponent"] = get_subcomponent_name_by_id(subcint)
 		m["subcomponent_id"] = subcint
-		m["fixedinver"] = get_version_text(fixedinverint)
-		m["fixedinver_id"] = fixedinverint
+		m["fixedinver"] = fixedinverint
+		
+		//extra fields for convenience
 		m["version_id"] = version
 		m["version"] = get_version_text(version)
-		m["qa"] = qa_email
+		m["qaemail"] = qa_email
 		m["qaname"] = qa_name
-		m["docs"] = docs_email
+		m["docsemail"] = docs_email
 		m["docsname"] = docs_name
-		m["qaint"] = qaint
-		m["docsint"] = docsint
-		m["assigned_toid"] = assigned_to
-		m["assigned_to"] = get_user_email(assigned_to)
 		m["assigned_toname"] = get_user_name(assigned_to)
-		m["cclist"] = get_bugcc_list(bugs_idint)
-
+		m["reportername"] = get_user_name(reporter)
+		m["component"] = get_component_name_by_id(component_id)
+		m["subcomponent"] = get_subcomponent_name_by_id(subcint)
+		m["fixedinvername"] = get_version_text(fixedinverint)
+		m["cclist"] = get_bugcc_list(bug_idint)
+		fmt.Println(bug_idint)
+	    
 	} else {
 		m["error_msg"] = err
 		fmt.Println(err)
@@ -1523,6 +1576,7 @@ func get_product_of_component(component_id int) int {
 
 }
 
+//TODO : this should be done from redis
 /*Returns all bugs related to a single product*/
 func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 	m := make(map[string][15]string)
@@ -1586,6 +1640,8 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 func get_user_bugs(user_id string) map[string][2]string {
 
 	m := make(map[string][2]string)
+	
+	//from userbug
 	bug_ids := redis_smembers("userbug" + user_id)
 	b := bug_ids.([]interface{})
 	for i, _ := range b {
@@ -1593,6 +1649,31 @@ func get_user_bugs(user_id string) map[string][2]string {
 		bug := get_redis_bug(string(b[i].([]uint8)))
 		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
+	
+	//from assignedtobug
+	bug_ids = redis_smembers("assigned_tobug" + user_id)
+	b = bug_ids.([]interface{})
+	for i, _ := range b {
+		//fmt.Println(string(b[i].([]uint8)))
+		bug := get_redis_bug(string(b[i].([]uint8)))
+		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
+	}
+	//from reporterbug
+	bug_ids = redis_smembers("reporterbug" + user_id)
+	b = bug_ids.([]interface{})
+	for i, _ := range b {
+		//fmt.Println(string(b[i].([]uint8)))
+		bug := get_redis_bug(string(b[i].([]uint8)))
+		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
+	}
+	//from docs
+	bug_ids = redis_smembers("docsbug" + user_id)
+	b = bug_ids.([]interface{})
+	for i, _ := range b {
+		//fmt.Println(string(b[i].([]uint8)))
+		bug := get_redis_bug(string(b[i].([]uint8)))
+		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
+	}	
 	//fmt.Println(m)
 	return m
 
@@ -1779,8 +1860,10 @@ func get_component_by_id(component_id string) map[string]interface{} {
 	m["name"] = name
 	m["description"] = description
 	m["product_id"] = product_id
-	m["owner"] = get_user_email(owner)
-	m["qa"] = get_user_email(qaint)
+	m["ownername"] = get_user_email(owner)
+	m["owner"] = owner
+	m["qaname"] = get_user_email(qaint)
+	m["qa"] = qaint
 	return m
 
 }

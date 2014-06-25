@@ -1,0 +1,72 @@
+{{define "head"}}<title>Search Bugs</title>{{end}}
+{{define "body"}}
+<div class="maincontent">
+    <div id="bug_details">
+	{{if .searchresult }}
+	    <p><a href="/searchbugs">Another Search ?</a></p>
+	{{else}}
+
+	<form id="queryform" name="queryform" action="/searchbugs/" method="post">
+	    <table>
+	    <tr>
+		<td>
+		    <span id="field_title">Products:</span>
+		    <select id="bug_product" size="7" multiple="multiple" name="bug_product">
+			    {{range $key, $val := .products}}
+				<option value={{index $val 0}}>{{$key}}</option>
+			    {{end}}
+		    </select>
+		</td>
+		<td>
+		    <span id="field_title">Components:</span>
+		    <select id="bug_component" size="7" multiple="multiple" name="bug_component">
+			    {{range $key, $val := .components}}
+				<option value={{index $val 0}}>{{$key}}</option>
+			    {{end}}
+		    </select>
+		</td>
+		<td>
+		    <span id="field_title">Bug Status:</span>
+		    <select id="bug_status" size="7" multiple="multiple" name="bug_status">
+			<option value="new" >New</option>
+			<option value="unconfirmed" >Unconfirmed</option>
+			<option value="worksforme" >Works For Me</option>
+			<option value="invalid" >Invalid</option>
+			<option value="duplicate" >Duplicate</option>
+			<option value="fixed" >Fixed</option>
+		    </select>
+		</td>
+		<td>
+		    <span class="field_title">Severity: </span> 
+		    <select name="bug_severity" size="7" multiple="multiple">
+			<option value="blocker">Blocker</option>
+			<option value="critical">Critical</option>
+			<option value="trivial">Trivial</option>
+			<option value="enhancement">Enhancement</option>
+			<option value="normal">Normal</option>
+		    </select>
+		</td>
+		<td>
+		    <span class="field_title">Priority: </span> 
+			<select name="bug_priority" size="7" multiple="multiple"> 
+			    <option value="high">High</option>
+			    <option value="low">Low</option>
+			    <option value="medium">Medium</option>
+			    <option value="critical">Critical</option>
+			</select>
+		</td>
+	    </tr>
+	    </table>
+	    <button>Search Bugs</button>
+	</form>
+	{{end}}
+	
+	<div>
+	<p>Search Results:</p>
+	    {{range $key,$val:= .searchbugs}}
+		<p><a href="/bugs/{{$key}}" class="{{if eq (index $val 1) "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}">{{$key}} {{index $val 0}}</a></p>
+	    {{end}}
+	</div>
+    </div>
+</div>
+{{end}}

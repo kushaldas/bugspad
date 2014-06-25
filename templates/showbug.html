@@ -131,22 +131,22 @@
 		    </tr>
 		    <tr>
 			<td class="field_title">QA: </td>
-			<td><input name="bug_qa" type="text" value="{{ .qa}}"></input></td>
+			<td><input name="bug_qa" type="text" value="{{ .qaemail}}"></input></td>
 		    </tr>
 		    <tr>
 			<td class="field_title">Assigned to: </td>
-			<td><input name="bug_assigned_to" type="text" value="{{ .assigned_to}}"></input></td>
+			<td><input name="bug_assigned_to" type="text" value="{{ .assigned_toemail}}"></input></td>
 		    </tr>
 		    <tr>
 			<td class="field_title">Docs:</td>
-			<td><input name="bug_docs" type="text" value="{{ .docs}}"></input></td>
+			<td><input name="bug_docs" type="text" value="{{ .docsemail}}"></input></td>
 		    </tr>
 		    {{if eq .status "fixed"}}
 		    <tr>
 			<td class="field_title">Fixed in Version: </td>
 			<td><select name="bug_fixedinver">
-				{{if ne .fixedinver_id (-1)}}
-				    {{$ver := .fixedinver_id}}
+				{{if ne .fixedinver (-1)}}
+				    {{$ver := .fixedinver}}
 				    {{range $key, $val := .versions}}
 					<option value={{$val}}  {{if eq $ver (index $val 0)  }} selected {{end}}>{{$key}}</option>
 				    {{end}}
