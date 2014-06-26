@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
+	//"strconv"
 	"strings"
 	"time"
 )
@@ -148,16 +148,13 @@ func backend_bug(w http.ResponseWriter, r *http.Request) {
 			user_id := get_user_id(user)
 			pdata["reporter"] = user_id
 			id, err := new_bug(pdata)
-			if err != nil {
-				fmt.Println(err.Error())
+			if err != "" {
+				fmt.Println(err)
 				return
 			}
-			bug_id, ok := strconv.ParseInt(id, 10, 32)
-			if ok == nil {
-				if pdata["emails"] != nil {
-					add_bug_cc(bug_id, pdata["emails"])
-				}
-
+			bug_id := id
+			if pdata["emails"] != nil {
+				add_bug_cc(int64(bug_id), pdata["emails"])
 			}
 
 			fmt.Fprintln(w, id)
