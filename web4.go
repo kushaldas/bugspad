@@ -561,7 +561,7 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 			newbug["hardware"] = r.FormValue("bug_hardware")
 			newbug["description"] = r.FormValue("bug_description")
 			newbug["priority"] = r.FormValue("bug_priority")
-			compid,_:=strconv.Atoi(r.FormValue("bug_component"))
+			compid, _ := strconv.Atoi(r.FormValue("bug_component"))
 			newbug["component_id"] = compid
 			newbug["reporter"] = get_user_id(useremail)
 			//fmt.Println(reflect.TypeOf(newbug["component_id"]))
@@ -669,24 +669,25 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 Search interface function bugspad
 */
 func searchbugs(w http.ResponseWriter, r *http.Request) {
-	
+
 	if r.Method == "GET" {
-	    m:=make(map[string]interface{})
-	    tml, _ := template.ParseFiles("./templates/searchbug.html","./templates/base.html") 
-	    m["products"] = get_all_products()
-	    m["components"] = get_all_components()
-	    m["searchresult"]=false
-	    m["pagetitle"]="Search"
-	    tml.ExecuteTemplate(w,"base", m)    
-	
+		m := make(map[string]interface{})
+		tml, _ := template.ParseFiles("./templates/searchbug.html", "./templates/base.html")
+		m["products"] = get_all_products()
+		m["components"] = get_all_components()
+		m["searchresult"] = false
+		m["pagetitle"] = "Search"
+		tml.ExecuteTemplate(w, "base", m)
+
 	} else if r.Method == "POST" {
-	   tml, _ := template.ParseFiles("./templates/searchbug.html","./templates/base.html")
-	   r.ParseForm()
-	   searchbugs := search_redis_bugs(r.Form["bug_component"], r.Form["bug_product"], r.Form["bug_status"], r.Form["bug_version"], r.Form["bug_fixedinver"])
-	   fmt.Println(searchbugs)
-	   tml.ExecuteTemplate(w,"base",map[string]interface{}{"searchbugs":searchbugs,"searchresult":true, "pagetitle":"Search"})
+		tml, _ := template.ParseFiles("./templates/searchbug.html", "./templates/base.html")
+		r.ParseForm()
+		searchbugs := search_redis_bugs(r.Form["bug_component"], r.Form["bug_product"], r.Form["bug_status"], r.Form["bug_version"], r.Form["bug_fixedinver"])
+		fmt.Println(searchbugs)
+		tml.ExecuteTemplate(w, "base", map[string]interface{}{"searchbugs": searchbugs, "searchresult": true, "pagetitle": "Search"})
 	}
 }
+
 /*
 Admin:: Homepage of the Admin interface.
 */

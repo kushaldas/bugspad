@@ -20,7 +20,7 @@ func main() {
 	// TODO: Update all searchable columns from bugs
 	rows, err := db.Query("SELECT id, status, description, version, severity, hardware, priority, whiteboard, reported, component_id, subcomponent_id, reporter, summary, fixedinver, qa, docs, assigned_to from bugs")
 	//rows, err := db.Query("SELECT id, status, summary FROM bugs")
-	m:=make(Bug)
+	m := make(Bug)
 	if err == nil {
 		var bug_id int
 		var status, description, severity, hardware, priority, whiteboard, summary []byte
@@ -28,7 +28,7 @@ func main() {
 		var qa, docs, subcomponent_id, fixedinver sql.NullInt64
 		var reported time.Time
 		for rows.Next() {
-		    	err = rows.Scan(&bug_id, &status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &subcomponent_id, &reporter, &summary, &fixedinver, &qa, &docs, &assigned_to)
+			err = rows.Scan(&bug_id, &status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &subcomponent_id, &reporter, &summary, &fixedinver, &qa, &docs, &assigned_to)
 			//err = rows.Scan(&id, &status, &summary)
 			if err == nil {
 				qaint := -1
@@ -77,7 +77,7 @@ func main() {
 				m["component_id"] = component_id
 				m["subcomponent_id"] = subcint
 				m["fixedinver"] = fixedinverint
-				
+
 				//extra fields for convenience
 				m["version_id"] = version
 				m["version"] = get_version_text(version)
@@ -97,7 +97,7 @@ func main() {
 				//redis_add_search_sets(m)
 				//update_redis_bug_status(sid, status)
 			} else {
-			    fmt.Println(err)
+				fmt.Println(err)
 			}
 		}
 		fmt.Println("All bug indexes loaded in Redis.")
