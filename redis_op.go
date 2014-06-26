@@ -229,7 +229,7 @@ func search_redis_bugs(components []string, products []string, statuses []string
 		bugidlist := bugids.([]interface{})
 		for j, _ := range bugidlist {
 			tmp := get_redis_bug(string(bugidlist[j].([]uint8)))
-			//fmt.Println(string(bugidlist[j].([]uint8)))
+			fmt.Println(string(bugidlist[j].([]uint8)))
 			bugid := int(tmp["id"].(float64))
 			ans[bugid] = [2]string{tmp["summary"].(string), tmp["status"].(string)}
 		}
@@ -430,7 +430,7 @@ func set_redis_bug(bug Bug) {
 	assignedtostring := strconv.Itoa(bug["assigned_to"].(int))
 	compid := bug["component_id"].(int)
 	productstring := strconv.Itoa(get_product_of_component(compid))
-	bugstring := strconv.Itoa(int(bug["id"].(int64)))
+	bugstring := strconv.Itoa(bug["id"].(int))
 	if bug["version"] != nil {
 
 		versionstring = strconv.Itoa(bug["version"].(int))

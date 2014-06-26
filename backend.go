@@ -293,9 +293,10 @@ func new_bug(data map[string]interface{}) (int, string) {
 	var buffer, buffer2 bytes.Buffer
 	vals := make([]interface{}, 0)
 	buffer.WriteString("INSERT INTO bugs (")
-	/*data["status"]="new"
-	buffer.WriteString(", status")
-	buffer2.WriteString(",?")
+	//Since the default status has to be "new"
+	data["status"]="new"
+	buffer.WriteString("status")
+	buffer2.WriteString("?")
 	vals = append(vals, data["status"].(string))
 
 	/*
@@ -321,8 +322,8 @@ func new_bug(data map[string]interface{}) (int, string) {
 	*/
 	val, ok := data["version"]
 	if ok {
-		buffer.WriteString("version")
-		buffer2.WriteString("?")
+		buffer.WriteString(", version")
+		buffer2.WriteString(", ?")
 		vals = append(vals, val)
 	}
 
@@ -464,7 +465,7 @@ func new_bug(data map[string]interface{}) (int, string) {
 
 	//_, err = db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, docs)
 	//redis_sadd("userbug"+val.(string), bug_id)
-	data["id"] = bug_id
+	data["id"] = int(bug_id)
 	//comp_id,_=strconv.Atoi(data["component_id"].(string))
 	data["qa"] = get_component_owner(data["component_id"].(int))
 	set_redis_bug(data)
@@ -518,8 +519,8 @@ func add_bug_comments(olddata map[string]interface{}, newdata map[string]interfa
 	if olddata["fixedinver"] != newdata["fixedinver"] {
 		changes_comments = changes_comments + htmlify(get_version_text(olddata["fixedinver"].(int)), get_version_text(newdata["fixedinvername"].(int)), "fixedinverame")
 	}
-	if olddata["version_id"] != newdata["version"] {
-		changes_comments = changes_comments + htmlify(get_version_text(olddata["version_id"].(int)), get_version_text(newdata["version"].(int)), "version")
+	if olddata["version"] != newdata["version"] {
+		changes_comments = changes_comments + htmlify(get_version_text(olddata["version"].(int)), get_version_text(newdata["version"].(int)), "version")
 	}
 	//fmt.Println(olddata["qaint"].(int))
 	//fmt.Println(newdata["qa"].(int))
@@ -529,13 +530,13 @@ func add_bug_comments(olddata map[string]interface{}, newdata map[string]interfa
 		}
 	}
 
-	if olddata["assigned_toid"] != newdata["assigned_to"] && newdata["assigned_to"] != -1 {
-		changes_comments = changes_comments + htmlify(get_user_email(olddata["assigned_toid"].(int)), get_user_email(newdata["assigned_to"].(int)), "assigned_to")
+	if olddata["assigned_to"] != newdata["assigned_to"] && newdata["assigned_to"] != -1 {
+		changes_comments = changes_comments + htmlify(get_user_email(olddata["assigned_to"].(int)), get_user_email(newdata["assigned_to"].(int)), "assigned_to")
 	}
 
-	if newdata["docsint"] != nil {
-		if olddata["docsint"] != newdata["docs"] && newdata["docs"].(int) != -1 {
-			changes_comments = changes_comments + htmlify(get_user_email(olddata["docsint"].(int)), get_user_email(newdata["docs"].(int)), "docs")
+	if newdata["docs"] != nil {
+		if olddata["docs"] != newdata["docs"] && newdata["docs"].(int) != -1 {
+			changes_comments = changes_comments + htmlify(get_user_email(olddata["docs"].(int)), get_user_email(newdata["docs"].(int)), "docs")
 		}
 	}
 	bug_idint, _ := strconv.Atoi(newdata["id"].(string))
@@ -919,13 +920,13 @@ func update_bug(data map[string]interface{}) error {
 	if err != nil {
 		fmt.Println(err)
 		return err
-	}
+	}/*
 	if ok1 {
 		bug := get_redis_bug(strconv.FormatInt(int64(bug_id), 10))
 		old_status := bug["status"].(string)
 		delete_redis_bug_status(strconv.FormatInt(int64(bug_id), 10), old_status)
 		update_redis_bug_status(strconv.FormatInt(int64(bug_id), 10), val1.(string))
-	}
+	}*/
 	add_latest_updated(strconv.FormatInt(int64(bug_id), 10))
 	add_bug_comments(old_bug, data)
 	return nil
@@ -1004,29 +1005,29 @@ func get_bug(bug_id string) Bug {
 		m["summary"] = string(summary)
 		m["severity"] = string(severity)
 		m["description"] = string(description)
-		m["version"] = string(version)
 		m["hardware"] = string(hardware)
 		m["priority"] = string(priority)
 		m["whiteboard"] = string(whiteboard)
 		m["reported"] = reported.String()
 		m["reporter"] = get_user_email(reporter)
 		m["assigned_to"] = assigned_to
-		m["assigned_toemail"] = get_user_email(assigned_to)
 		m["qa"] = qaint
 		m["docs"] = docsint
 		m["component_id"] = component_id
 		m["subcomponent_id"] = subcint
 		m["fixedinver"] = fixedinverint
+		m["version"] = version
 
 		//extra fields for convenience
-		m["version_id"] = version
-		m["version"] = get_version_text(version)
+		m["versiontext"] = get_version_text(version)
 		m["qaemail"] = qa_email
 		m["qaname"] = qa_name
 		m["docsemail"] = docs_email
 		m["docsname"] = docs_name
 		m["assigned_toname"] = get_user_name(assigned_to)
+		m["assigned_toemail"] = get_user_email(assigned_to)
 		m["reportername"] = get_user_name(reporter)
+		m["reporteremail"] = get_user_email(reporter)
 		m["component"] = get_component_name_by_id(component_id)
 		m["subcomponent"] = get_subcomponent_name_by_id(subcint)
 		m["fixedinvername"] = get_version_text(fixedinverint)

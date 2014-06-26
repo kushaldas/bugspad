@@ -64,29 +64,29 @@ func main() {
 				m["summary"] = string(summary)
 				m["severity"] = string(severity)
 				m["description"] = string(description)
-				m["version"] = string(version)
 				m["hardware"] = string(hardware)
 				m["priority"] = string(priority)
 				m["whiteboard"] = string(whiteboard)
 				m["reported"] = reported.String()
-				m["reporter"] = get_user_email(reporter)
+				m["reporter"] = reporter
 				m["assigned_to"] = assigned_to
-				m["assigned_toname"] = get_user_email(assigned_to)
 				m["qa"] = qaint
 				m["docs"] = docsint
 				m["component_id"] = component_id
 				m["subcomponent_id"] = subcint
 				m["fixedinver"] = fixedinverint
+				m["version"] = version
 
 				//extra fields for convenience
-				m["version_id"] = version
-				m["version"] = get_version_text(version)
+				m["versiontext"] = get_version_text(version)
 				m["qaemail"] = qa_email
 				m["qaname"] = qa_name
 				m["docsemail"] = docs_email
 				m["docsname"] = docs_name
 				m["assigned_toname"] = get_user_name(assigned_to)
+				m["assigned_toemail"] = get_user_email(assigned_to)
 				m["reportername"] = get_user_name(reporter)
+				m["reporteremail"] = get_user_email(reporter)
 				m["component"] = get_component_name_by_id(component_id)
 				m["subcomponent"] = get_subcomponent_name_by_id(subcint)
 				m["fixedinvername"] = get_version_text(fixedinverint)
