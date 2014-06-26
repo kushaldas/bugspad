@@ -1651,7 +1651,7 @@ func get_user_bugs(user_id string) map[string][2]string {
 	}
 
 	//from assignedtobug
-	bug_ids = redis_smembers("assigned_tobug" + user_id)
+	bug_ids = redis_smembers("assigned_tobug:" + user_id)
 	b = bug_ids.([]interface{})
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
@@ -1659,7 +1659,7 @@ func get_user_bugs(user_id string) map[string][2]string {
 		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
 	//from reporterbug
-	bug_ids = redis_smembers("reporterbug" + user_id)
+	bug_ids = redis_smembers("reporterbug:" + user_id)
 	b = bug_ids.([]interface{})
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
@@ -1667,7 +1667,7 @@ func get_user_bugs(user_id string) map[string][2]string {
 		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
 	//from docs
-	bug_ids = redis_smembers("docsbug" + user_id)
+	bug_ids = redis_smembers("docsbug:" + user_id)
 	b = bug_ids.([]interface{})
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
