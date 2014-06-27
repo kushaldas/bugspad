@@ -15,7 +15,7 @@ func product(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
@@ -48,7 +48,7 @@ func component(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
@@ -88,7 +88,7 @@ func component(w http.ResponseWriter, r *http.Request) {
 func components(w http.ResponseWriter, r *http.Request) {
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	product_id := ""
 	if r.Method == "POST" {
@@ -117,7 +117,8 @@ func components(w http.ResponseWriter, r *http.Request) {
 	}
 	if product_id != "" {
 		w.Header().Set("Content-Type", "application/json")
-		m := get_components_by_product(product_id)
+		product_idint := strconv.Atoi(product_id)
+		m := get_components_by_product(product_idint)
 		res_json, _ := json.Marshal(m)
 		fmt.Fprintln(w, string(res_json))
 	}
@@ -130,7 +131,7 @@ func backend_bug(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
@@ -186,7 +187,7 @@ func updatebug(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
@@ -214,7 +215,7 @@ func comment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	if r.Method == "POST" {
 		decoder := json.NewDecoder(r.Body)
@@ -247,7 +248,7 @@ func bug_cc(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
@@ -283,7 +284,7 @@ API call to get latest 10 bugs from the server
 func latest_bugs(w http.ResponseWriter, r *http.Request) {
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	w.Header().Set("Content-Type", "application/json")
 	vals := get_latest_created_list().([]interface{})
@@ -306,7 +307,7 @@ Can be used in the frontpage of the application.
 func latest_updated_bugs(w http.ResponseWriter, r *http.Request) {
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	w.Header().Set("Content-Type", "application/json")
 	vals := get_latest_updated_list().([]interface{})
@@ -325,7 +326,7 @@ func latest_updated_bugs(w http.ResponseWriter, r *http.Request) {
 func releases(w http.ResponseWriter, r *http.Request) {
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	w.Header().Set("Content-Type", "application/json")
 

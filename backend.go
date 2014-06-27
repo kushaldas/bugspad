@@ -139,7 +139,7 @@ func authenticate_redis(email string, password string) bool {
 }
 
 /* Finds all components for a given product id*/
-func get_components_by_product(product_id string) map[string][3]string {
+func get_components_by_product(product_id int) map[string][3]string {
 	m := make(map[string][3]string)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
@@ -294,31 +294,31 @@ func new_bug(data map[string]interface{}) (int, string) {
 	vals := make([]interface{}, 0)
 	buffer.WriteString("INSERT INTO bugs (")
 	//Since the default status has to be "new"
-	data["status"]="new"
+	data["status"] = "new"
 	buffer.WriteString("status")
 	buffer2.WriteString("?")
 	vals = append(vals, data["status"].(string))
 
 	/*
-	 * While filing a bug status cannot be anything other than new.
-	 * val, ok := data["status"]
-	if ok {
-		buffer.WriteString("status")
-		buffer2.WriteString("?")
-		vals = append(vals, val)
-		status = val.(string)
-	} else {
-		buffer.WriteString("status")
-		buffer2.WriteString("'new'")
-		status = "new"
-	}
+		 * While filing a bug status cannot be anything other than new.
+		 * val, ok := data["status"]
+		if ok {
+			buffer.WriteString("status")
+			buffer2.WriteString("?")
+			vals = append(vals, val)
+			status = val.(string)
+		} else {
+			buffer.WriteString("status")
+			buffer2.WriteString("'new'")
+			status = "new"
+		}
 
-	val, ok = data["status"]
-	if ok {
-		buffer.WriteString(", status")
-		buffer2.WriteString(",?")
-		vals = append(vals, val)
-	}
+		val, ok = data["status"]
+		if ok {
+			buffer.WriteString(", status")
+			buffer2.WriteString(",?")
+			vals = append(vals, val)
+		}
 	*/
 	val, ok := data["version"]
 	if ok {
@@ -612,7 +612,7 @@ func count_entries(table_name string) int {
 /*
 Fetches all the attachments of a bug.
 */
-func get_bug_attachments(bug_id string) map[int][6]string {
+func get_bug_attachments(bug_id int) map[int][6]string {
 	m := make(map[int][6]string)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
@@ -668,7 +668,7 @@ func make_attachments_obsolete(attachment_ids []string) error {
 /*
 Getting all bug ids blocked by the given bug.
 */
-func bugs_blocked_by(bug_id string) map[int]string {
+func bugs_blocked_by(bug_id int) map[int]string {
 	m := make(map[int]string)
 	//fmt.Print("dgffg")
 	db, err := sql.Open("mysql", conn_str)
@@ -698,7 +698,7 @@ func bugs_blocked_by(bug_id string) map[int]string {
 /*
 Getting all bugs which the given bug is dependent on.
 */
-func bugs_dependent_on(bug_id string) map[int]string {
+func bugs_dependent_on(bug_id int) map[int]string {
 	m := make(map[int]string)
 	//fmt.Print("dgffg")
 	db, err := sql.Open("mysql", conn_str)
@@ -809,7 +809,7 @@ func update_bug(data map[string]interface{}) error {
 	vals := make([]interface{}, 0)
 	buffer.WriteString("UPDATE bugs SET ")
 	bug_id, _ := strconv.ParseInt(data["id"].(string), 10, 64)
-	old_bug := get_bug(data["id"].(string))
+	old_bug := get_bug(data["id"].(int))
 	val, ok := data["status"]
 	if ok {
 		buffer.WriteString("status=?")
@@ -914,14 +914,14 @@ func update_bug(data map[string]interface{}) error {
 	if err != nil {
 		fmt.Println(err)
 		return err
-	}/*
-	if ok1 {
-		bug := get_redis_bug(strconv.FormatInt(int64(bug_id), 10))
-		old_status := bug["status"].(string)
-		delete_redis_bug_status(strconv.FormatInt(int64(bug_id), 10), old_status)
-		update_redis_bug_status(strconv.FormatInt(int64(bug_id), 10), val1.(string))
-	}*/
-	update_redis_bug(old_bug,data)
+	} /*
+		if ok1 {
+			bug := get_redis_bug(strconv.FormatInt(int64(bug_id), 10))
+			old_status := bug["status"].(string)
+			delete_redis_bug_status(strconv.FormatInt(int64(bug_id), 10), old_status)
+			update_redis_bug_status(strconv.FormatInt(int64(bug_id), 10), val1.(string))
+		}*/
+	update_redis_bug(old_bug, data)
 	add_latest_updated(strconv.FormatInt(int64(bug_id), 10))
 	add_bug_comments(old_bug, data)
 	return nil
@@ -954,7 +954,7 @@ func get_version_text(id int) string {
 /*
 Get a bug details.
 */
-func get_bug(bug_id string) Bug {
+func get_bug(bug_id int) Bug {
 	//fmt.Println(bug_id)
 	m := make(Bug)
 	db, err := sql.Open("mysql", conn_str)
@@ -994,8 +994,7 @@ func get_bug(bug_id string) Bug {
 			docs_email = get_user_email(docsint)
 			docs_name = get_user_name(docsint)
 		}
-		bug_idint, _ := strconv.Atoi(bug_id)
-		m["id"] = bug_idint
+		m["id"] = bug_id
 		m["status"] = string(status)
 		m["summary"] = string(summary)
 		m["severity"] = string(severity)
@@ -1026,8 +1025,7 @@ func get_bug(bug_id string) Bug {
 		m["component"] = get_component_name_by_id(component_id)
 		m["subcomponent"] = get_subcomponent_name_by_id(subcint)
 		m["fixedinvername"] = get_version_text(fixedinverint)
-		m["cclist"] = get_bugcc_list(bug_idint)
-		fmt.Println(bug_idint)
+		m["cclist"] = get_bugcc_list(bug_id)
 
 	} else {
 		m["error_msg"] = err
@@ -1279,7 +1277,7 @@ func add_release(name string) {
 /*
 Get original of a duplicate bug if it is a duplicate.
 */
-func find_orig_ifdup(bug_id string) int {
+func find_orig_ifdup(bug_id int) int {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
@@ -1302,7 +1300,7 @@ func find_orig_ifdup(bug_id string) int {
 /*
 Set original of a duplicate bug if it is a duplicate.
 */
-func add_dup_bug(dup string, dup_of string) bool {
+func add_dup_bug(dup int, dup_of int) bool {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
@@ -1321,7 +1319,7 @@ func add_dup_bug(dup string, dup_of string) bool {
 /*
 Remove original of a duplicate bug if it is a duplicate.
 */
-func remove_dup_bug(dup string) bool {
+func remove_dup_bug(dup int) bool {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
@@ -1433,7 +1431,7 @@ func get_releases() []string {
 /*
 Retrieving comments of a bug.
 */
-func fetch_comments_by_bug(bug_id string) map[int64][4]template.HTML {
+func fetch_comments_by_bug(bug_id int) map[int64][4]template.HTML {
 
 	m := make(map[int64][4]template.HTML)
 	db, err := sql.Open("mysql", conn_str)
@@ -1529,28 +1527,6 @@ func get_product_by_id(product_id string) map[string]interface{} {
 		//fmt.Println(m["name"])
 	}
 
-	return m
-
-}
-
-/* Finds all components for a given product id*/
-func get_components_by_id(product_id int) map[string][3]string {
-	m := make(map[string][3]string)
-	//fmt.Print("dgffg")
-	db, err := sql.Open("mysql", conn_str)
-	defer db.Close()
-	rows, err := db.Query("SELECT id, name, description from components where product_id=? order by name", product_id)
-	if err != nil {
-		fmt.Println(err)
-		return m
-	}
-	defer rows.Close()
-	var name, description, c_id string
-	for rows.Next() {
-		err = rows.Scan(&c_id, &name, &description)
-		//fmt.Println(c_id, name, description)
-		m[name] = [3]string{c_id, name, description}
-	}
 	return m
 
 }

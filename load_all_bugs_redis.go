@@ -70,11 +70,11 @@ func main() {
 				m["reported"] = reported.String()
 				m["reporter"] = reporter
 				m["assigned_to"] = assigned_to
-				if qaint!=-1{
-				    m["qa"] = qaint
+				if qaint != -1 {
+					m["qa"] = qaint
 				}
-				if docsint!=-1{
-				    m["docs"] = docsint
+				if docsint != -1 {
+					m["docs"] = docsint
 				}
 				m["component_id"] = component_id
 				m["subcomponent_id"] = subcint
