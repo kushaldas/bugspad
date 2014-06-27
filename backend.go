@@ -810,21 +810,15 @@ func update_bug(data map[string]interface{}) error {
 	buffer.WriteString("UPDATE bugs SET ")
 	bug_id, _ := strconv.ParseInt(data["id"].(string), 10, 64)
 	old_bug := get_bug(data["id"].(string))
-	val1, ok1 := data["status"]
-	if ok1 {
+	val, ok := data["status"]
+	if ok {
 		buffer.WriteString("status=?")
-		vals = append(vals, val1)
+		vals = append(vals, val)
 		// TODO
 		// In case of status change we have to update the redis index for the bug
-	} else {
-
-		bug := get_redis_bug(strconv.FormatInt(int64(bug_id), 10))
-		buffer.WriteString("status='")
-		buffer.WriteString(bug["status"].(string))
-		buffer.WriteString("'")
 	}
 
-	val, ok := data["version"]
+	val, ok = data["version"]
 	if ok {
 		buffer.WriteString(", version=?")
 		vals = append(vals, val)
@@ -927,6 +921,7 @@ func update_bug(data map[string]interface{}) error {
 		delete_redis_bug_status(strconv.FormatInt(int64(bug_id), 10), old_status)
 		update_redis_bug_status(strconv.FormatInt(int64(bug_id), 10), val1.(string))
 	}*/
+	update_redis_bug(old_bug,data)
 	add_latest_updated(strconv.FormatInt(int64(bug_id), 10))
 	add_bug_comments(old_bug, data)
 	return nil
@@ -1000,7 +995,7 @@ func get_bug(bug_id string) Bug {
 			docs_name = get_user_name(docsint)
 		}
 		bug_idint, _ := strconv.Atoi(bug_id)
-		m["id"] = bug_id
+		m["id"] = bug_idint
 		m["status"] = string(status)
 		m["summary"] = string(summary)
 		m["severity"] = string(severity)
@@ -1009,7 +1004,7 @@ func get_bug(bug_id string) Bug {
 		m["priority"] = string(priority)
 		m["whiteboard"] = string(whiteboard)
 		m["reported"] = reported.String()
-		m["reporter"] = get_user_email(reporter)
+		m["reporter"] = reporter
 		m["assigned_to"] = assigned_to
 		m["qa"] = qaint
 		m["docs"] = docsint
