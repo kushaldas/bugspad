@@ -34,7 +34,7 @@ func main() {
 				qaint := -1
 				docsint := -1
 				subcint := -1
-				fixedinverint := 0
+				fixedinverint := -1
 				if qa.Valid {
 					qaint = int(qa.Int64)
 				}
@@ -70,8 +70,12 @@ func main() {
 				m["reported"] = reported.String()
 				m["reporter"] = reporter
 				m["assigned_to"] = assigned_to
-				m["qa"] = qaint
-				m["docs"] = docsint
+				if qaint!=-1{
+				    m["qa"] = qaint
+				}
+				if docsint!=-1{
+				    m["docs"] = docsint
+				}
 				m["component_id"] = component_id
 				m["subcomponent_id"] = subcint
 				m["fixedinver"] = fixedinverint

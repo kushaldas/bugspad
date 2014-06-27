@@ -410,7 +410,7 @@ func get_latest_updated_list() interface{} {
 
 func set_redis_bug(bug Bug) {
 	data, _ := json.Marshal(bug)
-	fmt.Println(data)
+	//fmt.Println(data)
 	sdata := string(data)
 	bugidint, _ := bug["id"].(int)
 	sid := strconv.FormatInt(int64(bugidint), 10)

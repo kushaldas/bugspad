@@ -48,7 +48,7 @@
 
 			<td><select name="bug_version">
 				{{$ver := .version}}
-				<option value=0 {{if eq ($ver) (0)}} selected {{end}}>None</option>
+				<option value=-1 {{if eq ($ver) (-1)}} selected {{end}}>None</option>
 			        {{range $key, $val := .versions}}
 				    <option value={{index $val 0}} {{if eq ($ver) (index $val 0) }} selected {{end}}>{{$key}}</option>
 				{{end}}
