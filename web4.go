@@ -77,7 +77,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			if interface_data["is_user_admin"].(bool) {
 				log_message(r, "Admin logged:"+useremail)
 			}
-			interface_data["userbugs"] = get_user_bugs(strconv.Itoa(get_user_id(useremail)))
+			interface_data["userbugs"] = get_user_bugs(get_user_id(useremail))
 		}
 
 		tml, err := template.ParseFiles("./templates/home.html", "./templates/base.html")
@@ -186,10 +186,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 	interface_data := make(Bug)
 	bugid := r.URL.Path[len("/bugs/"):]
 	if r.Method == "GET" && bugid != "" {
-		interface_data["islogged"] = il
-		interface_data["useremail"] = useremail
-		interface_data["is_user_admin"] = is_user_admin(useremail)
-		interface_data["pagetitle"] = "Bug - " + bugid + " details"
+
 		/*fetching the main bug content
 		 ************************************************
 
@@ -230,6 +227,11 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		bug_id, _ := strconv.Atoi(bugid)
 		interface_data = get_bug(bug_id)
 
+		//adding generic data
+		interface_data["islogged"] = il
+		interface_data["useremail"] = useremail
+		interface_data["is_user_admin"] = is_user_admin(useremail)
+		interface_data["pagetitle"] = "Bug - " + bugid + " details"
 		//checking if the "id" interface{} is nil, ie the bug exists or not
 		if interface_data["id"] == nil {
 			fmt.Fprintln(w, "Bug does not exist!")
@@ -276,7 +278,6 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 
 		//Fetching the attachments related to the bug.
 		interface_data["attachments"] = get_bug_attachments(bug_id)
-
 		err = tml.ExecuteTemplate(w, "base", interface_data)
 		if err != nil {
 			log_message(r, "System Crash:"+err.Error())

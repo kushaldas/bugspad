@@ -1608,21 +1608,22 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 	return m, err
 }
 
-func get_user_bugs(user_id string) map[string][2]string {
+func get_user_bugs(user_id int) map[string][2]string {
 
 	m := make(map[string][2]string)
-
+	
 	//from userbug
-	bug_ids := redis_smembers("userbug" + user_id)
+	bug_ids := redis_smembers("userbug" + strconv.Itoa(user_id))
 	b := bug_ids.([]interface{})
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
 		bug := get_redis_bug(string(b[i].([]uint8)))
+		//fmt.Println(bug)
 		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
 
 	//from assignedtobug
-	bug_ids = redis_smembers("assigned_tobug:" + user_id)
+	bug_ids = redis_smembers("assigned_tobug:" + strconv.Itoa(user_id))
 	b = bug_ids.([]interface{})
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
@@ -1630,7 +1631,7 @@ func get_user_bugs(user_id string) map[string][2]string {
 		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
 	//from reporterbug
-	bug_ids = redis_smembers("reporterbug:" + user_id)
+	bug_ids = redis_smembers("reporterbug:" + strconv.Itoa(user_id))
 	b = bug_ids.([]interface{})
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
@@ -1638,7 +1639,7 @@ func get_user_bugs(user_id string) map[string][2]string {
 		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
 	//from docs
-	bug_ids = redis_smembers("docsbug:" + user_id)
+	bug_ids = redis_smembers("docsbug:" + strconv.Itoa(user_id))
 	b = bug_ids.([]interface{})
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
