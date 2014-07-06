@@ -1,18 +1,31 @@
-{{define "head"}}<title>Bug {{ .id}} - {{ .summary}}</title>{{end}}
+{{define "head"}}<title>Bug {{ .id}} CC list</title>{{end}}
 {{define "body"}}
-<div class="maincontent">
+<div class="maincontent container-fluid">
         <div id="bug_details">
-	    <h2 id="bug_heading">Bug - {{ .id}} {{ .summary}}</h2>
-	    <p>Select the CC entries you wish to delete
-	    <form name="bugdetail" action="/editbugcc/" method="POST">
+	    <h2 id="bug_heading">Bug - {{ .id}}</h2>
+	    <form class="form-horizontal" role="form" name="bugdetail" action="/editbugcc/" method="POST">
 		<input type="hidden" name="bug_id" value="{{ .id}}"></input>
-		<p class="field_title">CC List:</p>
-		    {{range $val := .cclist}}
-			    <p><input type="checkbox" name="ccentry" value="{{ index $val }}">{{ index $val }}</input></p>
-			    <p><input type="text" name="ccem" value="{{ index $val }}">{{ index $val }}</input></p>
-		    {{end}}
-		<p><label class="field_title">Add New CC<input type="text" name="newccentry"></input></label></p>
-		<button>Update CC List</button>
+		<div class="col-xs-6 col-md-4">
+		    <table class="table">
+			<th>Name</th>
+			<th>Email ID</th>
+			<th>Remove?</th>
+			{{range $key, $val := .cclist}}
+			<tr id={{ $key }}>
+			    <td>{{index $val 0}}</td>
+			    <td>{{index $val 1}}</td>
+			    <td><input type="checkbox" name="ccentry" value="{{ $key }}"></td>
+			</tr>
+			{{end}}
+		    </table>
+		 </div>
+		 <div class="col-xs-6 col-md-4">
+			<div class="form-group">
+			    <label class="" for="newccentry">New CC email</label>
+			    <input type="text" id="newccentry" class="form-control" name="newccentry"></input>
+			</div>
+		    <button type="submit" class="btn btn-default">Update Bug CC</button>
+		 </div>
 	    </form>
 	</div>
 </div>

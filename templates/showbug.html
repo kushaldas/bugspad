@@ -1,6 +1,6 @@
 {{define "head"}}<title class="{{if eq .status "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}">Bug {{ .id}} - {{ .summary}}</title>{{end}}
 {{define "body"}}
-<div class="maincontent">
+<div class="maincontent container-fluid">
     {{if .islogged}}
         <div id="bug_details">
 	    <h2 id="bug_heading"><label class={{if eq .status "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}>Bug - {{ .id}}</label> {{ .summary}}</h2>

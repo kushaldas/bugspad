@@ -1,39 +1,40 @@
 {{define "head"}}<title>Admin Page</title>{{end}}
 {{define "body"}}
 
-    <div class="maincontent">
-	<form name="componentdetail" action="/editcomponentpage/" method="POST">
-	    <table>
-		<tr>
-		    <td class="field_title">Component name: </td>
-		    <td><input name="componentname" type="text" value="{{ .component_name}}"></input></td>
-		</tr>
-		<tr>
-		    <td class="field_title">Description: </td>
-		    <td><textarea name="componentdescription" rows="6" columns="40">{{ .component_description}}</textarea></td>	    
-		</tr>
-		<tr>
-		    <td class="field_title">Owner: </td>
-		    <td><input name="componentowner" type="text" value="{{ .component_ownername}}"></input></td>
-		</tr>
-		<tr>
-		    <td class="field_title">QA: </td>
-		    <td><input name="componentqa" type="text" value="{{ .component_qaname}}"></input></td>
-		</tr>
-	    </table>
-	    <input name="componentproduct" type="hidden" value={{ .product_id}}></input>
-	    <input name="componentid" type="hidden" value={{ .component_id}}></input>
-	    <button>Save Changes</button>
-	    <p>Subcomponents: 
-		<table>
-		{{range $key,$val := .component_subs}}
-		    <tr>
-			<td><a href="#">{{index $val 0}}</a></td>
-			<td>{{$key}}</td>
-		    </tr>
-		{{end}}
-		</table>
-	    </p>
-	</form> 
+    <div class="maincontent container-fluid">
+	<center><h2>Edit Component</h2></center>
+	<form class="form-horizontal"  role="form" name="componentdetail" action="/editcomponentpage/" method="POST">
+		<input name="componentproduct" type="hidden" value="{{ .product_id}}"></input>
+		<input name="componentid" type="hidden" value={{ .component_id}}></input>
+	    	<div class="form-group">
+		    <label for="componentname" class="col-sm-2 control-label" >Name</label>
+		    <div class="col-sm-10">
+			<input type="text" name="componentname" class="form-control" id="componentname" value="{{ .component_name}}">
+		    </div>
+		</div>
+	    	<div class="form-group">
+		    <label for="componentowner" class="col-sm-2 control-label" >Default Assignee</label>
+		    <div class="col-sm-10">
+			<input type="text" name="componentowner" class="form-control" id="componentowner"  value="{{ .component_ownername}}" >
+		    </div>
+	    	</div>
+	    	<div class="form-group">
+		    <label for="qaname" class="col-sm-2 control-label" >QA</label>
+		    <div class="col-sm-10">
+			<input type="text" name="qaname" class="form-control" id="qaname" value="{{ .component_qaname}}">
+		    </div>
+	    	</div>
+	    	<div class="form-group">
+		    <label for="componentdescription" class="col-sm-2 control-label" >Description</label>
+		    <div class="col-sm-10">
+			<textarea id="componentdescription" name="componentdescription" rows="6"  class="form-control" >{{ .component_description}}</textarea>
+		    </div>
+		</div>
+		<div class="form-group">
+		    <div class="col-sm-offset-2 col-sm-10">
+			<button type="submit" class="btn btn-default">Save Changes</button>
+		    </div>
+		</div>	    
+	</form>
     </div>
 {{end}}

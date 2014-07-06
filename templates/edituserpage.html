@@ -1,6 +1,6 @@
 {{define "head"}}<title>Admin Page</title>{{end}}
 {{define "body"}}
-<div class="maincontent">
+<div class="maincontent container-fluid">
     <form name="userdetail" action="/edituserpage/" method="POST">
 	<p>Username: <input name="username" type="text" value="{{ .name}}"></input></p>
 	<p>Useremail: <input name="useremail" type="text" value="{{ .email}}"></input></p>

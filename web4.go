@@ -732,7 +732,7 @@ func admin(w http.ResponseWriter, r *http.Request) {
 				interface_data["islogged"] = il
 				interface_data["useremail"] = useremail
 				interface_data["is_user_admin"] = is_user_admin(useremail)
-				interface_data["pagetitle"] = "Admin"
+				interface_data["pagetitle"] = "Admin Panel"
 				err = tml.ExecuteTemplate(w, "base", interface_data)
 				if err != nil {
 					log_message(r, "System Crash:"+err.Error())
@@ -1149,16 +1149,18 @@ func editcomponentpage(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					log_message(r, "System Crash:"+err.Error())
 				}
-				interface_data["islogged"] = il
-				interface_data["useremail"] = useremail
-				interface_data["is_user_admin"] = is_user_admin(useremail)
-				interface_data["pagetitle"] = "Edit Component Page"
-				interface_data["component_id"] = component_id
 				cdata := get_component_by_id(component_id)
 				if cdata["id"] == nil {
 					fmt.Fprintln(w, "Component does not exist!")
 					return
 				}
+				interface_data["islogged"] = il
+				interface_data["useremail"] = useremail
+				interface_data["is_user_admin"] = is_user_admin(useremail)
+				interface_data["pagetitle"] = "Edit Component Page"
+				interface_data["component_id"] = component_id
+				comp_idint,_:=strconv.Atoi(component_id)
+				interface_data["product_id"] = get_product_of_component(comp_idint)
 				if cdata["error_msg"] != nil {
 					fmt.Fprintln(w, cdata["error_msg"])
 					return
@@ -1167,7 +1169,6 @@ func editcomponentpage(w http.ResponseWriter, r *http.Request) {
 				interface_data["component_qaname"] = cdata["qaname"]
 				interface_data["component_ownername"] = cdata["ownername"]
 				interface_data["component_description"] = cdata["description"]
-				comp_idint, err := strconv.Atoi(component_id)
 				interface_data["component_subs"] = get_subcomponents_by_component(comp_idint)
 				//fmt.Println(componentdata["error_msg"])
 				err = tml.ExecuteTemplate(w, "base", interface_data)

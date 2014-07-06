@@ -75,10 +75,11 @@ color: rgb(65, 131, 196);
 
     padding-bottom:10em;
     padding-left:2%;
+    padding-right:2%;
     margin:2%;
     border-radius:0.2em;
     border:0.01em solid rgb(210,210,210);
-    background-color:rgb(240,240,240)
+//    background-color:rgb(240,240,240)
 
 }
 

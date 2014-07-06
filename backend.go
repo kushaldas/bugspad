@@ -1608,9 +1608,9 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 	return m, err
 }
 
-func get_user_bugs(user_id int) map[string][2]string {
+func get_user_bugs(user_id int) map[int][2]string {
 
-	m := make(map[string][2]string)
+	m := make(map[int][2]string)
 	
 	//from userbug
 	bug_ids := redis_smembers("userbug" + strconv.Itoa(user_id))
@@ -1619,7 +1619,8 @@ func get_user_bugs(user_id int) map[string][2]string {
 		//fmt.Println(string(b[i].([]uint8)))
 		bug := get_redis_bug(string(b[i].([]uint8)))
 		//fmt.Println(bug)
-		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
+		bug_idint,_:=strconv.Atoi(string(b[i].([]uint8)))
+		m[bug_idint] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
 
 	//from assignedtobug
@@ -1628,7 +1629,8 @@ func get_user_bugs(user_id int) map[string][2]string {
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
 		bug := get_redis_bug(string(b[i].([]uint8)))
-		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
+		bug_idint,_:=strconv.Atoi(string(b[i].([]uint8)))
+		m[bug_idint] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
 	//from reporterbug
 	bug_ids = redis_smembers("reporterbug:" + strconv.Itoa(user_id))
@@ -1636,7 +1638,8 @@ func get_user_bugs(user_id int) map[string][2]string {
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
 		bug := get_redis_bug(string(b[i].([]uint8)))
-		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
+		bug_idint,_:=strconv.Atoi(string(b[i].([]uint8)))
+		m[bug_idint] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
 	//from docs
 	bug_ids = redis_smembers("docsbug:" + strconv.Itoa(user_id))
@@ -1644,7 +1647,8 @@ func get_user_bugs(user_id int) map[string][2]string {
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
 		bug := get_redis_bug(string(b[i].([]uint8)))
-		m[string(b[i].([]uint8))] = [2]string{bug["status"].(string), bug["summary"].(string)}
+		bug_idint,_:=strconv.Atoi(string(b[i].([]uint8)))
+		m[bug_idint] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
 	//fmt.Println(m)
 	return m
