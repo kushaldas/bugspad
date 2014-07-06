@@ -2,13 +2,26 @@
 {{define "body"}}
 <div class="maincontent container-fluid">
         <div id="bug_details">
-	    <h2 id="bug_heading">Bug - {{ .id}} {{ .summary}}</h2>
-	    <p>Select the CC entries you wish to delete
-	    <form name="productversion" action="/editproductversion/" method="POST">
+	    <center><h2 id="bug_heading">Product {{ .id}} - {{ .name}}</h2></center>
+	    <form role="form" class="form-horizontal"  name="productversion" action="/editproductversion/" method="POST">
+		<div class="form-group">
+		    <label for="version_value" class="col-sm-2 control-label" >Name</label>
+		    <div class="col-sm-10">
+			<input type="text" name="version_value" class="form-control" id="version_value" value="{{ .value}}">
+		    </div>
+		</div>
+		<div class="form-group">
+		    <label for="version_value" class="col-sm-2 control-label" >Is Active ?</label>
+		    <div class="col-sm-10">
+			<input type="checkbox" name="version_isactive" class="form-control" id="version_isactive" {{if  eq (1) .isactive }} checked {{end}}>
+		    </div>
+		</div>
 		<input type="hidden" name="version_id" value="{{ .id}}"></input>
-		<input type="text" name="version_value" value="{{ .value}}"></input>
-		<input type="checkbox" name="version_isactive" {{if  eq (1) .isactive }} checked {{end}}>Is Active</input>
-		<button>Update Product Versions</button>
+		<div class="form-group">
+		    <div class="col-sm-offset-2 col-sm-10">
+			<button type="submit" class="btn btn-default">Save Changes</button>
+		    </div>
+		</div>
 	    </form>
 	</div>
 </div>
