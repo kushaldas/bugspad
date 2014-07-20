@@ -822,7 +822,6 @@ func listproductversions(w http.ResponseWriter, r *http.Request) {
 			} else {
 			fmt.Fprintln(w, "You do not have sufficient rights!")
 			}
-		}
 	} else {
 		http.Redirect(w, r, "/login", http.StatusFound)
 	}
