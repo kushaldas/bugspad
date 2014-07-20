@@ -1111,11 +1111,11 @@ func addcomponentpage(w http.ResponseWriter, r *http.Request) {
 				}
 
 			} else if r.Method == "POST" {
-				qa := get_user_id(r.FormValue("qaname"))
+				qa := get_user_id(r.FormValue("qaemail"))
 				if qa == -1 && r.FormValue("qaname") != "" {
 					fmt.Fprintln(w, "Invalid QA name")
 				}
-				owner := get_user_id(r.FormValue("ownername"))
+				owner := get_user_id(r.FormValue("owneremail"))
 				if owner == -1 {
 					fmt.Fprintln(w, "Invalid Owner name")
 				}
