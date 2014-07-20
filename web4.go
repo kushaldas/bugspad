@@ -795,27 +795,32 @@ func listproductversions(w http.ResponseWriter, r *http.Request) {
 	il, useremail := is_logged(r)
 	interface_data := make(Bug)
 	if il {
-		if r.Method == "GET" && product_id != "" {
-			tml, err := template.ParseFiles("./templates/listproductversions.html", "./templates/base.html")
-			if err != nil {
-				log_message(r, "System Crash:"+err.Error())
-			}
-			prod_idint, _ := strconv.Atoi(product_id)
-			interface_data = get_product_by_id(product_id)
-			if interface_data["id"] == nil {
-				fmt.Fprintln(w, "Product does not exist!")
-				return
-			}
-			interface_data["islogged"] = il
-			interface_data["useremail"] = useremail
-			interface_data["is_user_admin"] = is_user_admin(useremail)
-			interface_data["pagetitle"] = "Edit Bug " + product_id + " CC"
-			interface_data["versions"] = get_product_versions(prod_idint)
-			interface_data["id"] = product_id
+			if is_user_admin(useremail) {
+				if r.Method == "GET" && product_id != "" {
+				    tml, err := template.ParseFiles("./templates/listproductversions.html", "./templates/base.html")
+				    if err != nil {
+					    log_message(r, "System Crash:"+err.Error())
+				    }
+				    prod_idint, _ := strconv.Atoi(product_id)
+				    interface_data = get_product_by_id(product_id)
+				    if interface_data["id"] == nil {
+					fmt.Fprintln(w, "Product does not exist!")
+					return
+				    }
+				    interface_data["islogged"] = il
+				    interface_data["useremail"] = useremail
+				    interface_data["is_user_admin"] = is_user_admin(useremail)
+				    interface_data["pagetitle"] = "Edit Bug " + product_id + " CC"
+				    interface_data["versions"] = get_product_versions(prod_idint)
+				    interface_data["id"] = product_id
 
-			err = tml.ExecuteTemplate(w, "base", interface_data)
-			if err != nil {
-				log_message(r, "System Crash:"+err.Error())
+				    err = tml.ExecuteTemplate(w, "base", interface_data)
+				    if err != nil {
+					    log_message(r, "System Crash:"+err.Error())
+				    }
+				}
+			} else {
+			fmt.Fprintln(w, "You do not have sufficient rights!")
 			}
 		}
 	} else {
@@ -831,7 +836,7 @@ func editproductversion(w http.ResponseWriter, r *http.Request) {
 	il, useremail := is_logged(r)
 	interface_data := make(Bug)
 	if il {
-		if r.Method == "GET" && version_id != "" {
+		if r.Method == "GET" && version_id != "" && is_user_admin(useremail) {
 			tml, err := template.ParseFiles("./templates/editproductversion.html", "./templates/base.html")
 			if err != nil {
 				log_message(r, "System Crash:"+err.Error())
@@ -887,9 +892,9 @@ Admin:: Add product version
 */
 func addproductversion(w http.ResponseWriter, r *http.Request) {
 
-	il, _ := is_logged(r)
+	il, useremail := is_logged(r)
 	if il {
-		if r.Method == "POST" {
+		if r.Method == "POST" && is_user_admin(useremail) {
 			err := add_product_version(r.FormValue("product_id"), r.FormValue("newversionentry"))
 			if err != nil {
 				fmt.Fprintln(w, err)
