@@ -229,7 +229,7 @@ func search_redis_bugs(components []string, products []string, statuses []string
 		bugidlist := bugids.([]interface{})
 		for j, _ := range bugidlist {
 			tmp := get_redis_bug(string(bugidlist[j].([]uint8)))
-			fmt.Println(string(bugidlist[j].([]uint8)))
+			//fmt.Println(string(bugidlist[j].([]uint8)))
 			bugid := int(tmp["id"].(float64))
 			ans[bugid] = [2]string{tmp["summary"].(string), tmp["status"].(string)}
 		}
