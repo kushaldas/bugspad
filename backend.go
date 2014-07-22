@@ -412,7 +412,18 @@ func new_bug(data map[string]interface{}) (int, string) {
 
 		buffer.WriteString(", qa")
 		buffer2.WriteString(",?")
-		vals = append(vals, strconv.Itoa(get_component_owner(val.(int))))
+		valint:=0
+		switch v := val.(type) {
+		case float64:
+		    // v is a float64 here, so e.g. v + 1.0 is possible.
+		    valint=int(v)
+		    //fmt.Printf("Float64: %v", v)
+		default:
+		    // And here I'm feeling dumb. ;)
+		    valint=v.(int)
+		    //fmt.Printf("I don't know, ask stackoverflow.")
+		}
+		vals = append(vals, strconv.Itoa(get_component_owner(valint)))
 	} else {
 		return -1, "Missing input: component_id"
 	}
