@@ -5,6 +5,7 @@
     <form class="form-horizontal" role="form" {{if .islogged}} action="/bugs/" method="POST" {{end}} >
     <div id="bug_details" class="col-md-12">
 		<input name="productofbug" type="hidden" value="{{ .bugproductid}}"></input>
+		<input name="bug_id" type="hidden" value="{{ .id}}"></input>
     {{if .islogged}}
     <div class="col-xs-6">
 		<div class="form-group">

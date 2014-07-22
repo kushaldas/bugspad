@@ -706,7 +706,7 @@ func searchbugs(w http.ResponseWriter, r *http.Request) {
 		}
 		r.ParseForm()
 		searchbugs := search_redis_bugs(r.Form["bug_component"], r.Form["bug_product"], r.Form["bug_status"], r.Form["bug_version"], r.Form["bug_fixedinver"])
-		fmt.Println(searchbugs)
+		//fmt.Println(searchbugs)
 		err = tml.ExecuteTemplate(w, "base", Bug{"searchbugs": searchbugs, "searchresult": true, "pagetitle": "Search"})
 		if err != nil {
 			log_message(r, "System Crash:"+err.Error())
