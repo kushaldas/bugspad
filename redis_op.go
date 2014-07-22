@@ -417,9 +417,21 @@ func set_redis_bug(bug Bug) {
 	//fmt.Println(sid)
 	//fmt.Println(sdata)
 	redis_hset("bugs", sid, sdata)
-
-	componentstring := strconv.Itoa(bug["component_id"].(int))
-	qastring := strconv.Itoa(bug["qa"].(int))
+	valint:=0
+	switch v := bug["component_id"].(type) {
+	    case float64:
+		    // v is a float64 here, so e.g. v + 1.0 is possible.
+		valint=int(v)
+		    //fmt.Printf("Float64: %v", v)
+	    default:
+	    // And here I'm feeling dumb. ;)
+		valint=v.(int)
+	   //fmt.Printf("I don't know, ask stackoverflow.")
+	}
+	componentidint:=valint
+	componentstring := strconv.Itoa(componentidint)
+	qauserid:=get_component_owner(valint)
+	qastring := strconv.Itoa(qauserid)
 	docsstring := ""
 	versionstring := ""
 	fixedinverstring := ""
@@ -428,7 +440,7 @@ func set_redis_bug(bug Bug) {
 	}
 	reporterstring := strconv.Itoa(bug["reporter"].(int))
 	assignedtostring := strconv.Itoa(bug["assigned_to"].(int))
-	compid := bug["component_id"].(int)
+	compid := componentidint
 	productstring := strconv.Itoa(get_product_of_component(compid))
 	bugstring := strconv.Itoa(bug["id"].(int))
 	if bug["version"] != nil {

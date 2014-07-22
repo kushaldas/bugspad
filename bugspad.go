@@ -148,6 +148,7 @@ func backend_bug(w http.ResponseWriter, r *http.Request) {
 		if authenticate_redis(user, password) {
 			user_id := get_user_id(user)
 			pdata["reporter"] = user_id
+			pdata["assigned_to"] = get_component_owner(int(pdata["component_id"].(float64)))
 			id, err := new_bug(pdata)
 			if err != "" {
 				fmt.Println(err)

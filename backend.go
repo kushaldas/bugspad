@@ -289,7 +289,19 @@ func new_bug(data map[string]interface{}) (int, string) {
 	defer db.Close()
 
 	//var status, summary string
-
+	valint:=0
+	switch v := data["component_id"].(type) {
+	    case float64:
+		    // v is a float64 here, so e.g. v + 1.0 is possible.
+		valint=int(v)
+		    //fmt.Printf("Float64: %v", v)
+	    default:
+	    // And here I'm feeling dumb. ;)
+		valint=v.(int)
+	   //fmt.Printf("I don't know, ask stackoverflow.")
+	}
+	qauserid:=get_component_owner(valint)
+	
 	var buffer, buffer2 bytes.Buffer
 	vals := make([]interface{}, 0)
 	buffer.WriteString("INSERT INTO bugs (")
@@ -410,20 +422,13 @@ func new_bug(data map[string]interface{}) (int, string) {
 		buffer2.WriteString(",?")
 		vals = append(vals, val)
 
-		buffer.WriteString(", qa")
-		buffer2.WriteString(",?")
-		valint:=0
-		switch v := val.(type) {
-		case float64:
-		    // v is a float64 here, so e.g. v + 1.0 is possible.
-		    valint=int(v)
-		    //fmt.Printf("Float64: %v", v)
-		default:
-		    // And here I'm feeling dumb. ;)
-		    valint=v.(int)
-		    //fmt.Printf("I don't know, ask stackoverflow.")
+
+
+		if qauserid!=-1 {
+		    buffer.WriteString(", qa")
+		    buffer2.WriteString(",?")
+		    vals = append(vals, strconv.Itoa(qauserid))
 		}
-		vals = append(vals, strconv.Itoa(get_component_owner(valint)))
 	} else {
 		return -1, "Missing input: component_id"
 	}
@@ -460,10 +465,11 @@ func new_bug(data map[string]interface{}) (int, string) {
 		db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, assignee)
 	}
 	//comp_id,_:= strconv.Atoi(data["component_id"].(string))
-	qa := get_component_owner(data["component_id"].(int))
-	_, present = db.Query("SELECT * from cc where bug_id=? and who=?", bug_id, qa)
-	if present == nil {
-		db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, qa)
+	if qauserid!=-1 {
+	    _, present = db.Query("SELECT * from cc where bug_id=? and who=?", bug_id, qauserid)
+	    if present == nil {
+		db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, qauserid)
+	    }
 	}
 
 	docs, ok := data["docs"]
@@ -478,7 +484,9 @@ func new_bug(data map[string]interface{}) (int, string) {
 	//redis_sadd("userbug"+val.(string), bug_id)
 	data["id"] = int(bug_id)
 	//comp_id,_=strconv.Atoi(data["component_id"].(string))
-	data["qa"] = get_component_owner(data["component_id"].(int))
+	if qauserid!=-1 {
+	    data["qa"] = qauserid
+	}
 	set_redis_bug(data)
 	add_latest_created(bug_id)
 
