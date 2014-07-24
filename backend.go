@@ -13,7 +13,10 @@ import (
 	"time"
 )
 
+
+
 var conn_str string
+
 
 /* To read config file values.  */
 func load_config(filepath string) {

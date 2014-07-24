@@ -11,12 +11,11 @@ import (
 
 type Result1 map[string]string
 
-
 func product(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
@@ -49,7 +48,7 @@ func component(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
@@ -66,10 +65,15 @@ func component(w http.ResponseWriter, r *http.Request) {
 		desc := pdata["description"].(string)
 		product_id := int(pdata["product_id"].(float64))
 		owner := pdata["owner"].(string)
+		qa := ""
+		if pdata["qa"] != nil {
+			qa = pdata["qa"].(string)
+		}
 		if authenticate_redis(user, password) {
 			owner_id := get_user_id(owner)
+			qa_id := get_user_id(qa)
 			fmt.Println(user, password, name, desc, product_id, owner_id)
-			id, _ := insert_component(name, desc, product_id, owner_id)
+			id, _ := insert_component(name, desc, product_id, owner_id, qa_id)
 			res := Result1{"id": id, "name": name, "description": desc}
 			res_json, _ := json.Marshal(res)
 			fmt.Fprintln(w, string(res_json))
@@ -84,7 +88,7 @@ func component(w http.ResponseWriter, r *http.Request) {
 func components(w http.ResponseWriter, r *http.Request) {
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	product_id := ""
 	if r.Method == "POST" {
@@ -113,7 +117,8 @@ func components(w http.ResponseWriter, r *http.Request) {
 	}
 	if product_id != "" {
 		w.Header().Set("Content-Type", "application/json")
-		m := get_components_by_id(product_id)
+		product_idint,_ := strconv.Atoi(product_id)
+		m := get_components_by_product(product_idint)
 		res_json, _ := json.Marshal(m)
 		fmt.Fprintln(w, string(res_json))
 	}
@@ -126,7 +131,7 @@ func backend_bug(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
@@ -143,17 +148,15 @@ func backend_bug(w http.ResponseWriter, r *http.Request) {
 		if authenticate_redis(user, password) {
 			user_id := get_user_id(user)
 			pdata["reporter"] = user_id
+			pdata["assigned_to"] = get_component_owner(int(pdata["component_id"].(float64)))
 			id, err := new_bug(pdata)
-			if err != nil {
-				fmt.Println(err.Error())
+			if err != "" {
+				fmt.Println(err)
 				return
 			}
-			bug_id, ok := strconv.ParseInt(id, 10, 32)
-			if ok == nil {
-				if pdata["emails"] != nil {
-					add_bug_cc(bug_id, pdata["emails"])
-				}
-
+			bug_id := id
+			if pdata["emails"] != nil {
+				add_bug_cc(int64(bug_id), pdata["emails"])
 			}
 
 			fmt.Fprintln(w, id)
@@ -171,7 +174,8 @@ func backend_bug(w http.ResponseWriter, r *http.Request) {
 		if index != -1 {
 			title = title[:index]
 		}
-		data := get_bug(title)
+		bugid,_:=strconv.Atoi(title)
+		data := get_bug(bugid)
 		res_json, _ := json.Marshal(data)
 		fmt.Fprintln(w, string(res_json))
 
@@ -185,7 +189,7 @@ func updatebug(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
@@ -213,7 +217,7 @@ func comment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	if r.Method == "POST" {
 		decoder := json.NewDecoder(r.Body)
@@ -246,7 +250,7 @@ func bug_cc(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	if r.Method == "POST" {
 		// In case of wrong type of input we should recover.
@@ -282,7 +286,7 @@ API call to get latest 10 bugs from the server
 func latest_bugs(w http.ResponseWriter, r *http.Request) {
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	w.Header().Set("Content-Type", "application/json")
 	vals := get_latest_created_list().([]interface{})
@@ -305,7 +309,7 @@ Can be used in the frontpage of the application.
 func latest_updated_bugs(w http.ResponseWriter, r *http.Request) {
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	w.Header().Set("Content-Type", "application/json")
 	vals := get_latest_updated_list().([]interface{})
@@ -324,7 +328,7 @@ func latest_updated_bugs(w http.ResponseWriter, r *http.Request) {
 func releases(w http.ResponseWriter, r *http.Request) {
 
 	tm := time.Now().UTC()
-	defer log(r, tm)
+	defer log_request(r, tm)
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -364,9 +368,9 @@ func releases(w http.ResponseWriter, r *http.Request) {
 // Main function of the application. This handles
 // all entry points for the webapplication.
 func main() {
-        // First load the configuration details.
+	// First load the configuration details.
 	load_config("config/bugspad.ini")
-        // Load the user details into redis.
+	// Load the user details into redis.
 	load_users()
 	http.HandleFunc("/component/", component)
 	http.HandleFunc("/components/", components)

@@ -9,11 +9,13 @@ import (
 	"os"
 	"strings"
 	"time"
+	"log"
 )
 
 type Page struct {
 	Email string
 	Flag_login bool
+	Bug Bug
 }
 
 func checkError(err error) {
@@ -21,6 +23,15 @@ func checkError(err error) {
 		fmt.Println("Fatal error ", err.Error())
 		os.Exit(1)
 	}
+}
+
+func isvalueinlist(value string, list []string) bool {
+	for _, v := range list {
+		if v == value {
+			return true
+		}
+	}
+	return false
 }
 
 func generate_hash() []byte {
@@ -39,6 +50,10 @@ func getCookie (user string) (http.Cookie,string){
 	final_hash := user + ":" + new_hash
 	cookie := http.Cookie{Name: "bugsuser", Value: final_hash, Path: "/", Expires: expire, MaxAge: 86400}
 	return cookie, final_hash
+}
+
+func log_message(r *http.Request, message string) {
+	log.Printf("%s %s", r.Header.Get("X-Real-IP"), message)
 }
 
 func get_template(name string) (*template.Template, error) {
@@ -122,10 +137,48 @@ func index_page(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+/*
+Registering a User
+*/
+func registeruser(w http.ResponseWriter, r *http.Request) {
+	// TODO add email verification for the user.
+	// TODO add openid registration.
+	interface_data := make(Bug)
+	if r.Method == "GET" {
+
+		tml, err := get_template("./templates/registeruser.html")
+		if err != nil {
+			log_message(r, "System Crash:"+err.Error())
+		}
+		interface_data["pagetitle"] = "Register"
+		page := Page{Bug: interface_data}
+		err = tml.ExecuteTemplate(w, "base", page)
+		if err != nil {
+			log_message(r, "System Crash:"+err.Error())
+		}
+		return
+
+	} else if r.Method == "POST" {
+		//type "0" refers to the normal user, while "1" refers to the admin
+		if r.FormValue("password") != r.FormValue("repassword") {
+			fmt.Fprintln(w, "Passwords do not match.")
+			return
+		}
+		ans := add_user(r.FormValue("username"), r.FormValue("useremail"), "0", r.FormValue("password"))
+		if ans != "User added." {
+			fmt.Fprintln(w, "User could not be registered.")
+			return
+		}
+		http.Redirect(w, r, "/", http.StatusFound)
+	}
+
+}
+
 func main() {
 	http.HandleFunc("/", index_page)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/logout/", logout)
+	http.HandleFunc("/register/", registeruser)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	http.ListenAndServe(":9999", nil)
 }

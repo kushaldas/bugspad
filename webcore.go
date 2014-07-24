@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"time"
 	"strings"
+	"time"
 )
 
 
@@ -19,10 +19,11 @@ func myrecover(w http.ResponseWriter) {
 	}
 }
 
-func log(r *http.Request, tm time.Time) {
+func log_request(r *http.Request, tm time.Time) {
 	duration := time.Now().Sub(tm)
 	fmt.Printf("%s %s %s %v\n", r.RemoteAddr, r.Method, r.URL, duration)
 }
+
 
 func is_logged(r *http.Request) (bool, string) {
         cookie, err := r.Cookie("bugsuser")
