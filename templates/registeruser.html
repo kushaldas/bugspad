@@ -1,0 +1,26 @@
+{{define "body"}}
+	<section>
+      <div class="container">
+        <h1>Register a new user</h1>
+        <form class="form-inline border-radius" role="form"  action="/register/" method="POST"> 
+        	<div class="form-item">
+		    	<label for="username">Full Name:</label>  
+		    	<input type="text" name="username" id="username">		 
+			</div>
+    		<div class="form-item">
+			    <label for="useremail">Email:</label>
+			    <input type="text" name="useremail" id="useremail">
+			</div>
+			<div class="form-item">
+			    <label for="password">Password:</label>
+			    <input type="password" name="password" id="password">
+			</div>
+			<div class="form-item">
+			    <label for="repassword">Type again:</label>
+			    <input type="password" name="repassword" id="repassword">
+			</div>
+			<input type="submit" value="Submit" class="btn btn-small border gray pill">
+        </form>
+      </div>
+	</section>
+{{end}}
