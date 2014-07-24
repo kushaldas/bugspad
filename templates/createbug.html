@@ -1,0 +1,106 @@
+{{define "body"}}
+	<section>
+      	<div class="container">
+		<h2>New Bug</h2>
+		
+	    <form class="form-inline border-radius" role="form" action="/filebug/" method="POST" >
+			<input name="productofbug" type="hidden" value="{{ .Bug.bugproductid}}"></input>
+
+			<div class="row clearfix">
+
+				<div class="column two-thirds">
+										<div class="form-item">
+					    <label for="bug_title">Summary</label>    
+					    <input type="text" id="mybugsummary" >
+					</div>
+					<div class="form-item">
+					    <textarea name="bug_description" id="bug_description" placeholder="Bug Description"></textarea>
+					</div>
+					<input type="submit" value="Submit" class="btn btn-small border gray pill">
+				</div>
+
+				<div class="column third">
+					<div class="form-item">
+					    <label for="bug_component">Component</label>
+					        
+					    <select name="bug_component" id="bug_component">
+						{{range $key, $val := .Bug.components}}
+						    <option value={{index $val 0}}>{{$key}}</option>
+						{{end}}
+					    </select>
+					</div>
+					<div class="form-item">
+					    <label for="bug_whiteboard">Whiteboard</label>
+					        
+					    <input type="text" name="bug_whiteboard" id="bug_whiteboard">
+					</div>
+					<div class="form-item">
+					    <label for="bug_severity">Severity</label>
+				        
+					    <select name="bug_severity" id="bug_severity" >
+						<option value="blocker">Blocker</option>
+						<option value="critical">Critical</option>
+						<option value="trivial">Trivial</option>
+						<option value="enhancement">Enhancement</option>
+						<option value="normal" selected>Normal</option>
+					    </select>
+					</div>
+					<div class="form-item">
+					    <label for="bug_version"  >Version</label>
+					        
+					    <select name="bug_version" id="bug_version">
+						{{range $key, $val := .Bug.versions}}
+						    {{if eq (index $val 1) (1)}}
+							<option value={{index $val 0}}>{{$key}}</option>
+						    {{end}}
+						{{end}}
+					    </select>
+					</div>
+					<div class="form-item">
+					    <label for="bug_hardware"  >Hardware</label>
+					        
+					    <input type="text" name="bug_hardware" id="bug_hardware">
+					</div>
+					<div class="form-item">
+					    <label for="bug_priority"  >Priority</label>
+					        
+					    <select name="bug_priority" id="bug_priority" >
+							    <option value="high">High</option>
+							    <option value="low" selected>Low</option>
+							    <option value="medium">Medium</option>
+							    <option value="critical">Critical</option>
+					    </select>
+					</div>
+
+					<div class="form-item">
+					    <label for="bug_assignee"  >Assignee</label>
+					        
+					    <input type="text" name="bug_assignee" id="bug_assignee" placeholder="Leave blank for default">
+					</div>
+					<div class="form-item">
+					    <label for="bug_depends_on" >Depends On</label>
+					        
+					    <input type="text" name="bug_depends_on" id="bug_depends_on" placeholder="Enter comma separated bug ids, e.g 1,2,3">
+					</div>
+					<div class="form-item">
+					    <label for="bug_blocks" >Blocks</label>
+					        
+					    <input type="text" name="bug_blocks" id="bug_blocks" placeholder="Enter comma separated bug ids, e.g 1,2,3">
+					</div>
+					<div class="form-item">
+					    <label for="bug_cc" >Bug CC</label>
+					        
+					    <input type="text" name="bug_cc" id="bug_cc" placeholder="Enter comma separated email ids.">
+					</div>
+					<div class="form-item">
+					    <label for="bug_docs" >Docs Maintainer</label>
+					    <input type="text" name="bug_docs" id="bug_docs">
+
+					</div>
+				</div>
+			</div>
+
+	    </form>
+      </div>
+	</section>
+{{end}}

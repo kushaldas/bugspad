@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 	"log"
+	"strconv"
 )
 
 type Page struct {
@@ -205,6 +206,164 @@ func before_createbug(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+/*
+Function for creating a new bug.
+*/
+func createbug(w http.ResponseWriter, r *http.Request) {
+	//perform any preliminary check
+	//backend_bug(w,r)
+	//to_be_rendered by the template
+	interface_data := make(Bug)
+	il, useremail := is_logged(r)
+	page := Page{Flag_login: il, Email: useremail}
+	if r.Method == "GET" {
+		product_id := r.URL.Path[len("/filebug/"):]
+		_, err := strconv.ParseInt(product_id, 10, 32)
+		if err != nil {
+			fmt.Fprintln(w, "You need to give a valid product for filing a bug!")
+			return
+		}
+		tml, err := get_template("./templates/createbug.html")
+		if err != nil {
+			log_message(r, "System Crash:"+err.Error())
+		}
+		if il {
+			prod_idint, _ := strconv.Atoi(product_id)
+			allcomponents := get_components_by_product(prod_idint)
+			interface_data["useremail"] = useremail
+			interface_data["islogged"] = il
+			interface_data["is_user_admin"] = is_user_admin(useremail)
+			interface_data["components"] = allcomponents
+			interface_data["pagetitle"] = "File Bug"
+			interface_data["versions"] = get_product_versions(prod_idint)
+			page.Bug = interface_data
+			tml.ExecuteTemplate(w, "base", page)
+			return
+		} else {
+			http.Redirect(w, r, "/login", http.StatusFound)
+		}
+	} else if r.Method == "POST" {
+		if il {
+			_, severs, priors := get_redis_bugtags()
+			if !isvalueinlist(r.FormValue("bug_priority"), priors) {
+				fmt.Fprintln(w, "Bug Priority Invalid.")
+				return
+			}
+			if !isvalueinlist(r.FormValue("bug_severity"), severs) {
+				fmt.Fprintln(w, "Bug Severity Invalid.")
+				return
+			}
+			newbug := make(Bug)
+			newbug["summary"] = r.FormValue("mybugsummary")
+			newbug["whiteboard"] = r.FormValue("bug_whiteboard")
+			newbug["severity"] = r.FormValue("bug_severity")
+			newbug["hardware"] = r.FormValue("bug_hardware")
+			newbug["description"] = r.FormValue("bug_description")
+			newbug["priority"] = r.FormValue("bug_priority")
+			compid, _ := strconv.Atoi(r.FormValue("bug_component"))
+			newbug["component_id"] = compid
+			newbug["reporter"] = get_user_id(useremail)
+			//fmt.Println(reflect.TypeOf(newbug["component_id"]))
+			//fmt.Println(reflect.TypeOf(newbug["reporter"]))
+			docsint := get_user_id(r.FormValue("bug_docs"))
+			if r.FormValue("bug_docs") != "" {
+				if docsint != -1 {
+					newbug["docs"] = docsint
+				} else {
+					fmt.Fprintln(w, "Please enter a valid user as Docs Maintainer.")
+					return
+				}
+			}
+			comp_idint, _ := strconv.Atoi(r.FormValue("bug_component"))
+			version_int, _ := strconv.Atoi(r.FormValue("bug_version"))
+			fmt.Println(version_int)
+			if r.FormValue("bug_assignee") != "" {
+				assignid := get_user_id(r.FormValue("bug_assignee"))
+				if assignid == -1 {
+					fmt.Fprintln(w, "Please enter a valid user as assignee")
+					return
+				}
+				newbug["assigned_to"] = assignid
+			} else { //simply add the component owner as the assignee.
+				newbug["assigned_to"] = get_component_owner(comp_idint)
+			}
+
+			newbug["version"] = version_int
+			bugid, err := new_bug(newbug)
+
+			if bugid == -1 {
+				fmt.Fprintln(w, err)
+				return
+			}
+			//CC Addition
+			bugccemails := make([]interface{}, 0)
+			ccs := strings.SplitAfter(r.FormValue("bug_cc"), ",")
+			for index, _ := range ccs {
+				//fmt.Println(dependbug)
+				if ccs[index] != "" {
+					bugccemails = append(bugccemails, strings.Trim(ccs[index], ","))
+				}
+			}
+			if bugccemails != nil {
+				if !add_bug_cc(int64(bugid), bugccemails) {
+					fmt.Fprintln(w, "Bug CC could not be updated, please check")
+					return
+				}
+				http.Redirect(w, r, "/bugs/"+strconv.Itoa(bugid), http.StatusFound)
+
+			} else {
+				fmt.Fprintln(w, "The Bug creation had errors, unable to fetch Bug ID.")
+				return
+			}
+			//Adding dependencies and blocked.
+			dependbugs := strings.SplitAfter(r.FormValue("bug_depends_on"), ",")
+			//fmt.Println(dependbugs)
+			for index, _ := range dependbugs {
+				//fmt.Println(dependbug)
+				if dependbugs[index] != "" {
+					dependbug_idint, _ := strconv.Atoi(strings.Trim(dependbugs[index], ","))
+					// fmt.Println(dependbug_idint)
+					valid, val := is_valid_bugdependency(bugid, dependbug_idint)
+					fmt.Println(val)
+					if valid {
+						err := add_bug_dependency(bugid, dependbug_idint)
+						if err != nil {
+							fmt.Fprintln(w, err)
+							return
+						}
+					} else {
+						fmt.Fprintln(w, val)
+						return
+					}
+				}
+
+			}
+
+			blockedbugs := strings.SplitAfter(r.FormValue("bug_blocks"), " ")
+			//fmt.Println(blockedbugs)
+			for index, _ := range blockedbugs {
+				if blockedbugs[index] != "" {
+					blockedbug_idint, _ := strconv.Atoi(strings.Trim(blockedbugs[index], ","))
+					valid, val := is_valid_bugdependency(blockedbug_idint, bugid)
+					if valid {
+						err := add_bug_dependency(blockedbug_idint, bugid)
+						if err != nil {
+							fmt.Fprintln(w, err)
+							return
+						}
+					} else {
+						fmt.Fprintln(w, val)
+						return
+					}
+				}
+
+			}
+
+		}
+	}
+
+}
+
 func main() {
 	load_config("config/bugspad.ini")
 	// Load the user details into redis.
@@ -224,6 +383,7 @@ func main() {
 	http.HandleFunc("/logout/", logout)
 	http.HandleFunc("/register/", registeruser)
 	http.HandleFunc("/filebug_product/", before_createbug)
+	http.HandleFunc("/filebug/", createbug)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	http.ListenAndServe(":9999", nil)
 }
