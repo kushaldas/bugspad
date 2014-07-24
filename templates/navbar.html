@@ -1,0 +1,17 @@
+{{define "navbar"}}
+<nav class="nav-responsive-left">
+	<ul class="list-inline">
+		<li><a href="/">Home</a></li>
+		<li><a href="#">New Bug</a></li>
+		<li><a href="#">Search</a></li>
+		{{ with .Flag_login }}<li><a href="#">My bugs</a></li>{{ end }}
+	</ul>
+</nav>
+<nav class="nav-responsive">
+	{{ with .Email }}
+	<ul class="list-inline">
+		<li><a href="#">Welcome {{ . }}</a></li>
+	</ul>
+	{{end}}
+</nav>
+{{end}}

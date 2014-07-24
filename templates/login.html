@@ -1,9 +1,20 @@
-{{define "head"}}<title>Login Page</title>{{end}}
 {{define "body"}}
-    <h1>Login</h1>
-    <form action="/login" method="POST">
-        <p>Username: <input type="text" name="username"></p>
-        <p>Password: <input type="password" name="password"></p>
-        <p><button>Login</button></p>
-    </form>
+<section>
+	<div class="container">
+	<h1>Login to Bugspad</h1>
+	<form class="form-inline" action="/login" method="POST">       
+		<div class="form-item">
+			<label for="username">Email:</label>
+			<input type="email" name="username" placeholder="john_doe@example.com" />
+		</div>                 
+		<div class="form-item">
+			<label for="password">Password:</label>
+			<input type="password" name="password" />
+		</div>
+		
+
+		<input type="submit" value="login" class="btn btn-small border gray pill">
+	</form>				
+	</div>
+</section>
 {{end}}
