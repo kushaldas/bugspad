@@ -364,6 +364,325 @@ func createbug(w http.ResponseWriter, r *http.Request) {
 
 }
 
+/*
+Function for displaying the bug details.
+*/
+func showbug(w http.ResponseWriter, r *http.Request) {
+	//perform any preliminary check if required.
+	//backend_bug(w,r)
+	il, useremail := is_logged(r)
+	page := Page{Flag_login: il, Email: useremail}
+	interface_data := make(Bug)
+	bugid := r.URL.Path[len("/bugs/"):]
+	if r.Method == "GET" && bugid != "" {
+
+		/*fetching the main bug content
+		 ************************************************
+
+		"id" = bug id
+		"status" = bug status
+		"summary" = bug summary
+		"severity" = bug severity
+		"description" = bug description
+		"hardware" = bug hardware
+		"priority" = bug priority
+		"whiteboard" = bug whiteboard
+		"reported" = bug reporting time UTC
+		"reporter" = reporter user id
+		"assigned_to" = assigned_to user id
+		"qa" = quality Assurance user id
+		"docs" = docs Maintainer user id
+		"component_id" = bug component id
+		"subcomponent_id" = bug subcomponent id ---> IGNORED
+		"fixedinver" = version id of the version in which the bug was fixed (if it is fixed)
+		"version" = version id of the component of the bug
+
+		//extra fields for convenience
+		"versiontext"
+		"qaemail" = qa_email
+		"qaname" = qa_name
+		"docsemail" = docs_email
+		"docsname" = docs_name
+		"assigned_toname" = get_user_name(assigned_to)
+		"assigned_toemail" = get_user_email(assigned_to)
+		"reportername" = get_user_name(reporter)
+		"reporteremail" = get_user_email(reporter)
+		"component" = get_component_name_by_id(component_id)
+		"subcomponent" = get_subcomponent_name_by_id(subcint)
+		"fixedinvername" = get_version_text(fixedinverint)
+		"cclist" = List of (emails,name) of CC members
+
+		 ************************************************/
+		bug_id, _ := strconv.Atoi(bugid)
+		interface_data = get_bug(bug_id)
+
+		//adding generic data
+		interface_data["islogged"] = il
+		interface_data["useremail"] = useremail
+		interface_data["is_user_admin"] = is_user_admin(useremail)
+		interface_data["pagetitle"] = "Bug - " + bugid + " details"
+		//checking if the "id" interface{} is nil, ie the bug exists or not
+		if interface_data["id"] == nil {
+			fmt.Fprintln(w, "Bug does not exist!")
+			return
+		}
+		tml, err := get_template("./templates/showbug.html")
+		if err != nil {
+			log_message(r, "System Crash:"+err.Error())
+		}
+		//Adding in the comments associated with the bug/
+		interface_data["comment_data"] = fetch_comments_by_bug(bug_id)
+
+		//Adding the bug dependency list for the bug.
+		interface_data["dependencylist"] = bugs_dependent_on(bug_id)
+
+		//Adding the bug blockage list for the bug.
+		interface_data["blockedlist"] = bugs_blocked_by(bug_id)
+
+		//Adding the original bug id if the bug is a duplicate
+		dup := find_orig_ifdup(bug_id)
+		if dup != -1 {
+			interface_data["duplicateof"] = dup
+		}
+
+		//loggedin specific data
+		if il {
+			bug_product_id := get_product_of_component(interface_data["component_id"].(int))
+			if bug_product_id == -1 {
+				log_message(r, "Consistency Error:There is no product for the component "+strconv.Itoa(interface_data["component_id"].(int)))
+				fmt.Fprintln(w, "No product exists for the component of the bug!")
+				return
+			}
+
+			//fetching allcomponents of the currentproduct
+			interface_data["allcomponents"] = get_components_by_product(bug_product_id)
+
+			//fetching allsubcomponents of the
+			interface_data["allsubcomponents"] = get_subcomponents_by_component(interface_data["component_id"].(int))
+
+			//fetching all versions of the product
+			interface_data["versions"] = get_product_versions(bug_product_id)
+
+		}
+
+		//Fetching the attachments related to the bug.
+		interface_data["attachments"] = get_bug_attachments(bug_id)
+		page.Bug = interface_data
+		err = tml.ExecuteTemplate(w, "base", page)
+		if err != nil {
+			log_message(r, "System Crash:"+err.Error())
+		}
+		return
+
+	} else if r.Method == "POST" {
+
+		stats, severs, priors := get_redis_bugtags()
+
+		//Checking if the Status, Severity and Priority are valid.
+		if !isvalueinlist(r.FormValue("bug_status"), stats) {
+			fmt.Fprintln(w, "Bug Status Invalid.")
+			return
+		}
+		if strings.Contains(r.FormValue("bug_status"), "closed") {
+			if r.FormValue("blockedlist") != "" {
+				fmt.Fprintln(w, "This bug blocks other bugs and hence cannot be closed.")
+				return
+			}
+		}
+		interface_data["status"] = r.FormValue("bug_status")
+
+		if !isvalueinlist(r.FormValue("bug_priority"), priors) {
+			fmt.Fprintln(w, "Bug Priority Invalid.")
+			return
+		}
+		interface_data["priority"] = r.FormValue("bug_priority")
+
+		if !isvalueinlist(r.FormValue("bug_severity"), severs) {
+			fmt.Fprintln(w, "Bug Severity Invalid.")
+			return
+		}
+		interface_data["severity"] = r.FormValue("bug_severity")
+
+		//checking if the fields are valid.
+		tmp, err := strconv.Atoi(r.FormValue("bug_id"))
+		if err != nil {
+			fmt.Fprintln(w, "Bug id invalid.")
+			return
+		}
+		interface_data["id"] = tmp
+		/*		interface_data["subcomponent_id"],err = subcomp_idint
+				if r.FormValue("bug_subcomponent") != "" && err!=nil {
+					fmt.Fprintln(w, "Bug subcomponent invalid.")
+					return
+				}
+		*/
+		interface_data["component_id"], err = strconv.Atoi(r.FormValue("bug_component"))
+		if err != nil {
+			fmt.Fprintln(w, "Bug component invalid.")
+			return
+		}
+		//interface_data["component_id"]=tmp
+
+		interface_data["post_user"] = get_user_id(useremail)
+		if interface_data["post_user"] == -1 {
+			fmt.Fprintln(w, "Commenter is invalid.")
+			return
+		}
+		interface_data["qa"] = get_user_id(r.FormValue("bug_qa"))
+		if interface_data["qa"] == -1 && r.FormValue("bug_qa") != "" {
+			fmt.Fprintln(w, "QA user is invalid.")
+			return
+		}
+		interface_data["docs"] = get_user_id(r.FormValue("bug_docs"))
+		if interface_data["docs"] == -1 && r.FormValue("bug_docs") != "" {
+			fmt.Fprintln(w, "Docs user is invalid.")
+			return
+		}
+		interface_data["assigned_to"] = get_user_id(r.FormValue("bug_assigned_to"))
+		if interface_data["assigned_to"] == -1 && r.FormValue("bug_assigned_to") != "" {
+			fmt.Fprintln(w, "Assignee user is invalid.")
+			return
+		}
+		fixversion_id, _ := strconv.Atoi(r.FormValue("bug_fixedinver"))
+		version_id, _ := strconv.Atoi(r.FormValue("bug_version"))
+		if fixversion_id > 0 {
+			interface_data["fixedinver"] = fixversion_id
+		}
+		if version_id > 0 {
+			interface_data["version"] = version_id
+		}
+
+		interface_data["hardware"] = r.FormValue("bug_hardware")
+		interface_data["summary"] = r.FormValue("bug_title")
+		interface_data["whiteboard"] = r.FormValue("bug_whiteboard")
+		interface_data["com_content"] = r.FormValue("com_content")
+
+		/******update dependencies**********/
+		//fetching old dependencies
+		olddependencies := ""
+		dep := bugs_dependent_on(interface_data["id"].(int))
+		for i, _ := range dep {
+			fmt.Println(i)
+			tmp := strconv.Itoa(i)
+			olddependencies = olddependencies + tmp + ","
+		}
+		//fetching old blockedby bugs
+		oldblocks := ""
+		bloc := bugs_blocked_by(interface_data["id"].(int))
+		for i, _ := range bloc {
+			tmp := strconv.Itoa(i)
+			oldblocks = oldblocks + tmp + ","
+		}
+
+		clear_dependencies(interface_data["id"].(int), "blocked")
+		dependbugs := strings.SplitAfter(r.FormValue("dependencylist"), ",")
+		for index, _ := range dependbugs {
+			if dependbugs[index] != "" {
+				dependbug_idint, _ := strconv.Atoi(strings.Trim(dependbugs[index], ","))
+				valid, err := is_valid_bugdependency(interface_data["id"].(int), dependbug_idint)
+				if valid {
+					err := add_bug_dependency(interface_data["id"].(int), dependbug_idint)
+					if err != nil {
+						fmt.Fprintln(w, err)
+						return
+					}
+				} else {
+					fmt.Fprintln(w, err)
+					return
+				}
+			}
+
+		}
+
+		clear_dependencies(interface_data["id"].(int), "dependson")
+		blockedbugs := strings.SplitAfter(r.FormValue("blockedlist"), ",")
+		for index, _ := range blockedbugs {
+			if blockedbugs[index] != "" {
+				blockedbug_idint, _ := strconv.Atoi(strings.Trim(blockedbugs[index], ","))
+				valid, val := is_valid_bugdependency(blockedbug_idint, interface_data["id"].(int))
+				if valid {
+					err := add_bug_dependency(blockedbug_idint, interface_data["id"].(int))
+					if err != nil {
+						fmt.Fprintln(w, err)
+						return
+					}
+
+				} else {
+					fmt.Fprintln(w, val)
+					return
+				}
+			}
+
+		}
+
+		newdependencies := ""
+		dep = bugs_dependent_on(interface_data["id"].(int))
+		for i, _ := range dep {
+			tmp := strconv.Itoa(i)
+			newdependencies = newdependencies + tmp + ","
+		}
+		newblocks := ""
+		bloc = bugs_blocked_by(interface_data["id"].(int))
+		for i, _ := range bloc {
+			tmp := strconv.Itoa(i)
+			newblocks = newblocks + tmp + ","
+		}
+		net_comment := ""
+		if olddependencies != newdependencies {
+			net_comment = net_comment + htmlify(olddependencies, newdependencies, "depends on")
+		}
+
+		if oldblocks != newblocks {
+			net_comment = net_comment + htmlify(oldblocks, newblocks, "blocks")
+		} //fmt.Fprintln(w,"Bug successfully updated!")
+
+		/********dependencies updated**********/
+
+		/*******duplicate changes if any***********/
+		dupof, _ := strconv.Atoi(r.FormValue("bug_duplicate"))
+		orig := find_orig_ifdup(dupof)
+		if interface_data["status"].(string) == "duplicate" {
+			if dupof != 0 {
+				if orig != -1 {
+					fmt.Fprintln(w, "Cant be duplicated as a duplicate of a duplicate.")
+					return
+				}
+				//remove previous entry
+				if remove_dup_bug(interface_data["id"].(int)) {
+					//add new entry
+					if !add_dup_bug(interface_data["id"].(int), dupof) {
+						fmt.Fprintln(w, "Some error occured while updating duplicates.")
+						return
+					}
+				} else {
+					fmt.Fprintln(w, "Some error occured while updating duplicates.")
+					return
+				}
+				sorg := strconv.Itoa(orig)
+				net_comment = net_comment + htmlify(sorg, strconv.Itoa(dupof), "duplicateof")
+			}
+		} else {
+			if !remove_dup_bug(interface_data["id"].(int)) {
+				fmt.Fprintln(w, "Some error occured while updating duplicates.")
+				return
+			}
+		}
+		/*******duplicates done********/
+
+		err = update_bug(interface_data)
+		if err != nil {
+			fmt.Fprintln(w, "Bug could not be updated!")
+			return
+		}
+		if net_comment != "" {
+			new_comment(interface_data["post_user"].(int), interface_data["id"].(int), net_comment)
+		}
+		http.Redirect(w, r, "/bugs/"+r.FormValue("bug_id"), http.StatusFound)
+
+	}
+
+}
+
 func main() {
 	load_config("config/bugspad.ini")
 	// Load the user details into redis.
@@ -384,6 +703,7 @@ func main() {
 	http.HandleFunc("/register/", registeruser)
 	http.HandleFunc("/filebug_product/", before_createbug)
 	http.HandleFunc("/filebug/", createbug)
+	http.HandleFunc("/bugs/", showbug)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	http.ListenAndServe(":9999", nil)
 }

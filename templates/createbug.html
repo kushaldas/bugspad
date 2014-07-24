@@ -4,14 +4,14 @@
 		<h2>New Bug</h2>
 		
 	    <form class="form-inline border-radius" role="form" action="/filebug/" method="POST" >
-			<input name="productofbug" type="hidden" value="{{ .Bug.bugproductid}}"></input>
+			<input name="productofbug" type="hidden" value="{{ .Bug.bugproductid }}"></input>
 
 			<div class="row clearfix">
 
 				<div class="column two-thirds">
 										<div class="form-item">
 					    <label for="bug_title">Summary</label>    
-					    <input type="text" id="mybugsummary" >
+					    <input type="text" id="mybugsummary" name="mybugsummary">
 					</div>
 					<div class="form-item">
 					    <textarea name="bug_description" id="bug_description" placeholder="Bug Description"></textarea>

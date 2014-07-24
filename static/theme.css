@@ -25,3 +25,7 @@ textarea {
 #mybugsummary {
 	min-width: 100%;
 }
+
+#bugcomment {
+	max-width: 100%;
+}

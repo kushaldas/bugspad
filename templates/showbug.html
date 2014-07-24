@@ -1,0 +1,223 @@
+{{define "body"}}
+<section>
+	<div class="container">
+		<h2 id="bug_heading"><label class={{if eq .Bug.status "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}>Bug - {{ .Bug.id}}</label> {{ .Bug.summary}}</h2>
+		<form class="form-inline border-radius" role="form" action="/bugs/" method="POST" >
+			<input name="productofbug" type="hidden" value="{{ .Bug.bugproductid }}"></input>
+			<input name="bug_id" type="hidden" value="{{ .Bug.id }}"></input>
+			{{if .Bug.islogged}}
+			TODO
+
+			{{else}}
+
+
+			<div class="row clearfix">
+
+				<div class="column two-thirds">
+					<div class="form-item">
+						<label for="bug_title">Summary</label>    
+						<input type="text" id="mybugsummary" disabled value="{{ .Bug.summary }}">
+					</div>
+					<div class="form-item">
+						<textarea disabled name="bug_description" id="bug_description" placeholder="Bug Description">{{ .Bug.description }}</textarea>
+					</div>
+				</div>
+
+				<div class="column third">
+					<div class="form-item">
+						<label for="bug_component">Component</label>
+
+						<select name="bug_component" id="bug_component">
+							{{$comp := .Bug.component}}
+							{{range $key, $val := .Bug.allcomponents}}
+							<option value={{index $val 0}} {{if eq $comp $key  }} selected {{end}}>{{$key}}</option>
+							{{end}}
+						</select>
+					</div>
+					<div class="form-item">
+						<label for="bug_whiteboard"  >Whiteboard</label>
+						<input disabled type="text" name="bug_whiteboard" class="form-control" id="bug_whiteboard" value="{{.Bug.whiteboard}}">
+					</div>
+					<div class="form-item">
+						<label for="bug_status">Status</label>
+
+						<select disabled name="bug_status" id="bug_status"  class="form-control">
+							<option value="new" {{if eq .Bug.status "new"}} selected {{end}}>New</option>
+							<option value="open" {{if eq .Bug.status "open"}} selected {{end}}>Open</option>
+							<option value="unconfirmed" {{if eq .Bug.status "unconfirmed"}} selected {{end}}>Unconfirmed</option>
+							<option value="worksforme" {{if eq .Bug.status "worksforme"}} selected {{end}}>Works For Me</option>
+							<option value="invalid" {{if eq .Bug.status "invalid"}} selected {{end}}>Invalid</option>
+							<option value="duplicate" {{if eq .Bug.status "duplicate"}} selected {{end}}>Duplicate</option>
+							<option value="fixed (closed)" {{if eq .Bug.status "fixed (closed)"}} selected {{end}}>Fixed (Closed)</option>
+							<option value="notabug (closed)" {{if eq .Bug.status "notabug (closed)"}} selected {{end}}>Notabug (Closed)</option>
+							<option value="wontfix (closed)" {{if eq .Bug.status "wontfix (closed)"}} selected {{end}}>Wont Fix (Closed)</option>
+						</select>
+					</div>
+					<div class="form-item">
+						<label for="bug_severity">Severity</label>
+
+						<select disabled name="bug_severity" id="bug_severity"  class="form-control">
+							<option value="blocker" {{if eq .Bug.severity "blocker"}} selected {{end}}>Blocker</option>
+							<option value="critical" {{if eq .Bug.severity "critical"}} selected {{end}}>Critical</option>
+							<option value="trivial" {{if eq .Bug.severity "trivial"}} selected {{end}}>Trivial</option>
+							<option value="enhancement" {{if eq .Bug.severity "enhancement"}} selected {{end}}>Enhancement</option>
+							<option value="normal" {{if eq .Bug.severity "normal"}} selected {{end}}>Normal</option>
+						</select>
+
+					</div>
+					<div class="form-item">
+						<label for="bug_reporter"  >Reporter</label>
+
+						<input disabled type="text" name="bug_reporter" class="form-control" id="bug_reporter" value="{{.Bug.reportername}}">
+
+					</div>
+					<div class="form-item">
+						<label for="bug_reported_on"  >Reported On</label>
+
+						<input disabled type="text" name="bug_reported_on" class="form-control" id="bug_reported_on" value="{{.Bug.reported}}">
+
+					</div>
+					{{if eq .status "fixed"}}
+					<div class="form-item">
+						<label for="bug_fixedinver"  >Fixed in Version</label>
+
+						<select disabled type="text" name="bug_fixedinver" class="form-control" id="bug_fixedinver">
+							{{if ne .fixedinver (-1)}}
+							{{$ver := .Bug.fixedinver}}
+							{{range $key, $val := .Bug.versions}}
+							<option value={{$val}}  {{if eq $ver (index $val 0)  }} selected {{end}}>{{$key}}</option>
+							{{end}}
+							{{else}}
+							<option value="-1" selected>--</option>
+							{{range $key, $val := .Bug.versions}}
+							<option value={{$val}}>{{$key}}</option>
+							{{end}}
+							{{end}}
+						</select>
+
+					</div>
+					{{end}}
+					{{if eq .status "duplicate"}}
+					<div class="form-item">
+						<label for="bug_duplicate"  >Duplicate Of</label>
+
+						<input disabled type="text" name="bug_duplicate" class="form-control" id="bug_duplicate" value="{{ .Bug.duplicateof}}">
+
+					</div>
+
+
+				</div>
+			</div>
+
+			{{end}}
+
+				<div class="form-item">
+					<label for="bug_version"  >Version</label>
+
+					<select disabled name="bug_version" class="form-control" id="bug_version">
+						{{$ver := .Bug.version}}
+						<option value=-1 {{if eq ($ver) (-1)}} selected {{end}}>None</option>
+						{{range $key, $val := .Bug.versions}}
+						<option value={{index $val 0}} {{if eq ($ver) (index $val 0) }} selected {{end}}>{{$key}}</option>
+						{{end}}
+					</select>
+
+				</div>
+				<div class="form-item">
+					<label for="bug_hardware"  >Hardware</label>
+
+					<input disabled type="text" name="bug_hardware" class="form-control" id="bug_hardware" value="{{.Bug.hardware}}">
+
+				</div>
+				<div class="form-item">
+					<label for="bug_priority"  >Priority</label>
+
+					<select disabled name="bug_priority" id="bug_priority"  class="form-control">
+						<option value="high" {{if eq .Bug.priority "high"}} selected {{end}}>High</option>
+						<option value="low" {{if eq .Bug.priority "low"}} selected {{end}}>Low</option>
+						<option value="medium" {{if eq .Bug.priority "medium"}} selected {{end}}>Medium</option>
+						<option value="critical" {{if eq .Bug.priority "critical"}} selected {{end}}>Critical</option>
+					</select>
+
+				</div>
+				<div class="form-item">
+					<label for="bug_assignee"  >Assignee</label>
+
+					<input disabled type="text" name="bug_assignee" class="form-control" id="bug_assignee" value="{{ .Bug.assigned_toname}}">
+
+				</div>
+				<div class="form-item">
+					<label for="bug_depends_on" >Depends On</label>
+					<div class="col-sm-10" id="bug_depends_on">
+						{{range $key,$val := .Bug.dependencylist}}
+						<a class="{{if eq (index $val) "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}" href="/bugs/{{$key}}">{{$key}} </a>
+						{{end}}
+					</div>
+				</div>
+				<div class="form-item">
+					<label for="bug_blocks" >Blocks</label>
+					<div class="col-sm-10" name="bug_blocks" class="form-control" id="bug_blocks">
+						{{range $key,$val := .Bug.blockedlist}}
+						<a class="{{if eq (index $val) "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}" href="/bugs/{{ index $val }}">{{$key}} </a>
+						{{end}}
+
+					</div>
+					<div class="form-item">
+						<label for="bug_cc" >Bug CC</label>
+						<div class="col-sm-10" class="form-control" id="bug_cc">
+							{{range $key,$val := .Bug.cclist}}
+							{{ index $val 0}},
+							{{end}}
+
+						</div>
+
+					</div>
+
+					{{end}}
+				</div> <!-- endof bugdetail div-->
+				<div id="bug_comments">
+					<h2>Comments</h2>
+					{{$islogged := .Bug.islogged}}
+					{{range $key, $val := .Bug.comment_data}}
+					<div id={{ $key }} class="comment_box">
+						<i>{{if $islogged}}{{ index $val 0 }}{{end}} {{index $val 1}} {{index $val 3}}</i>
+						<p>{{index $val 2}}</p>
+						<br>
+					</div>
+					{{end}}
+					{{if .islogged}}
+					<div class="form-item">
+						<label for="com_content" >New Comment</label>
+						<div class="col-sm-10">
+							<textarea name="com_content" class="form-control" id="com_content" rows="5"></textarea>
+						</div>
+
+						{{else}}
+						<p> You need to <a href="/login">log in</a> to comment on this bug.</p>
+						{{end}}
+					</div>
+
+					<div id="bug_attachments">
+						{{range $key, $val := .Bug.attachments}}
+						<div id={{ $key }} class="attachment_box">
+							<p><a href="{{index $val 0}}">{{index $val 2}}</a><p>
+								<p>Description: {{index $val 1}}<p>
+									<p>Submitter:{{if $islogged}}{{ index $val 3 }}{{else}}{{ index $val 4 }}{{end}}<p>
+										<p>Submitted at: {{index $val 5}}<p>
+										</div>
+										{{end}}
+										{{if .islogged}}
+										<a href="/addattachment/{{ .Bug.id}}">Add new attachment</a>
+										{{end}}
+									</div>
+									{{if .islogged}}
+									<div class="form-item">
+										<div class="col-sm-offset-1 col-sm-10">
+											<button type="submit" class="btn btn-default">Save Changes</button>
+										</div>
+									</div>
+									{{end}}
+								</form>
+							</div>
+						</section>
+						{{end}}
