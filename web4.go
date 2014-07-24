@@ -81,11 +81,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 			cookie,final_hash := getCookie(user)
 			http.SetCookie(w, &cookie)
 			redis_hset("sessions", user, final_hash)			
-			tml, _ := get_template("templates/logout.html") 
-
-			user_type := Page{Email: user, Flag_login: true}
-
-			tml.ExecuteTemplate(w, "base", user_type)
+			http.Redirect(w, r, "/", http.StatusFound)
 
 		} else {
 			fmt.Fprintln(w, AUTH_ERROR)
@@ -113,7 +109,21 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+func index_page(w http.ResponseWriter, r *http.Request) {
+	var tml *template.Template
+	var err error
+	login_flag, useremail := is_logged(r)
+	page := Page{Flag_login: login_flag, Email: useremail}
+	tml, err = get_template("./templates/home.html")
+	if err != nil {
+		checkError(err)
+	}
+	tml.ExecuteTemplate(w, "base", page)
+	return
+}
+
 func main() {
+	http.HandleFunc("/", index_page)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/logout/", logout)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
