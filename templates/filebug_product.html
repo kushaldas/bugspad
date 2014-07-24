@@ -1,0 +1,12 @@
+{{define "body"}}
+	<section>
+      <div class="container">
+      	<h2>Select a Product</h2>
+		<table class="table">
+		{{range $key,$val := .Bug.products}}
+	    	<tr><td><a href="/filebug/{{index $val 0}}">{{$key}}</a></td></tr>
+		{{end}}
+		</table>
+      </div>
+	</section>
+{{end}}

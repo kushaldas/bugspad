@@ -174,11 +174,56 @@ func registeruser(w http.ResponseWriter, r *http.Request) {
 
 }
 
+/*
+Function to handle product selection before filing a bug.
+*/
+func before_createbug(w http.ResponseWriter, r *http.Request) {
+	il, useremail := is_logged(r)
+	interface_data := make(Bug)
+	page := Page{Flag_login: il, Email: useremail}
+	if r.Method == "GET" {
+		tml, err := get_template("./templates/filebug_product.html")
+		if err != nil {
+			log_message(r, "System Crash:"+err.Error())
+		}
+		if il {
+			allproducts := get_all_products()
+			interface_data["useremail"] = useremail
+			interface_data["islogged"] = il
+			interface_data["is_user_admin"] = is_user_admin(useremail)
+			interface_data["products"] = allproducts
+			interface_data["pagetitle"] = "Choose Product"
+			page.Bug = interface_data
+			err := tml.ExecuteTemplate(w, "base", page)
+			if err != nil {
+				log_message(r, "System Crash:"+err.Error())
+			}
+			return
+		} else {
+			http.Redirect(w, r, "/login", http.StatusFound)
+		}
+	}
+}
+
 func main() {
+	load_config("config/bugspad.ini")
+	// Load the user details into redis.
+	load_users()
+	//loading static bug tags
+	load_bugtags()
+	//to be used for logging purpose.
+	logf, err := os.OpenFile("search_kd.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0640)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+
+	log.SetOutput(logf)
 	http.HandleFunc("/", index_page)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/logout/", logout)
 	http.HandleFunc("/register/", registeruser)
+	http.HandleFunc("/filebug_product/", before_createbug)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	http.ListenAndServe(":9999", nil)
 }
