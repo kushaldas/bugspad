@@ -5,18 +5,18 @@ import (
 	"encoding/base64"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
-	"log"
-	"strconv"
 )
 
 type Page struct {
-	Email string
+	Email      string
 	Flag_login bool
-	Bug Bug
+	Bug        Bug
 }
 
 func checkError(err error) {
@@ -36,15 +36,15 @@ func isvalueinlist(value string, list []string) bool {
 }
 
 func generate_hash() []byte {
-    b := make([]byte, 16)
-    rand.Read(b)
-    en := base64.StdEncoding // or URLEncoding
-    d := make([]byte, en.EncodedLen(len(b)))
-    en.Encode(d, b) 
-    return b
+	b := make([]byte, 16)
+	rand.Read(b)
+	en := base64.StdEncoding // or URLEncoding
+	d := make([]byte, en.EncodedLen(len(b)))
+	en.Encode(d, b)
+	return b
 }
 
-func getCookie (user string) (http.Cookie,string){
+func getCookie(user string) (http.Cookie, string) {
 	hash := generate_hash()
 	new_hash := get_hex(string(hash))
 	expire := time.Now().AddDate(0, 0, 1)
@@ -73,19 +73,19 @@ func login(w http.ResponseWriter, r *http.Request) {
 		login_flag, useremail := is_logged(r)
 		page := Page{Flag_login: login_flag, Email: useremail}
 		if !(login_flag) {
-		//One style of template parsing.
+			//One style of template parsing.
 			tml, err = get_template("./templates/login.html")
 			fmt.Println("login page")
 			if err != nil {
 				checkError(err)
 			}
-			
+
 		} else {
 			fmt.Println(page)
 			tml, err = get_template("./templates/home.html")
 			if err != nil {
 				checkError(err)
-			}	
+			}
 		}
 		tml.ExecuteTemplate(w, "base", page)
 		return
@@ -93,10 +93,10 @@ func login(w http.ResponseWriter, r *http.Request) {
 		user := strings.TrimSpace(r.FormValue("username"))
 		password := strings.TrimSpace(r.FormValue("password"))
 		if authenticate_redis(user, password) {
-			
-			cookie,final_hash := getCookie(user)
+
+			cookie, final_hash := getCookie(user)
 			http.SetCookie(w, &cookie)
-			redis_hset("sessions", user, final_hash)			
+			redis_hset("sessions", user, final_hash)
 			http.Redirect(w, r, "/", http.StatusFound)
 
 		} else {
@@ -115,7 +115,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 			pss := string(redis_hget("sessions", words[0]))
 			if pss == hash {
 				// Now we have a proper session matched, We can logout now.
-				redis_hdel("sessions",words[0])
+				redis_hdel("sessions", words[0])
 				fmt.Println("Logout man!")
 				http.Redirect(w, r, "/login", http.StatusFound)
 			}
@@ -694,7 +694,6 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 
 	log.SetOutput(logf)
 	http.HandleFunc("/", index_page)
