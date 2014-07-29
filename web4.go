@@ -228,6 +228,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		interface_data = get_bug(bug_id)
 
 		//adding generic data
+		fmt.Println(bug_id)
 		interface_data["islogged"] = il
 		interface_data["useremail"] = useremail
 		interface_data["is_user_admin"] = is_user_admin(useremail)

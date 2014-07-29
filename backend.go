@@ -289,6 +289,8 @@ func new_bug(data map[string]interface{}) (int, string) {
 	defer db.Close()
 
 	//var status, summary string
+	
+	//needing to do float64 vs int test, as API gives float64.
 	valint:=0
 	switch v := data["component_id"].(type) {
 	    case float64:
@@ -301,7 +303,17 @@ func new_bug(data map[string]interface{}) (int, string) {
 	   //fmt.Printf("I don't know, ask stackoverflow.")
 	}
 	qauserid:=get_component_owner(valint)
-	
+	switch v := data["version"].(type) {
+	    case float64:
+		    // v is a float64 here, so e.g. v + 1.0 is possible.
+		valint=int(v)
+		    //fmt.Printf("Float64: %v", v)
+	    default:
+	    // And here I'm feeling dumb. ;)
+		valint=v.(int)
+	   //fmt.Printf("I don't know, ask stackoverflow.")
+	}
+	versionid:=valint
 	var buffer, buffer2 bytes.Buffer
 	vals := make([]interface{}, 0)
 	buffer.WriteString("INSERT INTO bugs (")
@@ -332,14 +344,15 @@ func new_bug(data map[string]interface{}) (int, string) {
 			vals = append(vals, val)
 		}
 	*/
-	val, ok := data["version"]
-	if ok {
-		buffer.WriteString(", version")
-		buffer2.WriteString(", ?")
-		vals = append(vals, val)
-	}
+	//version is compulsory, asa bug without the product version is useless.
+	//val, ok := data["version"]
+	//if ok {
+	buffer.WriteString(", version")
+	buffer2.WriteString(", ?")
+	vals = append(vals, versionid)
+	//}
 
-	val, ok = data["severity"]
+	val, ok := data["severity"]
 	if ok {
 		buffer.WriteString(", severity")
 		buffer2.WriteString(",?")
