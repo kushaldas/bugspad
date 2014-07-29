@@ -289,31 +289,31 @@ func new_bug(data map[string]interface{}) (int, string) {
 	defer db.Close()
 
 	//var status, summary string
-	
+
 	//needing to do float64 vs int test, as API gives float64.
-	valint:=0
+	valint := 0
 	switch v := data["component_id"].(type) {
-	    case float64:
-		    // v is a float64 here, so e.g. v + 1.0 is possible.
-		valint=int(v)
-		    //fmt.Printf("Float64: %v", v)
-	    default:
-	    // And here I'm feeling dumb. ;)
-		valint=v.(int)
-	   //fmt.Printf("I don't know, ask stackoverflow.")
+	case float64:
+		// v is a float64 here, so e.g. v + 1.0 is possible.
+		valint = int(v)
+		//fmt.Printf("Float64: %v", v)
+	default:
+		// And here I'm feeling dumb. ;)
+		valint = v.(int)
+		//fmt.Printf("I don't know, ask stackoverflow.")
 	}
-	qauserid:=get_component_owner(valint)
+	qauserid := get_component_owner(valint)
 	switch v := data["version"].(type) {
-	    case float64:
-		    // v is a float64 here, so e.g. v + 1.0 is possible.
-		valint=int(v)
-		    //fmt.Printf("Float64: %v", v)
-	    default:
-	    // And here I'm feeling dumb. ;)
-		valint=v.(int)
-	   //fmt.Printf("I don't know, ask stackoverflow.")
+	case float64:
+		// v is a float64 here, so e.g. v + 1.0 is possible.
+		valint = int(v)
+		//fmt.Printf("Float64: %v", v)
+	default:
+		// And here I'm feeling dumb. ;)
+		valint = v.(int)
+		//fmt.Printf("I don't know, ask stackoverflow.")
 	}
-	versionid:=valint
+	versionid := valint
 	var buffer, buffer2 bytes.Buffer
 	vals := make([]interface{}, 0)
 	buffer.WriteString("INSERT INTO bugs (")
@@ -435,12 +435,10 @@ func new_bug(data map[string]interface{}) (int, string) {
 		buffer2.WriteString(",?")
 		vals = append(vals, val)
 
-
-
-		if qauserid!=-1 {
-		    buffer.WriteString(", qa")
-		    buffer2.WriteString(",?")
-		    vals = append(vals, strconv.Itoa(qauserid))
+		if qauserid != -1 {
+			buffer.WriteString(", qa")
+			buffer2.WriteString(",?")
+			vals = append(vals, strconv.Itoa(qauserid))
 		}
 	} else {
 		return -1, "Missing input: component_id"
@@ -478,11 +476,11 @@ func new_bug(data map[string]interface{}) (int, string) {
 		db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, assignee)
 	}
 	//comp_id,_:= strconv.Atoi(data["component_id"].(string))
-	if qauserid!=-1 {
-	    _, present = db.Query("SELECT * from cc where bug_id=? and who=?", bug_id, qauserid)
-	    if present == nil {
-		db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, qauserid)
-	    }
+	if qauserid != -1 {
+		_, present = db.Query("SELECT * from cc where bug_id=? and who=?", bug_id, qauserid)
+		if present == nil {
+			db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, qauserid)
+		}
 	}
 
 	docs, ok := data["docs"]
@@ -497,8 +495,8 @@ func new_bug(data map[string]interface{}) (int, string) {
 	//redis_sadd("userbug"+val.(string), bug_id)
 	data["id"] = int(bug_id)
 	//comp_id,_=strconv.Atoi(data["component_id"].(string))
-	if qauserid!=-1 {
-	    data["qa"] = qauserid
+	if qauserid != -1 {
+		data["qa"] = qauserid
 	}
 	set_redis_bug(data)
 	add_latest_created(bug_id)
@@ -1643,7 +1641,7 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 func get_user_bugs(user_id int) map[int][2]string {
 
 	m := make(map[int][2]string)
-	
+
 	//from userbug
 	bug_ids := redis_smembers("userbug" + strconv.Itoa(user_id))
 	b := bug_ids.([]interface{})
@@ -1651,7 +1649,7 @@ func get_user_bugs(user_id int) map[int][2]string {
 		//fmt.Println(string(b[i].([]uint8)))
 		bug := get_redis_bug(string(b[i].([]uint8)))
 		//fmt.Println(bug)
-		bug_idint,_:=strconv.Atoi(string(b[i].([]uint8)))
+		bug_idint, _ := strconv.Atoi(string(b[i].([]uint8)))
 		m[bug_idint] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
 
@@ -1661,7 +1659,7 @@ func get_user_bugs(user_id int) map[int][2]string {
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
 		bug := get_redis_bug(string(b[i].([]uint8)))
-		bug_idint,_:=strconv.Atoi(string(b[i].([]uint8)))
+		bug_idint, _ := strconv.Atoi(string(b[i].([]uint8)))
 		m[bug_idint] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
 	//from reporterbug
@@ -1670,7 +1668,7 @@ func get_user_bugs(user_id int) map[int][2]string {
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
 		bug := get_redis_bug(string(b[i].([]uint8)))
-		bug_idint,_:=strconv.Atoi(string(b[i].([]uint8)))
+		bug_idint, _ := strconv.Atoi(string(b[i].([]uint8)))
 		m[bug_idint] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
 	//from docs
@@ -1679,7 +1677,7 @@ func get_user_bugs(user_id int) map[int][2]string {
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
 		bug := get_redis_bug(string(b[i].([]uint8)))
-		bug_idint,_:=strconv.Atoi(string(b[i].([]uint8)))
+		bug_idint, _ := strconv.Atoi(string(b[i].([]uint8)))
 		m[bug_idint] = [2]string{bug["status"].(string), bug["summary"].(string)}
 	}
 	//fmt.Println(m)

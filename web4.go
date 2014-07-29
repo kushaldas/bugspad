@@ -796,33 +796,33 @@ func listproductversions(w http.ResponseWriter, r *http.Request) {
 	il, useremail := is_logged(r)
 	interface_data := make(Bug)
 	if il {
-			if is_user_admin(useremail) {
-				if r.Method == "GET" && product_id != "" {
-				    tml, err := template.ParseFiles("./templates/listproductversions.html", "./templates/base.html")
-				    if err != nil {
-					    log_message(r, "System Crash:"+err.Error())
-				    }
-				    prod_idint, _ := strconv.Atoi(product_id)
-				    interface_data = get_product_by_id(product_id)
-				    if interface_data["id"] == nil {
+		if is_user_admin(useremail) {
+			if r.Method == "GET" && product_id != "" {
+				tml, err := template.ParseFiles("./templates/listproductversions.html", "./templates/base.html")
+				if err != nil {
+					log_message(r, "System Crash:"+err.Error())
+				}
+				prod_idint, _ := strconv.Atoi(product_id)
+				interface_data = get_product_by_id(product_id)
+				if interface_data["id"] == nil {
 					fmt.Fprintln(w, "Product does not exist!")
 					return
-				    }
-				    interface_data["islogged"] = il
-				    interface_data["useremail"] = useremail
-				    interface_data["is_user_admin"] = is_user_admin(useremail)
-				    interface_data["pagetitle"] = "Edit Bug " + product_id + " CC"
-				    interface_data["versions"] = get_product_versions(prod_idint)
-				    interface_data["id"] = product_id
-
-				    err = tml.ExecuteTemplate(w, "base", interface_data)
-				    if err != nil {
-					    log_message(r, "System Crash:"+err.Error())
-				    }
 				}
-			} else {
-			fmt.Fprintln(w, "You do not have sufficient rights!")
+				interface_data["islogged"] = il
+				interface_data["useremail"] = useremail
+				interface_data["is_user_admin"] = is_user_admin(useremail)
+				interface_data["pagetitle"] = "Edit Bug " + product_id + " CC"
+				interface_data["versions"] = get_product_versions(prod_idint)
+				interface_data["id"] = product_id
+
+				err = tml.ExecuteTemplate(w, "base", interface_data)
+				if err != nil {
+					log_message(r, "System Crash:"+err.Error())
+				}
 			}
+		} else {
+			fmt.Fprintln(w, "You do not have sufficient rights!")
+		}
 	} else {
 		http.Redirect(w, r, "/login", http.StatusFound)
 	}
@@ -1164,7 +1164,7 @@ func editcomponentpage(w http.ResponseWriter, r *http.Request) {
 				interface_data["is_user_admin"] = is_user_admin(useremail)
 				interface_data["pagetitle"] = "Edit Component Page"
 				interface_data["component_id"] = component_id
-				comp_idint,_:=strconv.Atoi(component_id)
+				comp_idint, _ := strconv.Atoi(component_id)
 				interface_data["product_id"] = get_product_of_component(comp_idint)
 				if cdata["error_msg"] != nil {
 					fmt.Fprintln(w, cdata["error_msg"])

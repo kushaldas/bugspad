@@ -117,7 +117,7 @@ func components(w http.ResponseWriter, r *http.Request) {
 	}
 	if product_id != "" {
 		w.Header().Set("Content-Type", "application/json")
-		product_idint,_ := strconv.Atoi(product_id)
+		product_idint, _ := strconv.Atoi(product_id)
 		m := get_components_by_product(product_idint)
 		res_json, _ := json.Marshal(m)
 		fmt.Fprintln(w, string(res_json))
@@ -174,7 +174,7 @@ func backend_bug(w http.ResponseWriter, r *http.Request) {
 		if index != -1 {
 			title = title[:index]
 		}
-		bugid,_:=strconv.Atoi(title)
+		bugid, _ := strconv.Atoi(title)
 		data := get_bug(bugid)
 		res_json, _ := json.Marshal(data)
 		fmt.Fprintln(w, string(res_json))

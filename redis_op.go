@@ -417,34 +417,34 @@ func set_redis_bug(bug Bug) {
 	//fmt.Println(sid)
 	//fmt.Println(sdata)
 	redis_hset("bugs", sid, sdata)
-	valint:=0
-	
+	valint := 0
+
 	//doing this as API returns float64
 	switch v := bug["component_id"].(type) {
-	    case float64:
-		    // v is a float64 here, so e.g. v + 1.0 is possible.
-		valint=int(v)
-		    //fmt.Printf("Float64: %v", v)
-	    default:
-	    // And here I'm feeling dumb. ;)
-		valint=v.(int)
-	   //fmt.Printf("I don't know, ask stackoverflow.")
+	case float64:
+		// v is a float64 here, so e.g. v + 1.0 is possible.
+		valint = int(v)
+		//fmt.Printf("Float64: %v", v)
+	default:
+		// And here I'm feeling dumb. ;)
+		valint = v.(int)
+		//fmt.Printf("I don't know, ask stackoverflow.")
 	}
-	componentidint:=valint
+	componentidint := valint
 	switch v := bug["version"].(type) {
-	    case float64:
-		    // v is a float64 here, so e.g. v + 1.0 is possible.
-		valint=int(v)
-		    //fmt.Printf("Float64: %v", v)
-	    default:
-	    // And here I'm feeling dumb. ;)
-		valint=v.(int)
-	   //fmt.Printf("I don't know, ask stackoverflow.")
+	case float64:
+		// v is a float64 here, so e.g. v + 1.0 is possible.
+		valint = int(v)
+		//fmt.Printf("Float64: %v", v)
+	default:
+		// And here I'm feeling dumb. ;)
+		valint = v.(int)
+		//fmt.Printf("I don't know, ask stackoverflow.")
 	}
-	versionidint:=valint
+	versionidint := valint
 
 	componentstring := strconv.Itoa(componentidint)
-	qauserid:=get_component_owner(valint)
+	qauserid := get_component_owner(valint)
 	qastring := strconv.Itoa(qauserid)
 	docsstring := ""
 	versionstring := ""
