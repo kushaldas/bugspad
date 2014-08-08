@@ -101,7 +101,7 @@
 		        <div class="col-sm-10">
 		    <select name="bug_version" class="form-control" id="bug_version">
 			    {{$ver := .version}}
-				<option value=-1 {{if eq ($ver) (-1)}} selected {{end}}>None</option>
+				<option value=-1 {{if eq ($ver) (-1.0)}} selected {{end}}>None</option>
 			        {{range $key, $val := .versions}}
 				    <option value={{index $val 0}} {{if eq ($ver) (index $val 0) }} selected {{end}}>{{$key}}</option>
 			    {{end}}
@@ -273,9 +273,10 @@
 		<div class="form-group">
 		    <label for="bug_version" class="col-sm-2 control-label" >Version</label>
 		        <div class="col-sm-10">
-		    <select disabled name="bug_version" class="form-control" id="bug_version">
 			    {{$ver := .version}}
-				<option value=-1 {{if eq ($ver) (-1)}} selected {{end}}>None</option>
+		        <select disabled name="bug_version" class="form-control" id="bug_version">
+			  
+				<option value=-1 {{if eq $ver (-1.0)}} selected {{end}}>None</option>
 			        {{range $key, $val := .versions}}
 				    <option value={{index $val 0}} {{if eq ($ver) (index $val 0) }} selected {{end}}>{{$key}}</option>
 				{{end}}

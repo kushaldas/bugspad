@@ -225,8 +225,8 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 
 		 ************************************************/
 		bug_id, _ := strconv.Atoi(bugid)
-		interface_data = get_bug(bug_id)
-
+		interface_data = get_redis_bug(bug_id)
+		//fmt.Println(interface_data["version"].(int))
 		//adding generic data
 		fmt.Println(bug_id)
 		interface_data["islogged"] = il
@@ -259,7 +259,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 
 		//loggedin specific data
 		if il {
-			bug_product_id := get_product_of_component(interface_data["component_id"].(int))
+			bug_product_id := get_product_of_component(int(interface_data["component_id"].(float64)))
 			if bug_product_id == -1 {
 				log_message(r, "Consistency Error:There is no product for the component "+strconv.Itoa(interface_data["component_id"].(int)))
 				fmt.Fprintln(w, "No product exists for the component of the bug!")
@@ -270,7 +270,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 			interface_data["allcomponents"] = get_components_by_product(bug_product_id)
 
 			//fetching allsubcomponents of the
-			interface_data["allsubcomponents"] = get_subcomponents_by_component(interface_data["component_id"].(int))
+			interface_data["allsubcomponents"] = get_subcomponents_by_component(int(interface_data["component_id"].(float64)))
 
 			//fetching all versions of the product
 			interface_data["versions"] = get_product_versions(bug_product_id)
@@ -1121,7 +1121,7 @@ func addcomponentpage(w http.ResponseWriter, r *http.Request) {
 				}
 				product_id, _ := strconv.Atoi(r.FormValue("productid"))
 				id, err := insert_component(r.FormValue("componentname"), r.FormValue("componentdescription"), product_id, owner, qa)
-				log_message(r, "Component "+id+"added.")
+				log_message(r, "Component "+strconv.Itoa(id)+"added.")
 				if err != nil {
 					fmt.Fprintln(w, err)
 				}

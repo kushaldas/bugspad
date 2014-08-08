@@ -189,9 +189,17 @@ func delete_redis_bug_status(bug_id string, status string) {
 	conn.Do("HDEL", "b_status:"+status, bug_id)
 }
 
-func get_redis_bug(bug_id string) Bug {
+/*Adds a redis bug into redis*/
+func add_redis_bugcomment(commentdata map[string]interface{}) {
+    	data, _ := json.Marshal(commentdata)
+	//fmt.Println(data)
+	sdata := string(data)
+	redis_sadd("bugcomments"+strconv.Itoa(commentdata["bugid"].(int)),sdata)
+}
+
+func get_redis_bug(bug_id int) Bug {
 	m := make(Bug)
-	data := redis_hget("bugs", bug_id)
+	data := redis_hget("bugs", strconv.Itoa(bug_id))
 	if data == nil {
 		fmt.Println("sorry no data")
 		return nil
@@ -205,7 +213,23 @@ func get_redis_bug(bug_id string) Bug {
 	return m
 
 }
+func update_redis_component(newcomponent map[string]interface{}) {
+	newcompdata, _ := json.Marshal(newcomponent)
+	sdata := string(newcompdata)
+	component_idstr := strconv.Itoa(newcomponent["id"].(int))
+	//sid := strconv.FormatInt(int64(oldbug["id"].(int)), 10)
+	redis_hset("components", component_idstr, sdata)
 
+}
+
+func add_redis_component(newcomponent map[string]interface{}){
+	ncompdata, _ := json.Marshal(newcomponent)
+	sdata := string(ncompdata)
+	redis_sadd("productcomponents"+strconv.Itoa(newcomponent["product_id"].(int)), strconv.Itoa(newcomponent["id"].(int)))
+	component_idstr := strconv.Itoa(newcomponent["id"].(int))
+	//sid := strconv.FormatInt(int64(oldbug["id"].(int)), 10)
+	redis_hset("components", component_idstr, sdata)
+}
 /*
 Searching bugs.
 Currently returns the union of bugs
@@ -218,9 +242,9 @@ func search_redis_bugs(components []string, products []string, statuses []string
 		bugids := redis_smembers("componentbug:" + components[index])
 		bugidlist := bugids.([]interface{})
 		for j, _ := range bugidlist {
-			tmp := get_redis_bug(string(bugidlist[j].([]uint8)))
-			bugid := int(tmp["id"].(float64))
-			ans[bugid] = [2]string{tmp["summary"].(string), tmp["status"].(string)}
+			bug_idint, _ := strconv.Atoi(string(bugidlist[j].([]uint8)))
+			tmp := get_redis_bug(bug_idint)
+			ans[bug_idint] = [2]string{tmp["summary"].(string), tmp["status"].(string)}
 		}
 	}
 	for index, _ := range products {
@@ -228,37 +252,37 @@ func search_redis_bugs(components []string, products []string, statuses []string
 		//fmt.Println(bugids)
 		bugidlist := bugids.([]interface{})
 		for j, _ := range bugidlist {
-			tmp := get_redis_bug(string(bugidlist[j].([]uint8)))
+			bug_idint, _ := strconv.Atoi(string(bugidlist[j].([]uint8)))
+			tmp := get_redis_bug(bug_idint)
 			//fmt.Println(string(bugidlist[j].([]uint8)))
-			bugid := int(tmp["id"].(float64))
-			ans[bugid] = [2]string{tmp["summary"].(string), tmp["status"].(string)}
+			ans[bug_idint] = [2]string{tmp["summary"].(string), tmp["status"].(string)}
 		}
 	}
 	for index, _ := range statuses {
 		bugids := redis_smembers("statusbug:" + statuses[index])
 		bugidlist := bugids.([]interface{})
 		for j, _ := range bugidlist {
-			tmp := get_redis_bug(string(bugidlist[j].([]uint8)))
-			bugid := int(tmp["id"].(float64))
-			ans[bugid] = [2]string{tmp["summary"].(string), tmp["status"].(string)}
+			bug_idint, _ := strconv.Atoi(string(bugidlist[j].([]uint8)))
+			tmp := get_redis_bug(bug_idint)
+			ans[bug_idint] = [2]string{tmp["summary"].(string), tmp["status"].(string)}
 		}
 	}
 	for index, _ := range versions {
 		bugids := redis_smembers("versionbug:" + versions[index])
 		bugidlist := bugids.([]interface{})
 		for j, _ := range bugidlist {
-			tmp := get_redis_bug(string(bugidlist[j].([]uint8)))
-			bugid := int(tmp["id"].(float64))
-			ans[bugid] = [2]string{tmp["summary"].(string), tmp["status"].(string)}
+			bug_idint, _ := strconv.Atoi(string(bugidlist[j].([]uint8)))			
+			tmp := get_redis_bug(bug_idint)
+			ans[bug_idint] = [2]string{tmp["summary"].(string), tmp["status"].(string)}
 		}
 	}
 	for index, _ := range fixedinvers {
 		bugids := redis_smembers("fixedinverbug:" + fixedinvers[index])
 		bugidlist := bugids.([]interface{})
 		for j, _ := range bugidlist {
-			tmp := get_redis_bug(string(bugidlist[j].([]uint8)))
-			bugid := int(tmp["id"].(float64))
-			ans[bugid] = [2]string{tmp["summary"].(string), tmp["status"].(string)}
+			bug_idint, _ := strconv.Atoi(string(bugidlist[j].([]uint8)))
+			tmp := get_redis_bug(bug_idint)
+			ans[bug_idint] = [2]string{tmp["summary"].(string), tmp["status"].(string)}
 		}
 	}
 	return ans
