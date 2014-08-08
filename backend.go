@@ -5,13 +5,13 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/vaughan0/go-ini"
 	"html/template"
 	"strconv"
 	"time"
-	"encoding/json"
 )
 
 var conn_str string
@@ -119,15 +119,15 @@ func insert_component(name string, desc string, product_id int, owner int, qa in
 		return -1, err
 	}
 	rid, err := ret.LastInsertId()
-	m:=make(map[string]interface{})
-	m["id"]=int(rid)
-	m["name"]=name
-	m["description"]=desc
-	m["product_id"]=product_id
-	m["owner"]=owner
-	m["qa"]=qa
+	m := make(map[string]interface{})
+	m["id"] = int(rid)
+	m["name"] = name
+	m["description"] = desc
+	m["product_id"] = product_id
+	m["owner"] = owner
+	m["qa"] = qa
 	add_redis_component(m)
-	redis_sadd("productcomponents"+strconv.Itoa(product_id),strconv.Itoa(int(rid)))
+	redis_sadd("productcomponents"+strconv.Itoa(product_id), strconv.Itoa(int(rid)))
 	return int(rid), err
 }
 
@@ -151,34 +151,34 @@ func authenticate_redis(email string, password string) bool {
 /* Finds all components for a given product id*/
 func get_components_by_product(product_id int) map[string][3]string {
 	m := make(map[string][3]string)
-	product_idstr:=strconv.Itoa(product_id)
-	allcompids:=redis_smembers("productcomponents"+product_idstr).([]interface{})
-	for i,_:=range allcompids{
-		component:=redis_hget("components",string(allcompids[i].([]uint8)))
-		component_data:=make(map[string]interface{})
-		err:=json.Unmarshal(component,&component_data)
-		if (err!=nil){
-		    fmt.Println(err)
-		    return m
+	product_idstr := strconv.Itoa(product_id)
+	allcompids := redis_smembers("productcomponents" + product_idstr).([]interface{})
+	for i, _ := range allcompids {
+		component := redis_hget("components", string(allcompids[i].([]uint8)))
+		component_data := make(map[string]interface{})
+		err := json.Unmarshal(component, &component_data)
+		if err != nil {
+			fmt.Println(err)
+			return m
 		}
-		component_idstr:=strconv.Itoa(int(component_data["id"].(float64)))
-		m[component_data["name"].(string)] = [3]string{component_idstr, component_data["name"].(string), component_data["description"].(string) }
-		
+		component_idstr := strconv.Itoa(int(component_data["id"].(float64)))
+		m[component_data["name"].(string)] = [3]string{component_idstr, component_data["name"].(string), component_data["description"].(string)}
+
 	}
 	/*
-	db, err := sql.Open("mysql", conn_str)
-	defer db.Close()
-	rows, err := db.Query("SELECT id, name, description from components where product_id=?", product_id)
-	if err != nil {
-		return m
-	}
-	defer rows.Close()
-	var name, description, c_id string
-	for rows.Next() {
-		err = rows.Scan(&c_id, &name, &description)
-		//fmt.Println(c_id, name, description)
-		m[name] = [3]string{c_id, name, description}
-	}*/
+		db, err := sql.Open("mysql", conn_str)
+		defer db.Close()
+		rows, err := db.Query("SELECT id, name, description from components where product_id=?", product_id)
+		if err != nil {
+			return m
+		}
+		defer rows.Close()
+		var name, description, c_id string
+		for rows.Next() {
+			err = rows.Scan(&c_id, &name, &description)
+			//fmt.Println(c_id, name, description)
+			m[name] = [3]string{c_id, name, description}
+		}*/
 	return m
 
 }
@@ -1203,21 +1203,21 @@ func new_comment(reporter int, bug_id int, desc string) (id string, err error) {
 		return "", err
 	}
 	defer db.Close()
-	datec:=time.Now()
-	ret, err := db.Exec("INSERT INTO comments (description, user, datec, bug) VALUES (?,?,?,?)", desc, reporter,  datec, bug_id)
+	datec := time.Now()
+	ret, err := db.Exec("INSERT INTO comments (description, user, datec, bug) VALUES (?,?,?,?)", desc, reporter, datec, bug_id)
 	if err != nil {
 		fmt.Println(err.Error())
 		return "Error in entering a new comment", err
 	}
 	rid, err := ret.LastInsertId()
-	commentdata:=make(map[string]interface{})
-	commentdata["id"]=rid
-	commentdata["bugid"]=bug_id
-	commentdata["description"]=template.HTML(desc)
-	commentdata["datec"]=template.HTML(time.Time.String(datec))
-	commentdata["useremail"]=template.HTML(get_user_email(reporter))
-	commentdata["username"]=template.HTML(get_user_name(reporter))
-	
+	commentdata := make(map[string]interface{})
+	commentdata["id"] = rid
+	commentdata["bugid"] = bug_id
+	commentdata["description"] = template.HTML(desc)
+	commentdata["datec"] = template.HTML(time.Time.String(datec))
+	commentdata["useremail"] = template.HTML(get_user_email(reporter))
+	commentdata["username"] = template.HTML(get_user_name(reporter))
+
 	add_redis_bugcomment(commentdata)
 	//checking if reporter is in bugcc list if not add it.
 	_, err = db.Query("SELECT * from cc where bug_id=?,who=?", reporter, bug_id)
@@ -1497,40 +1497,40 @@ Retrieving comments of a bug.
 func fetch_comments_by_bug(bug_id int) map[int64][4]template.HTML {
 
 	/*
-	 * CRAPPY MYSQL LOGIC being removed as it is slow.
-	*
-	db, err := sql.Open("mysql", conn_str)
-	defer db.Close()
-	rows, err := db.Query("SELECT users.email as useremail, users.name as username, comments.id as com_id, description, datec, bug FROM comments JOIN users WHERE bug=? and users.id=comments.user;", bug_id)
-	//fmt.Println(rows)
-	if err != nil {
+		 * CRAPPY MYSQL LOGIC being removed as it is slow.
+		*
+		db, err := sql.Open("mysql", conn_str)
+		defer db.Close()
+		rows, err := db.Query("SELECT users.email as useremail, users.name as username, comments.id as com_id, description, datec, bug FROM comments JOIN users WHERE bug=? and users.id=comments.user;", bug_id)
+		//fmt.Println(rows)
+		if err != nil {
+			return m
+		}
+		defer rows.Close()
+		var description, username, useremail, bug string
+		var datec time.Time
+		var com_id int64
+		for rows.Next() {
+			err = rows.Scan(&useremail, &username, &com_id, &description, &datec, &bug)
+			//fmt.Println(c_id, name, description)
+			//m = append(m,Comment{com_id, description, user, datec})
+			//user="jj"
+			//fmt.Println(datec)
+			m[com_id] = [4]template.HTML{template.HTML(useremail), template.HTML(username), template.HTML(description), template.HTML(time.Time.String(datec))}
+		}
 		return m
-	}
-	defer rows.Close()
-	var description, username, useremail, bug string
-	var datec time.Time
-	var com_id int64
-	for rows.Next() {
-		err = rows.Scan(&useremail, &username, &com_id, &description, &datec, &bug)
-		//fmt.Println(c_id, name, description)
-		//m = append(m,Comment{com_id, description, user, datec})
-		//user="jj"
-		//fmt.Println(datec)
-		m[com_id] = [4]template.HTML{template.HTML(useremail), template.HTML(username), template.HTML(description), template.HTML(time.Time.String(datec))}
-	}
-	return m
 	*/
 	m := make(map[int64][4]template.HTML)
 	comments := redis_smembers("bugcomments" + strconv.Itoa(bug_id))
 	b := comments.([]interface{})
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
-		comment:=b[i].([]uint8)
-		commentinterface:=make(map[string]interface{})
+		comment := b[i].([]uint8)
+		commentinterface := make(map[string]interface{})
 		err := json.Unmarshal([]byte(comment), &commentinterface)
-		if err!=nil{
-		    fmt.Println(err)
-		    return m
+		if err != nil {
+			fmt.Println(err)
+			return m
 		}
 		//com_idint,_:=strconv.Atoi(string(commentinterface["id"]).(int))
 		com_id := int64(commentinterface["id"].(float64))
@@ -1704,7 +1704,7 @@ func get_user_bugs(user_id int) map[int][2]string {
 	b := bug_ids.([]interface{})
 	for i, _ := range b {
 		//fmt.Println(string(b[i].([]uint8)))
-		bug_idint,_:=strconv.Atoi(string(b[i].([]uint8)))
+		bug_idint, _ := strconv.Atoi(string(b[i].([]uint8)))
 		bug := get_redis_bug(bug_idint)
 		//fmt.Println(bug)
 		m[bug_idint] = [2]string{bug["status"].(string), bug["summary"].(string)}

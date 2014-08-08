@@ -2,12 +2,12 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"html/template"
 	"strconv"
 	"time"
-	"html/template"
-	"encoding/json"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 	}
 	defer db.Close()
 	//loading bugs and related searchable items into redis
-	
+
 	rows, err := db.Query("SELECT id, status, description, version, severity, hardware, priority, whiteboard, reported, component_id, subcomponent_id, reporter, summary, fixedinver, qa, docs, assigned_to from bugs")
 	//rows, err := db.Query("SELECT id, status, summary FROM bugs")
 	m := make(Bug)
@@ -33,7 +33,7 @@ func main() {
 		for rows.Next() {
 			err = rows.Scan(&bug_id, &status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &subcomponent_id, &reporter, &summary, &fixedinver, &qa, &docs, &assigned_to)
 			if err == nil {
-			    //fmt.Println("Bug inserted",bug_id)
+				//fmt.Println("Bug inserted",bug_id)
 				qaint := -1
 				docsint := -1
 				subcint := -1
@@ -104,7 +104,7 @@ func main() {
 				//redis_add_search_sets(m)
 				//update_redis_bug_status(sid, status)
 			} else {
-				fmt.Println(err.Error()+strconv.Itoa(bug_id))
+				fmt.Println(err.Error() + strconv.Itoa(bug_id))
 			}
 		}
 		fmt.Println("All bug indexes loaded in Redis.")
@@ -141,61 +141,61 @@ func main() {
 	var bugid int
 	rowsout, _ := db.Query("SELECT id from bugs")
 	for rowsout.Next() {
-	    _ = rowsout.Scan(&bugid);
-	    rows, _ = db.Query("SELECT users.email as useremail, users.name as username, comments.id as com_id, description, datec, bug FROM comments JOIN users WHERE bug=? and users.id=comments.user;", bugid)
-	    //fmt.Println(rows)
-	    var description, username, useremail, bug string
-	    var datec time.Time
-	    var com_id int64
-	    m:=make(map[string]interface{})
-	    for rows.Next() {
-		    err = rows.Scan(&useremail, &username, &com_id, &description, &datec, &bug)
-		    //fmt.Println(description)
-		    //fmt.Println(com_id)
-		    m["id"]=com_id
-		    m["useremail"]=template.HTML(useremail)
-		    m["username"]=template.HTML(username)
-		    m["description"]=template.HTML(description)
-		    m["datec"]=template.HTML(time.Time.String(datec))
-		    commentdata, _ := json.Marshal(m)
-		    sdata := string(commentdata)
-		    redis_sadd("bugcomments"+bug,sdata)
-	    }
-	    defer rows.Close()
+		_ = rowsout.Scan(&bugid)
+		rows, _ = db.Query("SELECT users.email as useremail, users.name as username, comments.id as com_id, description, datec, bug FROM comments JOIN users WHERE bug=? and users.id=comments.user;", bugid)
+		//fmt.Println(rows)
+		var description, username, useremail, bug string
+		var datec time.Time
+		var com_id int64
+		m := make(map[string]interface{})
+		for rows.Next() {
+			err = rows.Scan(&useremail, &username, &com_id, &description, &datec, &bug)
+			//fmt.Println(description)
+			//fmt.Println(com_id)
+			m["id"] = com_id
+			m["useremail"] = template.HTML(useremail)
+			m["username"] = template.HTML(username)
+			m["description"] = template.HTML(description)
+			m["datec"] = template.HTML(time.Time.String(datec))
+			commentdata, _ := json.Marshal(m)
+			sdata := string(commentdata)
+			redis_sadd("bugcomments"+bug, sdata)
+		}
+		defer rows.Close()
 	}
 	defer rowsout.Close()
 	fmt.Println("All Bug Comments loaded.")
-	
+
 	//load components and the products associated with it
-	var productid int;
+	var productid int
 	rowsout, _ = db.Query("SELECT id from products")
 	for rowsout.Next() {
-	    _ = rowsout.Scan(&productid);
-	    rows, _ = db.Query("SELECT id, name, description, owner, qa FROM components WHERE product_id=?", productid)
-	    //fmt.Println(rows)
-	    var description, name string
-	    var component_id, owner int
-	    var qa sql.NullInt64
-	    m:=make(map[string]interface{})
-	    for rows.Next() {
-		    err = rows.Scan(&component_id, &name, &description, &owner, &qa)
-		    qaint:=-1
-		    if qa.Valid{
-			qaint=int(qa.Int64)
-		    }
-		    //fmt.Println(description)
-		    m["id"]=component_id
-		    m["name"]=name
-		    m["owner"]=owner
-		    m["description"]=description
-		    m["qa"]=qaint
-		    m["product_id"]=productid
-		    componentdata, _ := json.Marshal(m)
-		    sdata := string(componentdata)
-		    redis_sadd("productcomponents"+strconv.Itoa(productid),strconv.Itoa(component_id))
-		    redis_hset("components",strconv.Itoa(component_id),sdata)
-	    }
-	    defer rows.Close()
+		_ = rowsout.Scan(&productid)
+		rows, _ = db.Query("SELECT id, name, description, owner, qa FROM components WHERE product_id=?", productid)
+		//fmt.Println(rows)
+		var description, name string
+		var component_id, owner int
+		var qa sql.NullInt64
+		m := make(map[string]interface{})
+		for rows.Next() {
+			err = rows.Scan(&component_id, &name, &description, &owner, &qa)
+			qaint := -1
+			if qa.Valid {
+				qaint = int(qa.Int64)
+			}
+			//fmt.Println(description)
+			m["id"] = component_id
+			m["name"] = name
+			m["owner"] = owner
+			m["description"] = description
+			m["qa"] = qaint
+			m["product_id"] = productid
+			componentdata, _ := json.Marshal(m)
+			sdata := string(componentdata)
+			redis_sadd("productcomponents"+strconv.Itoa(productid), strconv.Itoa(component_id))
+			redis_hset("components", strconv.Itoa(component_id), sdata)
+		}
+		defer rows.Close()
 	}
 	fmt.Println("All Components and Products associated loaded.")
 
