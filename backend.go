@@ -1329,7 +1329,7 @@ func get_component_owner(id int) int {
 /*
 Get product versions.
 */
-func get_product_versions(product_id int) map[string][2]float64 {
+func get_product_versions(product_id int) map[string][2]int {
 
 	m := make(map[string][2]float64)
 	//fmt.Print("dgffg")
