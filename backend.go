@@ -1331,7 +1331,7 @@ Get product versions.
 */
 func get_product_versions(product_id int) map[string][2]int {
 
-	m := make(map[string][2]float64)
+	m := make(map[string][2]int)
 	//fmt.Print("dgffg")
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
@@ -1347,11 +1347,11 @@ func get_product_versions(product_id int) map[string][2]int {
 	}
 	defer rows.Close()
 	var description string
-	var v_id, isactive float64
+	var v_id, isactive int
 	for rows.Next() {
 		err = rows.Scan(&v_id, &description, &isactive)
 		//fmt.Println(c_id, name, description)
-		m[description] = [2]float64{v_id, isactive}
+		m[description] = [2]int{v_id, isactive}
 	}
 	return m
 
