@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	//"encoding/json"
 	//"reflect"
 	//"io/ioutil"
 )
@@ -226,6 +227,10 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		 ************************************************/
 		bug_id, _ := strconv.Atoi(bugid)
 		interface_data = get_redis_bug(bug_id)
+		if interface_data["id"] == nil {
+			fmt.Fprintln(w, "Bug does not exist!")
+			return
+		}
 		//fmt.Println(interface_data["version"].(int))
 		//adding generic data
 		fmt.Println(bug_id)
@@ -234,10 +239,7 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		interface_data["is_user_admin"] = is_user_admin(useremail)
 		interface_data["pagetitle"] = "Bug - " + bugid + " details"
 		//checking if the "id" interface{} is nil, ie the bug exists or not
-		if interface_data["id"] == nil {
-			fmt.Fprintln(w, "Bug does not exist!")
-			return
-		}
+
 		tml, err := template.ParseFiles("./templates/showbug.html", "./templates/base.html")
 		if err != nil {
 			log_message(r, "System Crash:"+err.Error())
@@ -256,10 +258,10 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 		if dup != -1 {
 			interface_data["duplicateof"] = dup
 		}
-
+		interface_data["cclist"] = get_bugcc_list(int(bug_id))
 		//loggedin specific data
 		if il {
-			bug_product_id := get_product_of_component(int(interface_data["component_id"].(float64)))
+			bug_product_id := get_product_of_component(interface_data["component_id"].(int))
 			if bug_product_id == -1 {
 				log_message(r, "Consistency Error:There is no product for the component "+strconv.Itoa(interface_data["component_id"].(int)))
 				fmt.Fprintln(w, "No product exists for the component of the bug!")
@@ -267,11 +269,13 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 			}
 
 			//fetching allcomponents of the currentproduct
-			interface_data["allcomponents"] = get_components_by_product(bug_product_id)
-
-			//fetching allsubcomponents of the
-			interface_data["allsubcomponents"] = get_subcomponents_by_component(int(interface_data["component_id"].(float64)))
-
+			tmp22 := get_components_by_product(bug_product_id)
+			//fmt.Println(reflect.TypeOftmp22[0]))
+			interface_data["allcomponents"] = tmp22
+			//fmt.Println(refinterface_data["allcomponents"][1][0])
+			/*			//fetching allsubcomponents of the
+						interface_data["allsubcomponents"] = get_subcomponents_by_component(int(interface_data["component_id"].(float64)))
+			*/
 			//fetching all versions of the product
 			interface_data["versions"] = get_product_versions(bug_product_id)
 

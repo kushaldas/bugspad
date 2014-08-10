@@ -149,8 +149,8 @@ func authenticate_redis(email string, password string) bool {
 }
 
 /* Finds all components for a given product id*/
-func get_components_by_product(product_id int) map[string][3]string {
-	m := make(map[string][3]string)
+func get_components_by_product(product_id int) map[string][3]interface{} {
+	m := make(map[string][3]interface{})
 	product_idstr := strconv.Itoa(product_id)
 	allcompids := redis_smembers("productcomponents" + product_idstr).([]interface{})
 	for i, _ := range allcompids {
@@ -161,8 +161,8 @@ func get_components_by_product(product_id int) map[string][3]string {
 			fmt.Println(err)
 			return m
 		}
-		component_idstr := strconv.Itoa(int(component_data["id"].(float64)))
-		m[component_data["name"].(string)] = [3]string{component_idstr, component_data["name"].(string), component_data["description"].(string)}
+		component_idint := int(component_data["id"].(float64))
+		m[component_data["name"].(string)] = [3]interface{}{component_idint, component_data["name"].(string), component_data["description"].(string)}
 
 	}
 	/*
@@ -523,6 +523,42 @@ func new_bug(data map[string]interface{}) (int, string) {
 	if qauserid != -1 {
 		data["qa"] = qauserid
 	}
+	qaint := qauserid
+	docsint := -1
+	fixedinverint := 0
+	if data["fixedinver"] != nil {
+		fixedinverint = data["fixedinver"].(int)
+	}
+	if data["docs"] != nil {
+		docsint = data["docs"].(int)
+	}
+	qa_email := ""
+	qa_name := ""
+	docs_email := ""
+	docs_name := ""
+	if qaint != -1 {
+		qa_email = get_user_email(qaint)
+		qa_name = get_user_name(qaint)
+	}
+	if docsint != -1 {
+		docs_email = get_user_email(docsint)
+		docs_name = get_user_name(docsint)
+	}
+	//adding in addtional data
+	data["versiontext"] = get_version_text(data["version"].(int))
+	data["qaemail"] = qa_email
+	data["qaname"] = qa_name
+	data["docsemail"] = docs_email
+	data["docsname"] = docs_name
+	data["assigned_toname"] = get_user_name(data["assigned_to"].(int))
+	data["assigned_toemail"] = get_user_email(data["assigned_to"].(int))
+	data["reportername"] = get_user_name(data["reporter"].(int))
+	data["reporteremail"] = get_user_email(data["reporter"].(int))
+	data["component"] = get_component_name_by_id(data["component_id"].(int))
+	//data["subcomponent"] = get_subcomponent_name_by_id(subcint)
+	data["fixedinvername"] = get_version_text(fixedinverint)
+	//data["cclist"] = get_bugcc_list(int(bug_id))
+	//fmt.Println(data)
 	set_redis_bug(data)
 	add_latest_created(bug_id)
 
@@ -1291,9 +1327,9 @@ func get_component_owner(id int) int {
 /*
 Get product versions.
 */
-func get_product_versions(product_id int) map[string][2]int {
+func get_product_versions(product_id int) map[string][2]float64 {
 
-	m := make(map[string][2]int)
+	m := make(map[string][2]float64)
 	//fmt.Print("dgffg")
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
@@ -1309,11 +1345,11 @@ func get_product_versions(product_id int) map[string][2]int {
 	}
 	defer rows.Close()
 	var description string
-	var v_id, isactive int
+	var v_id, isactive float64
 	for rows.Next() {
 		err = rows.Scan(&v_id, &description, &isactive)
 		//fmt.Println(c_id, name, description)
-		m[description] = [2]int{v_id, isactive}
+		m[description] = [2]float64{v_id, isactive}
 	}
 	return m
 

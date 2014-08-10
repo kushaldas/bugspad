@@ -7,6 +7,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/vaughan0/go-ini"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -205,6 +206,24 @@ func get_redis_bug(bug_id int) Bug {
 		return nil
 	}
 	err := json.Unmarshal(data, &m)
+	//converting the default float64 returned from Unmarshalling to int
+	m["id"] = int(m["id"].(float64))
+	m["reporter"] = int(m["reporter"].(float64))
+	m["component_id"] = int(m["component_id"].(float64))
+	m["assigned_to"] = int(m["assigned_to"].(float64))
+	if reflect.TypeOf(m["version"]) != nil {
+		m["version"] = int(m["version"].(float64))
+	}
+	if reflect.TypeOf(m["qa"]) != nil {
+		m["qa"] = int(m["qa"].(float64))
+	}
+	if reflect.TypeOf(m["docs"]) != nil {
+		m["docs"] = int(m["docs"].(float64))
+	}
+	if reflect.TypeOf(m["fixedinver"]) != nil {
+		m["fixedinver"] = int(m["fixedinver"].(float64))
+	}
+
 	if err != nil {
 		fmt.Println(err)
 		return nil
@@ -434,9 +453,10 @@ func get_latest_updated_list() interface{} {
 }
 
 func set_redis_bug(bug Bug) {
-	data, _ := json.Marshal(bug)
-	//fmt.Println(data)
+	data, err := json.Marshal(bug)
+	fmt.Println(err)
 	sdata := string(data)
+	fmt.Println(sdata)
 	bugidint, _ := bug["id"].(int)
 	sid := strconv.FormatInt(int64(bugidint), 10)
 	//fmt.Println(sid)

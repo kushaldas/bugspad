@@ -101,7 +101,7 @@
 		        <div class="col-sm-10">
 		    <select name="bug_version" class="form-control" id="bug_version">
 			    {{$ver := .version}}
-				<option value=-1 {{if eq ($ver) (-1.0)}} selected {{end}}>None</option>
+				<option value=-1 {{if eq ($ver) (-1)}} selected {{end}}>None</option>
 			        {{range $key, $val := .versions}}
 				    <option value={{index $val 0}} {{if eq ($ver) (index $val 0) }} selected {{end}}>{{$key}}</option>
 			    {{end}}
@@ -129,9 +129,9 @@
 		    <label for="bug_component" class="col-sm-2 control-label" >Component</label>
 		        <div class="col-sm-10">
 		    <select name="bug_component" class="form-control" id="bug_component">
-				{{$comp := .component}}
+				{{$comp := .component_id}}
 			        {{range $key, $val := .allcomponents}}
-				    <option value={{index $val 0}} {{if eq $comp $key  }} selected {{end}}>{{$key}}</option>
+				    <option value={{index $val 0}} {{if eq $comp (index $val 0)  }} selected {{end}}>{{$key}}</option>
 				{{end}}
 		    </select>
 		    </div>
