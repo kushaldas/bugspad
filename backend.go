@@ -327,7 +327,8 @@ func new_bug(data map[string]interface{}) (int, string) {
 		valint = v.(int)
 		//fmt.Printf("I don't know, ask stackoverflow.")
 	}
-	qauserid := get_component_owner(valint)
+	componentidint:=valint
+	qauserid := get_component_owner(componentidint)
 	switch v := data["version"].(type) {
 	case float64:
 		// v is a float64 here, so e.g. v + 1.0 is possible.
@@ -545,7 +546,8 @@ func new_bug(data map[string]interface{}) (int, string) {
 		docs_name = get_user_name(docsint)
 	}
 	//adding in addtional data
-	data["versiontext"] = get_version_text(data["version"].(int))
+	swit
+	data["versiontext"] = get_version_text(versionid)
 	data["qaemail"] = qa_email
 	data["qaname"] = qa_name
 	data["docsemail"] = docs_email
@@ -554,7 +556,7 @@ func new_bug(data map[string]interface{}) (int, string) {
 	data["assigned_toemail"] = get_user_email(data["assigned_to"].(int))
 	data["reportername"] = get_user_name(data["reporter"].(int))
 	data["reporteremail"] = get_user_email(data["reporter"].(int))
-	data["component"] = get_component_name_by_id(data["component_id"].(int))
+	data["component"] = get_component_name_by_id(componentidint)
 	//data["subcomponent"] = get_subcomponent_name_by_id(subcint)
 	data["fixedinvername"] = get_version_text(fixedinverint)
 	//data["cclist"] = get_bugcc_list(int(bug_id))
