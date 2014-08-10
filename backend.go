@@ -546,7 +546,7 @@ func new_bug(data map[string]interface{}) (int, string) {
 		docs_name = get_user_name(docsint)
 	}
 	//adding in addtional data
-	swit
+
 	data["versiontext"] = get_version_text(versionid)
 	data["qaemail"] = qa_email
 	data["qaname"] = qa_name
