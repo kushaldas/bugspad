@@ -46,8 +46,8 @@ func main() {
 				}
 				if docs.Valid {
 					docsint = int(docs.Int64)
-/*				}
-				if subcomponent_id.Valid {
+				}
+/*				if subcomponent_id.Valid {
 					subcint = int(subcomponent_id.Int64)
 				}
 */				qa_email := ""
