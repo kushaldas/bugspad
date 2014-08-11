@@ -21,22 +21,22 @@ func main() {
 	defer db.Close()
 	//loading bugs and related searchable items into redis
 
-	rows, err := db.Query("SELECT id, status, description, version, severity, hardware, priority, whiteboard, reported, component_id, subcomponent_id, reporter, summary, fixedinver, qa, docs, assigned_to from bugs")
+	rows, err := db.Query("SELECT id, status, description, version, severity, hardware, priority, whiteboard, reported, component_id, reporter, summary, fixedinver, qa, docs, assigned_to from bugs")
 	//rows, err := db.Query("SELECT id, status, summary FROM bugs")
 	m := make(Bug)
 	if err == nil {
 		var bug_id int
 		var status, description, severity, hardware, priority, whiteboard, summary []byte
 		var reporter, component_id, assigned_to, version int
-		var qa, docs, subcomponent_id, fixedinver sql.NullInt64
+		var qa, docs, fixedinver sql.NullInt64
 		var reported time.Time
 		for rows.Next() {
-			err = rows.Scan(&bug_id, &status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &subcomponent_id, &reporter, &summary, &fixedinver, &qa, &docs, &assigned_to)
+			err = rows.Scan(&bug_id, &status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &reporter, &summary, &fixedinver, &qa, &docs, &assigned_to)
 			if err == nil {
 				//fmt.Println("Bug inserted",bug_id)
 				qaint := -1
 				docsint := -1
-				subcint := -1
+//				subcint := -1
 				fixedinverint := -1
 				if qa.Valid {
 					qaint = int(qa.Int64)
@@ -46,11 +46,11 @@ func main() {
 				}
 				if docs.Valid {
 					docsint = int(docs.Int64)
-				}
+/*				}
 				if subcomponent_id.Valid {
 					subcint = int(subcomponent_id.Int64)
 				}
-				qa_email := ""
+*/				qa_email := ""
 				qa_name := ""
 				docs_email := ""
 				docs_name := ""
@@ -80,7 +80,7 @@ func main() {
 					m["docs"] = docsint
 				}
 				m["component_id"] = component_id
-				m["subcomponent_id"] = subcint
+//				m["subcomponent_id"] = subcint
 				m["fixedinver"] = fixedinverint
 				m["version"] = version
 
@@ -95,7 +95,7 @@ func main() {
 				m["reportername"] = get_user_name(reporter)
 				m["reporteremail"] = get_user_email(reporter)
 				m["component"] = get_component_name_by_id(component_id)
-				m["subcomponent"] = get_subcomponent_name_by_id(subcint)
+//				m["subcomponent"] = get_subcomponent_name_by_id(subcint)
 				m["fixedinvername"] = get_version_text(fixedinverint)
 				//m["cclist"] = get_bugcc_list(bug_id)
 				//bugs_idint, _ := strconv.Atoi(bug_id)
