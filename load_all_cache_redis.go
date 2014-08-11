@@ -8,11 +8,13 @@ import (
 	"html/template"
 	"strconv"
 	"time"
+	"flag"
 )
 
 func main() {
 	load_config("config/bugspad.ini")
-
+	flag.Parse()
+	pool = newPool(*redisServer, *redisPassword)
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
