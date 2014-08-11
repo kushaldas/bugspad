@@ -18,15 +18,16 @@ type Bug map[string]interface{}
 
 // Generic function to delete a redis HASH
 func redis_hdel(name, key string) {
+	/*
 	conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Println(err)
 		return
-	}
-
+	}*/
+	conn:=pool.Get()
 	defer conn.Close()
-	_, err = conn.Do("HDEL", name, key)
+	_, err := conn.Do("HDEL", name, key)
 	if err != nil {
 		// handle error
 		fmt.Print(err)
@@ -38,15 +39,15 @@ func redis_hdel(name, key string) {
 
 // Generic function to update a redis HASH
 func redis_hset(name, key, value string) {
-	conn, err := redis.Dial("tcp", ":6379")
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Println(err)
 		return
-	}
-
+	}*/
+	conn:=pool.Get()
 	defer conn.Close()
-	_, err = conn.Do("HSET", name, key, value)
+	_, err := conn.Do("HSET", name, key, value)
 	//fmt.Println("hset result")
 	//fmt.Println(value)
 	//fmt.Println(val)
@@ -59,13 +60,13 @@ func redis_hset(name, key, value string) {
 
 // Generic function to get a redis HASH
 func redis_hget(name, key string) []byte {
-	conn, err := redis.Dial("tcp", ":6379")
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Println(err)
 		return nil
-	}
-
+	}*/
+	conn:=pool.Get()
 	defer conn.Close()
 	val, err := conn.Do("HGET", name, key)
 	if err != nil || val == nil {
@@ -78,13 +79,13 @@ func redis_hget(name, key string) []byte {
 
 //Generic function to add into a redis set
 func redis_sadd(name, value string) error {
-	conn, err := redis.Dial("tcp", ":6379")
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Println(err)
 		return nil
-	}
-
+	}*/
+	conn:=pool.Get()
 	defer conn.Close()
 	val, err := conn.Do("SADD", name, value)
 	if err != nil || val == nil {
@@ -97,15 +98,15 @@ func redis_sadd(name, value string) error {
 
 //Generic function to remove from a redis set
 func redis_srem(name, value string) error {
-	conn, err := redis.Dial("tcp", ":6379")
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Println(err)
 		return nil
-	}
-
+	}*/
+	conn:=pool.Get()
 	defer conn.Close()
-	_, err = conn.Do("SREM", name, value)
+	_, err := conn.Do("SREM", name, value)
 	if err != nil {
 		// handle error
 		fmt.Print(err)
@@ -116,12 +117,14 @@ func redis_srem(name, value string) error {
 //Generic function to check if an element exist in a redis set
 //Time complexity: O(1)
 func redis_sismember(name, value string) int {
-	conn, err := redis.Dial("tcp", ":6379")
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Println(err)
 		return -1
-	}
+	}*/
+	conn:=pool.Get()
+	defer conn.Close()
 	val, err := conn.Do("SISMEMBER", name, value)
 	if err != nil {
 		fmt.Println(err)
@@ -133,12 +136,14 @@ func redis_sismember(name, value string) int {
 
 //Function for deleting a DataStructure in redis
 func redis_del(name string) int {
-	conn, err := redis.Dial("tcp", ":6379")
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Println(err)
 		return -1
-	}
+	}*/
+	conn:=pool.Get()
+	defer conn.Close()
 	val, err := conn.Do("DEL", name)
 	if err != nil {
 		// handle error
@@ -150,15 +155,15 @@ func redis_del(name string) int {
 
 //Generic function to get all entries from a redis set
 func redis_smembers(name string) interface{} {
-	conn, err := redis.Dial("tcp", ":6379")
-	m := make([]interface{}, 0)
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Println(err)
 		return m
-	}
-
+	}*/
+	conn:=pool.Get()
 	defer conn.Close()
+	m := make([]interface{}, 0)
 	val, err := conn.Do("SMEMBERS", name)
 	if err != nil || val == nil {
 		// handle error
@@ -179,13 +184,13 @@ func update_redis_bug_status(bug_id string, status string) {
 }
 
 func delete_redis_bug_status(bug_id string, status string) {
-	conn, err := redis.Dial("tcp", ":6379")
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Println(err)
 		return
-	}
-
+	}*/
+	conn:=pool.Get()
 	defer conn.Close()
 	conn.Do("HDEL", "b_status:"+status, bug_id)
 }
@@ -340,6 +345,8 @@ func load_bugtags() {
 		fmt.Println(err)
 		return
 	}
+	//conn:=pool.Get()
+	defer conn.Close()
 	file, _ := ini.LoadFile("config/static.ini")
 	statuses, _ := file.Get("bugspad", "statuses")
 	severities, _ := file.Get("bugspad", "severities")
@@ -378,6 +385,7 @@ func update_redis(id int64, email string, password string, utype string, channel
 		return
 	}
 	fmt.Println(email)
+	//conn:=pool.Get()
 	defer conn.Close()
 	_, err = conn.Do("HSET", "users", email, password)
 	_, err = conn.Do("HSET", "userstype", email, utype)
@@ -392,16 +400,18 @@ func update_redis(id int64, email string, password string, utype string, channel
 	channel <- 1
 }
 
-func add_latest_created(bug_id int64) {
-	conn, err := redis.Dial("tcp", ":6379")
+func add_latest_created(bug_id int64) error{
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Print(err)
 		return
-	}
+	}*/
+	conn:=pool.Get()
 	defer conn.Close()
-	_, err = conn.Do("LPUSH", "latest_created", bug_id)
+	_, err := conn.Do("LPUSH", "latest_created", bug_id)
 	_, err = conn.Do("LTRIM", "latest_created", 0, 9)
+	return err
 
 }
 
@@ -409,12 +419,14 @@ func add_latest_created(bug_id int64) {
 This function returns a slice of latest created bugs (last 10)
 */
 func get_latest_created_list() interface{} {
-	conn, err := redis.Dial("tcp", ":6379")
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Print(err)
-		return nil
-	}
+		return
+	}*/
+	conn:=pool.Get()
+	defer conn.Close()
 	val, err := conn.Do("LRANGE", "latest_created", 0, 9)
 	if err != nil {
 		// handle error
@@ -424,26 +436,30 @@ func get_latest_created_list() interface{} {
 	return val
 }
 
-func add_latest_updated(bug_id string) {
-	conn, err := redis.Dial("tcp", ":6379")
+func add_latest_updated(bug_id string) error{
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Print(err)
 		return
-	}
+	}*/
+	conn:=pool.Get()
 	defer conn.Close()
-	_, err = conn.Do("LPUSH", "latest_updated", bug_id)
+	_, err := conn.Do("LPUSH", "latest_updated", bug_id)
 	_, err = conn.Do("LTRIM", "latest_updated", 0, 9)
+	return err
 
 }
 
 func get_latest_updated_list() interface{} {
-	conn, err := redis.Dial("tcp", ":6379")
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Print(err)
-		return nil
-	}
+		return
+	}*/
+	conn:=pool.Get()
+	defer conn.Close()
 	val, err := conn.Do("LRANGE", "latest_updated", 0, 9)
 	if err != nil {
 		// handle error
@@ -683,25 +699,28 @@ func update_redis_bug(oldbug Bug, newbug Bug) {
 	}
 }
 
-func add_redis_release(name string) {
-	conn, err := redis.Dial("tcp", ":6379")
+func add_redis_release(name string) error {
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Print(err)
 		return
-	}
+	}*/
+	conn:=pool.Get()
 	defer conn.Close()
-	_, err = conn.Do("LPUSH", "releases", name)
-
+	_, err := conn.Do("LPUSH", "releases", name)
+	return err
 }
 
 func get_redis_release_list() interface{} {
-	conn, err := redis.Dial("tcp", ":6379")
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Print(err)
-		return nil
-	}
+		return
+	}*/
+	conn:=pool.Get()
+	defer conn.Close()
 	val, err := conn.Do("LRANGE", "releases", 0, -1)
 	if err != nil {
 		// handle error
@@ -712,25 +731,30 @@ func get_redis_release_list() interface{} {
 }
 
 func clear_redis_releases() {
-	conn, err := redis.Dial("tcp", ":6379")
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Print(err)
-	}
+		return
+	}*/
+	conn:=pool.Get()
+	defer conn.Close()
 	conn.Do("DEL", "releases")
 
 }
 
 /* To find out if an user already exists or not. */
 func find_redis_user(email string) (bool, string) {
-	conn, err := redis.Dial("tcp", ":6379")
+	/*conn, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		// handle error
 		fmt.Print(err)
-		return true, "Redis error."
-	}
+		return
+	}*/
+	conn:=pool.Get()
+
 	defer conn.Close()
-	ret, err := conn.Do("HGET", "users", email)
+	ret, _ := conn.Do("HGET", "users", email)
 	if ret != nil {
 		return true, "User exists."
 	}
