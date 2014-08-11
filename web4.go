@@ -193,21 +193,21 @@ func showbug(w http.ResponseWriter, r *http.Request) {
 
 		"id" = bug id
 		"status" = bug status
-		"summary" = bug summary
-		"severity" = bug severity
+		"summary" = bug summary (editable)
+		"severity" = bug severity (editable)
 		"description" = bug description
-		"hardware" = bug hardware
-		"priority" = bug priority
-		"whiteboard" = bug whiteboard
+		"hardware" = bug hardware (editable)
+		"priority" = bug priority (editable)
+		"whiteboard" = bug whiteboard (editable)
 		"reported" = bug reporting time UTC
 		"reporter" = reporter user id
-		"assigned_to" = assigned_to user id
-		"qa" = quality Assurance user id
-		"docs" = docs Maintainer user id
-		"component_id" = bug component id
-		"subcomponent_id" = bug subcomponent id ---> IGNORED
-		"fixedinver" = version id of the version in which the bug was fixed (if it is fixed)
-		"version" = version id of the component of the bug
+		"assigned_to" = assigned_to user id (editable)
+		"qa" = quality Assurance user id (editable)
+		"docs" = docs Maintainer user id (editable)
+		"component_id" = bug component id (editable)
+		//"subcomponent_id" = bug subcomponent id ---> IGNORED
+		"fixedinver" = version id of the version in which the bug was fixed (if it is fixed) (editable)
+		"version" = version id of the component of the bug (editable)
 
 		//extra fields for convenience
 		"versiontext"
@@ -1178,7 +1178,7 @@ func editcomponentpage(w http.ResponseWriter, r *http.Request) {
 				interface_data["component_qaname"] = cdata["qaname"]
 				interface_data["component_ownername"] = cdata["ownername"]
 				interface_data["component_description"] = cdata["description"]
-				interface_data["component_subs"] = get_subcomponents_by_component(comp_idint)
+				//interface_data["component_subs"] = get_subcomponents_by_component(comp_idint)
 				//fmt.Println(componentdata["error_msg"])
 				err = tml.ExecuteTemplate(w, "base", interface_data)
 				if err != nil {

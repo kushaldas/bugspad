@@ -205,6 +205,7 @@ func get_redis_bug(bug_id int) Bug {
 		fmt.Println("sorry no data")
 		return nil
 	}
+	//DEBUG(string(data))
 	err := json.Unmarshal(data, &m)
 	//converting the default float64 returned from Unmarshalling to int
 	m["id"] = int(m["id"].(float64))
@@ -611,11 +612,11 @@ func update_redis_bug(oldbug Bug, newbug Bug) {
 
 	if oldbug["severity"] != newbug["severity"] {
 		if oldbug["severity"] != nil {
-			tmp := strconv.Itoa(oldbug["severity"].(int))
+			tmp := oldbug["severity"].(string)
 			redis_srem("severitybug:"+tmp, bugstring)
 		} else {
 			if newbug["severity"] != nil {
-				tmp := strconv.Itoa(newbug["severity"].(int))
+				tmp := newbug["severity"].(string)
 				redis_sadd("severitybug:"+tmp, bugstring)
 			}
 		}
@@ -623,11 +624,11 @@ func update_redis_bug(oldbug Bug, newbug Bug) {
 
 	if oldbug["status"] != newbug["status"] {
 		if oldbug["status"] != nil {
-			tmp := strconv.Itoa(oldbug["status"].(int))
+			tmp := oldbug["status"].(string)
 			redis_srem("statusbug:"+tmp, bugstring)
 		} else {
 			if newbug["status"] != nil {
-				tmp := strconv.Itoa(newbug["status"].(int))
+				tmp := newbug["status"].(string)
 				redis_sadd("statusbug:"+tmp, bugstring)
 			}
 		}
@@ -635,11 +636,11 @@ func update_redis_bug(oldbug Bug, newbug Bug) {
 
 	if oldbug["priority"] != newbug["priority"] {
 		if oldbug["priority"] != nil {
-			tmp := strconv.Itoa(oldbug["priority"].(int))
+			tmp := oldbug["priority"].(string)
 			redis_srem("prioritybug:"+tmp, bugstring)
 		} else {
 			if newbug["priority"] != nil {
-				tmp := strconv.Itoa(newbug["priority"].(int))
+				tmp := newbug["priority"].(string)
 				redis_sadd("prioritybug:"+tmp, bugstring)
 			}
 		}

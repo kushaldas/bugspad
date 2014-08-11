@@ -138,7 +138,8 @@ db. The details are stored in a hashmap "users" in the redis db.
 func authenticate_redis(email string, password string) bool {
 	mdstr := get_hex(password)
 	ret := redis_hget("users", email)
-
+	//DEBUG(string(ret))
+	//DEBUG(mdstr)
 	if string(ret) == mdstr {
 		ret := string(redis_hget("userstype", email))
 		if ret != "-1" {
@@ -207,7 +208,7 @@ func get_component_name_by_id(component_id int) string {
 }
 
 /* Gets component name using the id*/
-func get_subcomponent_name_by_id(subcomponent_id int) string {
+/*func get_subcomponent_name_by_id(subcomponent_id int) string {
 	db, err := sql.Open("mysql", conn_str)
 	if err != nil {
 		// handle error
@@ -228,9 +229,9 @@ func get_subcomponent_name_by_id(subcomponent_id int) string {
 	return ""
 
 }
-
+*/
 /* Finds all subcomponents for a given component*/
-func get_subcomponents_by_component(component_id int) map[string][3]string {
+/*func get_subcomponents_by_component(component_id int) map[string][3]string {
 	m := make(map[string][3]string)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
@@ -248,7 +249,7 @@ func get_subcomponents_by_component(component_id int) map[string][3]string {
 	return m
 
 }
-
+*/
 /* Get bug cc list*/
 func get_bugcc_list(bug_id int) map[int][2]string {
 	ans := make(map[int][2]string)
@@ -412,14 +413,14 @@ func new_bug(data map[string]interface{}) (int, string) {
 		buffer2.WriteString(",?")
 		vals = append(vals, val)
 	}
-
+/*
 	val, ok = data["subcomponent_id"]
 	if ok {
 		buffer.WriteString(", subcomponent_id")
 		buffer2.WriteString(",?")
 		vals = append(vals, val)
 	}
-
+*/
 	val, ok = data["reporter"]
 	if ok {
 		buffer.WriteString(", reporter")
@@ -583,6 +584,7 @@ func add_bug_comments(olddata map[string]interface{}, newdata map[string]interfa
 	if olddata["summary"] != newdata["summary"] {
 		changes_comments = changes_comments + htmlify(olddata["summary"].(string), newdata["summary"].(string), "summary")
 	}
+	//DEBUG(olddata["status"].(string)+" --- "+newdata["status"].(string))
 	if olddata["status"] != newdata["status"] {
 		changes_comments = changes_comments + htmlify(olddata["status"].(string), newdata["status"].(string), "status")
 	}
@@ -602,17 +604,17 @@ func add_bug_comments(olddata map[string]interface{}, newdata map[string]interfa
 		changes_comments = changes_comments + htmlify(olddata["component"].(string), newdata["component"].(string), "component")
 
 	}
-	if olddata["subcomponent_id"] != newdata["subcomponent_id"] {
+	/*if olddata["subcomponent_id"] != newdata["subcomponent_id"] {
 		changes_comments = changes_comments + htmlify(olddata["subcomponent"].(string), newdata["subcomponent"].(string), "subcomponent")
-	}
+	}*/
 	fmt.Println("fiv")
-	fmt.Println(olddata["fixedinver"].(int))
-	fmt.Println(newdata["fixedinver"].(int))
+//	fmt.Println(olddata["fixedinver"].(int))
+//	fmt.Println(newdata["fixedinver"].(int))
 	fmt.Println("fiv")
-	if olddata["fixedinver"] != newdata["fixedinver"] {
+	if newdata["fixedinver"]!=nil && olddata["fixedinver"] != newdata["fixedinver"] {
 		changes_comments = changes_comments + htmlify(get_version_text(olddata["fixedinver"].(int)), get_version_text(newdata["fixedinvername"].(int)), "fixedinverame")
 	}
-	if olddata["version"] != newdata["version"] {
+	if newdata["version"]!=nil && olddata["version"] != newdata["version"] {
 		changes_comments = changes_comments + htmlify(get_version_text(olddata["version"].(int)), get_version_text(newdata["version"].(int)), "version")
 	}
 	//fmt.Println(olddata["qaint"].(int))
@@ -632,13 +634,12 @@ func add_bug_comments(olddata map[string]interface{}, newdata map[string]interfa
 			changes_comments = changes_comments + htmlify(get_user_email(olddata["docs"].(int)), get_user_email(newdata["docs"].(int)), "docs")
 		}
 	}
-	bug_idint, _ := strconv.Atoi(newdata["id"].(string))
 	if changes_comments != "" {
 		//user_idint,_ := strconv.Atoi(newdata["post_user"].(int))
-		new_comment(newdata["post_user"].(int), bug_idint, changes_comments)
+		new_comment(newdata["post_user"].(int),newdata["id"].(int), changes_comments)
 	}
-	if newdata["com_content"].(string) != "" {
-		new_comment(newdata["post_user"].(int), bug_idint, newdata["com_content"].(string))
+	if newdata["com_content"]!=nil && newdata["com_content"].(string) != "" {
+		new_comment(newdata["post_user"].(int), newdata["id"].(int), newdata["com_content"].(string))
 	}
 
 }
@@ -898,47 +899,60 @@ func entry_exists(tablename string, fieldname string, fieldvalue string) bool {
 Updates a given bug based on input
 */
 func update_bug(data map[string]interface{}) error {
+ 	
 	var buffer bytes.Buffer
 	vals := make([]interface{}, 0)
 	buffer.WriteString("UPDATE bugs SET ")
-	bug_id, _ := strconv.ParseInt(data["id"].(string), 10, 64)
-	old_bug := get_bug(data["id"].(int))
+	bug_id, _ := data["id"].(int)
+	old_fetched_redis_bug:=make(map[string]interface{})
+	fetched_redis_bug:=make(map[string]interface{})
+	old_fetched_redis_bug = get_redis_bug(data["id"].(int))
+	fetched_redis_bug=get_redis_bug(data["id"].(int))
+	//DEBUG(old_fetched_redis_bug["status"].(string)+"updatedbefore"+data["status"].(string)+fetched_redis_bug["status"].(string))
+
 	val, ok := data["status"]
 	if ok {
 		buffer.WriteString("status=?")
 		vals = append(vals, val)
+		fetched_redis_bug["status"]=val
 		// TODO
 		// In case of status change we have to update the redis index for the bug
 	}
+	//DEBUG(old_fetched_redis_bug["status"].(string)+"updatedafter"+data["status"].(string)+fetched_redis_bug["status"].(string))
 
 	val, ok = data["version"]
 	if ok {
 		buffer.WriteString(", version=?")
 		vals = append(vals, val)
+		fetched_redis_bug["version"]=val
 	}
 
 	val, ok = data["severity"]
 	if ok {
 		buffer.WriteString(", severity=?")
 		vals = append(vals, val)
+		fetched_redis_bug["severity"]=val
 	}
 
 	val, ok = data["summary"]
 	if ok {
 		buffer.WriteString(", summary=?")
 		vals = append(vals, val)
+		fetched_redis_bug["summary"]=val
 	}
 
 	val, ok = data["hardware"]
 	if ok {
 		buffer.WriteString(", hardware=?")
 		vals = append(vals, val)
+		fetched_redis_bug["hardware"]=val
 	}
 
 	val, ok = data["priority"]
 	if ok {
 		buffer.WriteString(", priority=?")
 		vals = append(vals, val)
+		fetched_redis_bug["priority"]=val
 	}
 
 	val, ok = data["qa"]
@@ -948,6 +962,7 @@ func update_bug(data map[string]interface{}) error {
 		} else {
 			buffer.WriteString(", qa=?")
 			vals = append(vals, val)
+			fetched_redis_bug["qa"]=val
 		}
 	}
 
@@ -958,6 +973,7 @@ func update_bug(data map[string]interface{}) error {
 		} else {
 			buffer.WriteString(", docs=?")
 			vals = append(vals, val)
+			fetched_redis_bug["docs"]=val
 		}
 	}
 
@@ -965,15 +981,17 @@ func update_bug(data map[string]interface{}) error {
 	if ok {
 		buffer.WriteString(", whiteboard=?")
 		vals = append(vals, val)
+		fetched_redis_bug["whiteboard"]=val
 	}
 
 	val, ok = data["assigned_to"]
 	if ok {
 		buffer.WriteString(", assigned_to=?")
 		vals = append(vals, val)
+		fetched_redis_bug["assigned_to"]=val
 	}
 	// * Since this canot be changes.
-	val, ok = data["subcomponent_id"]
+	/*val, ok = data["subcomponent_id"]
 	if ok && val != -1 {
 		buffer.WriteString(", subcomponent_id=?")
 		vals = append(vals, val)
@@ -983,12 +1001,14 @@ func update_bug(data map[string]interface{}) error {
 	if ok {
 		buffer.WriteString(", fixedinver=?")
 		vals = append(vals, val)
+		fetched_redis_bug["fixedinver"]=val
 	}
 	///*Since this cannot be changed
 	val, ok = data["component_id"]
 	if ok {
 		buffer.WriteString(", component_id=?")
 		vals = append(vals, val)
+		fetched_redis_bug["component_id"]=val
 	}
 	//*/
 	buffer.WriteString(" WHERE id=?")
@@ -1014,9 +1034,9 @@ func update_bug(data map[string]interface{}) error {
 			delete_redis_bug_status(strconv.FormatInt(int64(bug_id), 10), old_status)
 			update_redis_bug_status(strconv.FormatInt(int64(bug_id), 10), val1.(string))
 		}*/
-	update_redis_bug(old_bug, data)
+	update_redis_bug(old_fetched_redis_bug, fetched_redis_bug)
 	add_latest_updated(strconv.FormatInt(int64(bug_id), 10))
-	add_bug_comments(old_bug, data)
+	add_bug_comments(old_fetched_redis_bug, data)
 	return nil
 }
 
@@ -1052,16 +1072,15 @@ func get_bug(bug_id int) Bug {
 	m := make(Bug)
 	db, err := sql.Open("mysql", conn_str)
 	defer db.Close()
-	row := db.QueryRow("SELECT status, description, version, severity, hardware, priority, whiteboard, reported, component_id, subcomponent_id, reporter, summary, fixedinver, qa, docs, assigned_to from bugs where id=?", bug_id)
+	row := db.QueryRow("SELECT status, description, version, severity, hardware, priority, whiteboard, reported, component_id, reporter, summary, fixedinver, qa, docs, assigned_to from bugs where id=?", bug_id)
 	var status, description, severity, hardware, priority, whiteboard, summary []byte
 	var reporter, component_id, assigned_to, version int
-	var qa, docs, subcomponent_id, fixedinver sql.NullInt64
+	var qa, docs, /*subcomponent_id,*/ fixedinver sql.NullInt64
 	var reported time.Time
-	err = row.Scan(&status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &subcomponent_id, &reporter, &summary, &fixedinver, &qa, &docs, &assigned_to)
+	err = row.Scan(&status, &description, &version, &severity, &hardware, &priority, &whiteboard, &reported, &component_id, &reporter, &summary, &fixedinver, &qa, &docs, &assigned_to)
 	if err == nil {
 		qaint := -1
 		docsint := -1
-		subcint := -1
 		fixedinverint := 0
 		if qa.Valid {
 			qaint = int(qa.Int64)
@@ -1072,9 +1091,9 @@ func get_bug(bug_id int) Bug {
 		if docs.Valid {
 			docsint = int(docs.Int64)
 		}
-		if subcomponent_id.Valid {
+		/*if subcomponent_id.Valid {
 			subcint = int(subcomponent_id.Int64)
-		}
+		}*/
 		qa_email := ""
 		qa_name := ""
 		docs_email := ""
@@ -1101,7 +1120,7 @@ func get_bug(bug_id int) Bug {
 		m["qa"] = qaint
 		m["docs"] = docsint
 		m["component_id"] = component_id
-		m["subcomponent_id"] = subcint
+		//m["subcomponent_id"] = subcint
 		m["fixedinver"] = fixedinverint
 		m["version"] = version
 
@@ -1116,7 +1135,7 @@ func get_bug(bug_id int) Bug {
 		m["reportername"] = get_user_name(reporter)
 		m["reporteremail"] = get_user_email(reporter)
 		m["component"] = get_component_name_by_id(component_id)
-		m["subcomponent"] = get_subcomponent_name_by_id(subcint)
+		//m["subcomponent"] = get_subcomponent_name_by_id(subcint)
 		m["fixedinvername"] = get_version_text(fixedinverint)
 		m["cclist"] = get_bugcc_list(bug_id)
 
@@ -1258,10 +1277,11 @@ func new_comment(reporter int, bug_id int, desc string) (id string, err error) {
 
 	add_redis_bugcomment(commentdata)
 	//checking if reporter is in bugcc list if not add it.
-	_, err = db.Query("SELECT * from cc where bug_id=?,who=?", reporter, bug_id)
+	_, err = db.Query("SELECT * from cc where bug_id=? and who=?", bug_id, reporter)
 	if err != nil {
 		_, err = db.Exec("INSERT INTO cc (bug_id, who) VALUES (?,?)", bug_id, reporter)
 		if err != nil {
+			fmt.Println(err)
 			fmt.Println(err)
 			return strconv.FormatInt(rid, 10), err
 		}
@@ -1269,11 +1289,12 @@ func new_comment(reporter int, bug_id int, desc string) (id string, err error) {
 	}
 	//check if the bug status is still new if yes then change it to open
 	bug := get_redis_bug(bug_id)
-	if bug["status"].(string) == "new" && err == nil {
+	if bug["status"].(string) == "new" {
 		bug["status"] = "open"
+		//DEBUG("bug ope")
 		update_bug(bug)
 	} else {
-		fmt.Println(err)
+		//DEBUG("bug not new")
 	}
 	return strconv.FormatInt(rid, 10), err
 }
@@ -1683,21 +1704,21 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 	}
 	r1 := "distinct bugs.id as id, bugs.status as status, bugs.version as version, bugs.severity as severity, bugs.hardware as hardware, bugs.priority as priority,"
 	r2 := " bugs.reporter as reporter, bugs.qa as qa, bugs.docs as docs, bugs.whiteboard as whiteboard, bugs.summary as summary, bugs.description as description, "
-	r3 := "bugs.reported as reported, bugs.fixedinver as fixedinver, bugs.component_id as component_id, bugs.subcomponent_id as subcomponent_id "
+	r3 := "bugs.reported as reported, bugs.fixedinver as fixedinver, bugs.component_id as component_id"// bugs.subcomponent_id as subcomponent_id "
 	rows, err := db.Query("SELECT "+r1+r2+r3+" from bugs join components join products where products.id=components.product_id and products.id=?", product_id)
 	if err != nil {
 		return m, err
 	}
 	var status, description, severity, hardware, priority, whiteboard, summary []byte
 	var id, reporter, component_id, version int
-	var qa, docs, subcomponent_id, fixedinver sql.NullInt64
+	var qa, docs, fixedinver sql.NullInt64
 	var reported time.Time
 	for rows.Next() {
-		err = rows.Scan(&id, &status, &version, &severity, &hardware, &priority, &reporter, &qa, &docs, &whiteboard, &summary, &description, &reported, &fixedinver, &component_id, &subcomponent_id)
+		err = rows.Scan(&id, &status, &version, &severity, &hardware, &priority, &reporter, &qa, &docs, &whiteboard, &summary, &description, &reported, &fixedinver, &component_id)
 		if err == nil {
 			qaint := -1
 			docsint := -1
-			subcint := -1
+//			subcint := -1
 			fixedinverint := -1
 			if qa.Valid {
 				qaint = int(qa.Int64)
@@ -1708,6 +1729,7 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 			if docs.Valid {
 				docsint = int(docs.Int64)
 			}
+			/*
 			if subcomponent_id.Valid {
 				subcint = int(subcomponent_id.Int64)
 			}
@@ -1716,6 +1738,7 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 			if subc["name"] != nil {
 				subcomponent_name = subc["name"].(string)
 			}
+			*/
 			c := get_component_by_id(strconv.Itoa(component_id))
 			component_name := ""
 			if c["name"] != nil {
@@ -1723,7 +1746,7 @@ func get_bugs_by_product(product_id string) (map[string][15]string, error) {
 			}
 
 			//fmt.Println(string(f))
-			m[strconv.Itoa(id)] = [15]string{string(status), string(get_version_text(version)), string(severity), string(hardware), string(priority), get_user_email(reporter), get_user_email(qaint), get_user_email(docsint), string(whiteboard), string(summary), string(description), reported.String(), string(get_version_text(fixedinverint)), component_name, subcomponent_name}
+			m[strconv.Itoa(id)] = [15]string{string(status), string(get_version_text(version)), string(severity), string(hardware), string(priority), get_user_email(reporter), get_user_email(qaint), get_user_email(docsint), string(whiteboard), string(summary), string(description), reported.String(), string(get_version_text(fixedinverint)), component_name}
 		} else {
 			//fmt.Println("yaha hai")
 			return m, err
@@ -1908,7 +1931,7 @@ func update_product(data map[string]interface{}) (msg string, err error) {
 	}
 	return "Update Successful.", err
 }
-
+/*
 func get_subcomponent_by_id(subcomponent_id string) map[string]interface{} {
 	m := make(map[string]interface{})
 	db, err := sql.Open("mysql", conn_str)
@@ -1933,7 +1956,7 @@ func get_subcomponent_by_id(subcomponent_id string) map[string]interface{} {
 	return m
 
 }
-
+*/
 /* Finds component for a given component id*/
 func get_component_by_id(component_id string) map[string]interface{} {
 	m := make(map[string]interface{})

@@ -12,6 +12,10 @@ const (
 	SUCCESS    string = "\"Success\""
 )
 
+func DEBUG(message string) {
+    fmt.Println("DEBUG::"+message)
+}
+
 func myrecover(w http.ResponseWriter) {
 	if r := recover(); r != nil {
 		fmt.Fprintln(w, "\"Wrong input.\"")
