@@ -1,6 +1,6 @@
 {{define "head"}}<title>Product {{ .id}} - {{ .name}}</title>{{end}}
 {{define "body"}}
-<div class="maincontent">
+<div class="maincontent container-fluid">
         <div id="bug_details">
 	    <h2 id="bug_heading">Product - {{ .name}}</h2>
 	    <p>The versions for the Product - {{ .name}}</p>
@@ -8,11 +8,20 @@
 	    {{range $key,$val := .versions}} 
 		<p><a href="/editproductversion/{{index $val 0}}">{{$key}}</a>{{if eq (index $val 1) (1)}}Active{{else}}Inactive{{end}}</p>
 	    {{end}}
-	    <form name="productversions" action="/addproductversion/" method="POST">
-		<p>Add New Version:</p>
+	    <p>Add New Version:</p>
+	    <form class="form-horizontal" role="form" name="productversions" action="/addproductversion/" method="POST">
 		<input type="hidden" name="product_id" value="{{ .id}}"></input>
-		<p><label class="field_title">Version Value: <input type="text" name="newversionentry"></input></label></p>
-		<button>Add Product Versions</button>
+		<div class="form-group">
+		    <label for="newversionentry" class="col-sm-2 control-label" >Version value</label>
+		    <div class="col-sm-10">
+			<input type="text" name="newversionentry" id="newversionentry" class="form-control"></input>
+		    </div>
+		</div>
+		<div class="form-group">
+		    <div class="col-sm-offset-2 col-sm-10">
+			<button type="submit" class="btn btn-default">Add New Product Version</button>
+		    </div>
+		</div>
 	    </form>
 	</div>
 </div>

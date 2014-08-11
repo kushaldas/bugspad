@@ -1,24 +1,41 @@
 {{define "head"}}<title>Bug {{ .id}} - Add attachment</title>{{end}}
 {{define "body"}}
-<div class="maincontent">
+<div class="maincontent container-fluid">
         <div id="bug_details">
 	    <h2 id="bug_heading">Bug - {{ .id}} {{ .summary}}</h2>
 	    <p>Select the attachments you wish to delete
-	    <form name="bugdetail" action="/addattachment/" method="POST" enctype="multipart/form-data">
+	    <form role="form" name="bugdetail" action="/addattachment/" method="POST" enctype="multipart/form-data">
 		<input type="hidden" name="bug_id" value="{{ .id}}"></input>
 		<p class="field_title">All attachments:</p>
-		{{range $key, $val := .attachments}}
-		<div id={{ $key }} class="attachment_box">
-		    <input type="checkbox" name="attachments_obsolete" value="{{ $key }}">Mark Obsolete</input>
-		    <p><a href="{{index $val 0}}">{{index $val 2}}</a><p>
-		    <p>Description: {{index $val 1}}<p>
-		    <p>Submitter: {{index $val 2}}<p>
-		    <p>Submitted at: {{index $val 3}}<p>
+		<div class="col-xs-6 col-md-4">
+		    <table class="table">
+			<th>Mark Obsolete</th>
+			<th>Description</th>
+			<th>Submitter</th>
+			<th>Submitted on</th>
+			{{range $key, $val := .attachments}}
+			<tr id={{ $key }}>
+			    <td><input type="checkbox" name="attachments_obsolete" value="{{ $key }}">Mark Obsolete</td>
+			    <td><a href="{{index $val 0}}">{{index $val 2}}</a></td>
+			    <td>{{index $val 1}}</td>
+			    <td>{{index $val 2}}</td>
+			    <td>{{index $val 3}}</td>
+			</tr>
+			{{end}}
+		    </table>
+		 </div>
+		 <div class="col-xs-6 col-md-4" class="form-group">
+		    <label>New Attachment</label>
+			<div class="form-group">
+			    <label class="" for="attachment_desc">Description</label>
+			    <input type="text" id="attachment_desc" class="form-control" name="attachment_desc"></input>
+			</div>
+			<div class="form-group">
+			    <label class="" for="uploadfile">File</label>
+			    <input type="file" name="uploadfile" id="uploadfile"></input>
+			</div>
+		    <button type="submit" class="btn btn-default">Update Bug attachments</button>
 		</div>
-		{{end}}
-		<p><label class="field_title">Description: <input type="text" name="attachment_desc"></input></label></p>
-		<p><label class="field_title">File: <input type="file" name="uploadfile"></input></label></p>
-		<button>Update Bug attachments</button>
 	    </form>
 	</div>
 </div>

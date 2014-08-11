@@ -1,7 +1,24 @@
 {{define "head"}}<title>Bugspad Home Page</title>{{end}}
 {{define "body"}}
     
-    <div class="maincontent">
-	<center style="font-size:50px;margin-top:2%;"><b>Bugspad</b> - lightning fast bugtracker!</center>	
+    <div class="maincontent container-fluid">
+	<center style="font-size:50px;margin-top:2%;"><b>Bugspad</b> - lightning fast bugtracker!</center>
+	{{if .islogged}}
+	<p>Bugs Related to you:</p>
+	    <table class="table">
+	    <tr>
+		<th>ID</th>
+		<th>Summary</th>
+		<th>Status</th>
+	    </tr>
+	    {{range $key,$val:= .userbugs}}
+		<tr>
+		    <td><a href="/bugs/{{$key}}" class="{{if eq (index $val 0) "fixed (closed)" "notabug (closed)" "wontfix (closed)"}}closedbug{{end}}">{{$key}}</a></td>
+		    <td>{{index $val 1}}</td>
+		    <td>{{index $val 0}}</td>
+		</tr>
+	    {{end}}
+	    </table>
+	{{end}}
     </div>
 {{end}}

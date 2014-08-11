@@ -35,7 +35,7 @@ url = "http://127.0.0.1:9998/bug/"
 for x in range(10): # 1079020
 	component_id = random.randint(522,530)
 	summary = "Test bug with %s for %s" % (x, component_id)
-	d = {'user': 'kushaldas@gmail.com', "password": 'asdf', "summary": summary, "description": text, "component_id": component_id }
+	d = {'user': 'kushaldas@gmail.com', "password": 'asdf', "summary": summary, "description": text, "component_id": component_id, "version":1 }
 	r = requests.post(url, data=json.dumps(d))
 	# print r.text
 

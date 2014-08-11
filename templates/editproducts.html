@@ -1,19 +1,19 @@
 {{define "head"}}<title>Admin Page</title>{{end}}
 {{define "body"}}
 
-<div class="maincontent">
-    <table id="productlist">
-    	<tr>
-	    <td>Name</td>
-	    <td>Description</td>
-	    <td>Type</td>
-	</tr>
-    	{{range $key, $val := .productlist}}
-	    <tr id="p{{$key}}">
-		<td><a href="/editproductpage/{{index $val 0}}">{{$key}}</a></td>
-		<td>{{index $val 1}}</td>
-	    </tr>
-	{{end}}
-    </table>
+<div class="maincontent container-fluid">
+    <center><h2>Products</h2></center>
+    <div class="col-xs-6 col-md-4">
+	<table id="productlist" class="table">
+	    <th>Name</th>
+	    <th>Description</th>
+	    {{range $key, $val := .productlist}}
+		<tr id="p{{$key}}">
+		    <td><a href="/editproductpage/{{index $val 0}}">{{$key}}</a></td>
+		    <td>{{index $val 1}}</td>
+		</tr>
+	    {{end}}
+	</table>
+    </div>
 </div>
 {{end}}

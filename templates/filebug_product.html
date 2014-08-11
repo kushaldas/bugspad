@@ -1,8 +1,8 @@
 {{define "head"}}<title>Create Bug Page</title>{{end}}
 {{define "body"}}
-<div class="maincontent">
+<div class="maincontent container-fluid">
 	<center><h2>Select a Product</h2></center>
-	<table>
+	<table class="table">
 	{{range $key,$val := .products}}
 	    <tr><td><a href="/filebug/{{index $val 0}}">{{$key}}</a></td></tr>
 	{{end}}
